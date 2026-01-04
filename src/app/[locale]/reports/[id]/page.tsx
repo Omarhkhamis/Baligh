@@ -8,7 +8,6 @@ import AppFooter from '../../../../components/AppFooter';
 import ShareButtons from '../../../../components/ShareButtons';
 import { useLocale, useTranslations } from 'next-intl';
 import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
-import { useMemo } from 'react';
 
 const IconDownload = () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,7 +204,7 @@ export default function ReportDetailPage() {
         if (locale === 'en') return report.documentUrlEn || report.documentUrlAr || report.documentUrl || null;
         return report.documentUrlEn || report.documentUrlAr || report.documentUrl || null; // ku defaults to English
     })();
-    const contentNodes = useMemo(() => renderBodyWithEmbeds(body), [body]);
+    const contentNodes = renderBodyWithEmbeds(body);
 
     return (
         <div className="min-h-screen bg-gray-50">

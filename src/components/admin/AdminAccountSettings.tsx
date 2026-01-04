@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toastSuccess } from './toast';
 
 type AdminInfo = {
     id: string;
@@ -61,6 +62,7 @@ export function AdminAccountSettings() {
             }
             setInfo(data);
             setMessage('تم تحديث الحساب بنجاح');
+            void toastSuccess('تم تحديث الحساب بنجاح');
             if (password) setPassword('');
         } catch {
             setError('خطأ غير متوقع');

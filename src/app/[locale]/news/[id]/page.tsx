@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import AppHeader from '../../../../components/AppHeader';
 import AppFooter from '../../../../components/AppFooter';
 import ShareButtons from '../../../../components/ShareButtons';
@@ -22,6 +21,40 @@ type NewsItem = {
     publishedAt?: string | null;
     createdAt?: string | null;
 };
+
+const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/)|youtu\.be\/)[^\s]+)/i;
+
+function extractYouTubeId(rawUrl: string): string | null {
+    try {
+        const normalized = rawUrl.trim().startsWith('http') ? rawUrl.trim() : `https://${rawUrl.trim()}`;
+        const u = new URL(normalized);
+        if (u.hostname.includes('youtu.be')) {
+            const id = u.pathname.split('/').filter(Boolean)[0];
+            return id || null;
+        }
+        if (u.pathname.startsWith('/shorts/') || u.pathname.startsWith('/live/')) {
+            const [, , id] = u.pathname.split('/');
+            return id || null;
+        }
+        if (u.searchParams.get('v')) {
+            return u.searchParams.get('v');
+        }
+        const parts = u.pathname.split('/');
+        const embedIndex = parts.findIndex((p) => p === 'embed' || p === 'v');
+        if (embedIndex !== -1 && parts[embedIndex + 1]) {
+            return parts[embedIndex + 1];
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+function toYouTubeEmbed(url?: string | null): string | null {
+    if (!url) return null;
+    const id = extractYouTubeId(url);
+    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestBranding=1` : null;
+}
 
 export default function NewsDetailPage() {
     const params = useParams();
@@ -108,13 +141,11 @@ export default function NewsDetailPage() {
             {/* Hero Image */}
             {newsItem.imageUrl && (
                 <div className="relative h-96 bg-gray-900 overflow-hidden">
-                    <Image
+                    <img
                         src={newsItem.imageUrl}
                         alt={title}
-                        fill
-                        priority
-                        className="object-cover opacity-90"
-                        sizes="100vw"
+                        className="object-cover opacity-90 w-full h-full"
+                        loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
@@ -181,7 +212,7 @@ export default function NewsDetailPage() {
                     <div className="mb-8">
                         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                             <iframe
-                                src={newsItem.videoUrl}
+                                src={toYouTubeEmbed(newsItem.videoUrl) || newsItem.videoUrl}
                                 title={title}
                                 className="absolute top-0 left-0 w-full h-full rounded-xl shadow-lg"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

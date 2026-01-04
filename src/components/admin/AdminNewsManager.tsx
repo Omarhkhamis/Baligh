@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { NEWS_CATEGORIES, type NewsCategoryKey } from '@/data/newsCategories';
 import { ImagePicker } from './ImagePicker';
+import { toastSuccess } from './toast';
 
 type NewsItem = {
     id: string;
@@ -133,9 +134,11 @@ export function AdminNewsManager() {
             if (editingId) {
                 setItems((prev) => prev.map((i) => (i.id === editingId ? data : i)));
                 setMessage('Article updated');
+                void toastSuccess('تم تحديث الخبر بنجاح');
             } else {
                 setItems((prev) => [data, ...prev]);
                 setMessage('Article created');
+                void toastSuccess('تم إنشاء الخبر بنجاح');
             }
             resetForm();
             setShowModal(false);

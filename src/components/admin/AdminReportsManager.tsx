@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
 import { ImagePicker } from './ImagePicker';
+import { toastSuccess } from './toast';
 
 type ReportItem = {
     id: string;
@@ -184,15 +185,22 @@ export function AdminReportsManager() {
             if (editingId) {
                 setItems((prev) => prev.map((i) => (i.id === editingId ? data : i)));
                 setMessage('Report updated');
+                void toastSuccess('تم تحديث التقرير بنجاح');
             } else {
                 setItems((prev) => [data, ...prev]);
                 setMessage('Report created');
+                void toastSuccess('تم إنشاء التقرير بنجاح');
             }
             resetForm();
             setShowModal(false);
         } catch (e) {
             console.error(e);
             setError('Unexpected error');
+            void Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: 'تعذر حفظ التقرير. حاول مجدداً.',
+            });
         } finally {
             setSaving(false);
         }

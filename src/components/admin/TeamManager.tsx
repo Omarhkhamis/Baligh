@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { ImagePicker } from './ImagePicker';
+import { toastSuccess } from './toast';
 
 type TeamMember = {
     id: string;
@@ -69,9 +70,11 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
             if (editingId) {
                 setMembers((prev) => prev.map((m) => (m.id === editingId ? data : m)).sort((a, b) => a.sortOrder - b.sortOrder));
                 setMessage('Updated successfully');
+                void toastSuccess('تم تحديث بيانات الفريق بنجاح');
             } else {
                 setMembers((prev) => [...prev, data].sort((a, b) => a.sortOrder - b.sortOrder));
                 setMessage('Created successfully');
+                void toastSuccess('تم إضافة عضو الفريق بنجاح');
             }
             setEditingId(null);
             setForm(defaultForm);
