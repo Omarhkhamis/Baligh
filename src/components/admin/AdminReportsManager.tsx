@@ -15,6 +15,8 @@ type ReportItem = {
     authorNameEn?: string | null;
     imageUrl?: string | null;
     documentUrl?: string | null;
+    documentUrlAr?: string | null;
+    documentUrlEn?: string | null;
     isPublished: boolean;
     publishedAt?: string | null;
     createdAt?: string | null;
@@ -32,6 +34,8 @@ type FormState = {
     authorNameEn: string;
     imageUrl: string;
     documentUrl: string;
+    documentUrlAr: string;
+    documentUrlEn: string;
     publishNow: boolean;
 };
 
@@ -47,6 +51,8 @@ const defaultForm: FormState = {
     authorNameEn: '',
     imageUrl: '',
     documentUrl: '',
+    documentUrlAr: '',
+    documentUrlEn: '',
     publishNow: true,
 };
 
@@ -59,7 +65,8 @@ export function AdminReportsManager() {
     const [message, setMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
-    const [uploadingPdf, setUploadingPdf] = useState(false);
+    const [uploadingPdfAr, setUploadingPdfAr] = useState(false);
+    const [uploadingPdfEn, setUploadingPdfEn] = useState(false);
 
     const categoryOptions = useMemo(() => Object.entries(REPORT_CATEGORIES), []);
 
@@ -89,8 +96,7 @@ export function AdminReportsManager() {
         setForm((prev) => ({ ...prev, [key]: value }));
     };
 
-    const handlePdfUpload = async (file: File | null) => {
-        if (!file) return;
+    const uploadPdf = async (file: File, onSuccess: (url: string) => void, setUploading: (v: boolean) => void) => {
         if (!file.name.toLowerCase().endsWith('.pdf')) {
             setError('Only PDF files are allowed');
             return;
@@ -99,7 +105,7 @@ export function AdminReportsManager() {
             setError('Max file size is 20MB');
             return;
         }
-        setUploadingPdf(true);
+        setUploading(true);
         setError(null);
         setMessage(null);
         try {
@@ -114,14 +120,24 @@ export function AdminReportsManager() {
                 setError(data?.error || 'Upload failed');
                 return;
             }
-            setForm((prev) => ({ ...prev, documentUrl: data.url }));
+            onSuccess(data.url);
             setMessage('PDF uploaded');
         } catch (e) {
             console.error(e);
             setError('Upload failed');
         } finally {
-            setUploadingPdf(false);
+            setUploading(false);
         }
+    };
+
+    const handlePdfUploadAr = (file: File | null) => {
+        if (!file) return;
+        uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlAr: url })), setUploadingPdfAr);
+    };
+
+    const handlePdfUploadEn = (file: File | null) => {
+        if (!file) return;
+        uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlEn: url })), setUploadingPdfEn);
     };
 
     const resetForm = () => {
@@ -154,6 +170,8 @@ export function AdminReportsManager() {
                     authorNameEn: form.authorNameEn || null,
                     imageUrl: form.imageUrl || null,
                     documentUrl: form.documentUrl || null,
+                    documentUrlAr: form.documentUrlAr || form.documentUrl || null,
+                    documentUrlEn: form.documentUrlEn || form.documentUrl || null,
                     publishNow: form.publishNow,
                 }),
             });
@@ -248,13 +266,15 @@ export function AdminReportsManager() {
                                                 summaryEn: item.summary?.en || '',
                                                 bodyAr: item.body?.ar || '',
                                                 bodyEn: item.body?.en || '',
-                                                category: (item.category.toLowerCase() as ReportCategoryKey) || 'initiative',
-                                                authorName: item.authorName || '',
-                                                authorNameEn: item.authorNameEn || '',
-                                                imageUrl: item.imageUrl || '',
-                                                documentUrl: item.documentUrl || '',
-                                                publishNow: item.isPublished ?? true,
-                                            });
+                                            category: (item.category.toLowerCase() as ReportCategoryKey) || 'initiative',
+                                            authorName: item.authorName || '',
+                                            authorNameEn: item.authorNameEn || '',
+                                            imageUrl: item.imageUrl || '',
+                                            documentUrl: item.documentUrl || '',
+                                            documentUrlAr: (item as any).documentUrlAr || item.documentUrl || '',
+                                            documentUrlEn: (item as any).documentUrlEn || item.documentUrl || '',
+                                            publishNow: item.isPublished ?? true,
+                                        });
                                             setMessage(null);
                                             setError(null);
                                             setShowModal(true);
@@ -378,33 +398,75 @@ export function AdminReportsManager() {
                                     onChange={(url) => handleChange('imageUrl', url)}
                                     placeholder="Image URL (optional)"
                                 />
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700">Document (PDF only, max 20MB)</label>
-                                    <div className="flex gap-2">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Document (Arabic PDF, max 20MB)</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(e) => handlePdfUploadAr(e.target.files?.[0] || null)}
+                                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleChange('documentUrlAr', '')}
+                                                className="px-3 py-2 text-xs rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
                                         <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={(e) => handlePdfUpload(e.target.files?.[0] || null)}
-                                            className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            placeholder="Or paste Arabic PDF/link"
+                                            value={form.documentUrlAr}
+                                            onChange={(e) => handleChange('documentUrlAr', e.target.value)}
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleChange('documentUrl', '')}
-                                            className="px-3 py-2 text-xs rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
-                                        >
-                                            Clear
-                                        </button>
+                                        {form.documentUrlAr && (
+                                            <p className="text-xs text-emerald-700">Attached (AR): {form.documentUrlAr}</p>
+                                        )}
+                                        {uploadingPdfAr && <p className="text-xs text-gray-500">Uploading Arabic PDF...</p>}
                                     </div>
-                                    <input
-                                        className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                        placeholder="Or paste a PDF/link"
-                                        value={form.documentUrl}
-                                        onChange={(e) => handleChange('documentUrl', e.target.value)}
-                                    />
-                                    {form.documentUrl && (
-                                        <p className="text-xs text-emerald-700">Attached: {form.documentUrl}</p>
-                                    )}
-                                    {uploadingPdf && <p className="text-xs text-gray-500">Uploading PDF...</p>}
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700">Document (English PDF, max 20MB)</label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="file"
+                                                accept="application/pdf"
+                                                onChange={(e) => handlePdfUploadEn(e.target.files?.[0] || null)}
+                                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleChange('documentUrlEn', '')}
+                                                className="px-3 py-2 text-xs rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <input
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            placeholder="Or paste English PDF/link"
+                                            value={form.documentUrlEn}
+                                            onChange={(e) => handleChange('documentUrlEn', e.target.value)}
+                                        />
+                                        {form.documentUrlEn && (
+                                            <p className="text-xs text-emerald-700">Attached (EN): {form.documentUrlEn}</p>
+                                        )}
+                                        {uploadingPdfEn && <p className="text-xs text-gray-500">Uploading English PDF...</p>}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="block text-sm font-semibold text-gray-700">Fallback / legacy PDF link (optional)</label>
+                                        <input
+                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            placeholder="Optional fallback PDF link"
+                                            value={form.documentUrl}
+                                            onChange={(e) => handleChange('documentUrl', e.target.value)}
+                                        />
+                                        {form.documentUrl && (
+                                            <p className="text-xs text-emerald-700">Attached (fallback): {form.documentUrl}</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <div>

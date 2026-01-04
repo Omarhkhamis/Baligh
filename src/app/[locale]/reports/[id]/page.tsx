@@ -8,6 +8,7 @@ import AppFooter from '../../../../components/AppFooter';
 import ShareButtons from '../../../../components/ShareButtons';
 import { useLocale, useTranslations } from 'next-intl';
 import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { useMemo } from 'react';
 
 const IconDownload = () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -31,9 +32,87 @@ type ReportItem = {
     authorNameEn?: string | null;
     imageUrl?: string | null;
     documentUrl?: string | null;
+    documentUrlAr?: string | null;
+    documentUrlEn?: string | null;
     publishedAt?: string | null;
     createdAt?: string | null;
 };
+
+const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\\?v=|embed\/|shorts\/)|youtu\.be\/)[A-Za-z0-9_-]{11}[^\s]*)/gi;
+
+function youtubeToEmbed(url: string): string | null {
+    try {
+        const u = new URL(url);
+        // youtu.be/<id>
+        if (u.hostname.includes('youtu.be')) {
+            const id = u.pathname.split('/')[1];
+            return id ? `https://www.youtube.com/embed/${id}` : null;
+        }
+        // youtube.com/shorts/<id>
+        if (u.pathname.startsWith('/shorts/')) {
+            const id = u.pathname.split('/')[2] || u.pathname.split('/')[1];
+            return id ? `https://www.youtube.com/embed/${id}` : null;
+        }
+        // youtube.com/watch?v=<id> or embed/<id>
+        if (u.searchParams.get('v')) {
+            return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+        }
+        const parts = u.pathname.split('/');
+        const embedIndex = parts.findIndex((p) => p === 'embed');
+        if (embedIndex !== -1 && parts[embedIndex + 1]) {
+            return `https://www.youtube.com/embed/${parts[embedIndex + 1]}`;
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+function renderBodyWithEmbeds(body: string) {
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let idx = 0;
+    YT_REGEX.lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    const pushText = (text: string, key: string) => {
+        if (text && text.trim().length > 0) {
+            elements.push(
+                <p key={key} className="text-gray-800 leading-relaxed whitespace-pre-line text-lg">
+                    {text}
+                </p>
+            );
+        }
+    };
+
+    while ((match = YT_REGEX.exec(body)) !== null) {
+        const before = body.slice(lastIndex, match.index);
+        pushText(before, `text-${idx}`);
+        const embedUrl = youtubeToEmbed(match[0]);
+        if (embedUrl) {
+            elements.push(
+                <div key={`yt-${idx}`} className="my-6 rounded-2xl overflow-hidden bg-black aspect-video">
+                    <iframe
+                        src={embedUrl}
+                        title="YouTube video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full"
+                    />
+                </div>
+            );
+        } else {
+            pushText(match[0], `text-link-${idx}`);
+        }
+        lastIndex = YT_REGEX.lastIndex;
+        idx += 1;
+    }
+
+    const tail = body.slice(lastIndex);
+    pushText(tail, `text-tail`);
+
+    return elements;
+}
 
 export default function ReportDetailPage() {
     const params = useParams();
@@ -111,6 +190,12 @@ export default function ReportDetailPage() {
     const author = locale === 'en'
         ? (report.authorNameEn || report.authorName)
         : (report.authorName || report.authorNameEn);
+    const pdfUrl = (() => {
+        if (locale === 'ar') return report.documentUrlAr || report.documentUrlEn || report.documentUrl || null;
+        if (locale === 'en') return report.documentUrlEn || report.documentUrlAr || report.documentUrl || null;
+        return report.documentUrlEn || report.documentUrlAr || report.documentUrl || null; // ku defaults to English
+    })();
+    const contentNodes = useMemo(() => renderBodyWithEmbeds(body), [body]);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -181,9 +266,9 @@ export default function ReportDetailPage() {
                             <span>{author}</span>
                         </div>
                     )}
-                    {report.documentUrl && (
+                    {pdfUrl && (
                         <a
-                            href={report.documentUrl}
+                            href={pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 text-[#1E8C4E] font-semibold text-sm hover:gap-3 transition-all"
@@ -195,10 +280,8 @@ export default function ReportDetailPage() {
                 </div>
 
                 {/* Content */}
-                <div className="prose prose-lg max-w-none">
-                    <div className="text-gray-800 leading-relaxed whitespace-pre-line text-lg">
-                        {body}
-                    </div>
+                <div className="prose prose-lg max-w-none space-y-4">
+                    {contentNodes}
                 </div>
 
                 {/* Share Section */}

@@ -139,6 +139,8 @@ model ReportStudy {
   authorName  String?
   authorNameEn String?
   documentUrl String?
+  documentUrlAr String?
+  documentUrlEn String?
   imageUrl    String?
   isPublished Boolean              @default(false)
   publishedAt DateTime?            @db.Timestamptz(6)

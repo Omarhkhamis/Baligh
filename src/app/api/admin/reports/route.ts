@@ -60,6 +60,8 @@ export async function POST(req: NextRequest) {
             authorNameEn,
             imageUrl,
             documentUrl,
+            documentUrlAr,
+            documentUrlEn,
             publishNow,
         } = body;
 
@@ -79,6 +81,8 @@ export async function POST(req: NextRequest) {
                 authorName: authorName || null,
                 authorNameEn: authorNameEn || null,
                 documentUrl: documentUrl || null,
+                documentUrlAr: documentUrlAr || documentUrl || null,
+                documentUrlEn: documentUrlEn || documentUrl || null,
                 imageUrl: imageUrl || null,
                 isPublished: !!publishNow,
                 publishedAt: publishNow ? new Date() : null,
@@ -113,6 +117,8 @@ export async function PATCH(req: NextRequest) {
             authorNameEn,
             imageUrl,
             documentUrl,
+            documentUrlAr,
+            documentUrlEn,
             publishNow,
         } = body;
 
@@ -130,6 +136,8 @@ export async function PATCH(req: NextRequest) {
                 authorName: authorName ?? undefined,
                 authorNameEn: authorNameEn ?? undefined,
                 documentUrl: documentUrl ?? undefined,
+                documentUrlAr: documentUrlAr ?? undefined,
+                documentUrlEn: documentUrlEn ?? undefined,
                 imageUrl: imageUrl ?? undefined,
                 isPublished: publishNow !== undefined ? !!publishNow : undefined,
                 publishedAt: publishNow ? new Date() : undefined,
