@@ -119,13 +119,12 @@ export default function ReportDetailPage() {
             {/* Hero Image */}
             {report.imageUrl && (
                 <div className="relative h-96 bg-gray-900 overflow-hidden">
-                    <Image
+                    {/* Use native img for dynamic uploads to avoid Image Optimization 400s */}
+                    <img
                         src={report.imageUrl}
                         alt={title}
-                        fill
-                        priority
-                        className="object-cover opacity-90"
-                        sizes="100vw"
+                        className="object-cover opacity-90 w-full h-full"
+                        loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
