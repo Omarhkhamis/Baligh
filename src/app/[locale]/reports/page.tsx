@@ -199,13 +199,15 @@ export default function ReportsPage() {
                                             <a href={`/${locale}/reports/${item.id}`} className="block relative h-64 bg-gray-200 overflow-hidden cursor-pointer">
                                                 <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors z-10"></div>
                                                 {item.imageUrl ? (
-                                                    {/* Use native img for dynamic uploads to avoid Next Image 400s */}
-                                                    <img
-                                                        src={item.imageUrl}
-                                                        alt={title}
-                                                        className="object-cover group-hover:scale-110 transition-transform duration-500 w-full h-full"
-                                                        loading="lazy"
-                                                    />
+                                                    <>
+                                                        {/* Use native img for dynamic uploads to avoid Next Image 400s */}
+                                                        <img
+                                                            src={item.imageUrl}
+                                                            alt={title}
+                                                            className="object-cover group-hover:scale-110 transition-transform duration-500 w-full h-full"
+                                                            loading="lazy"
+                                                        />
+                                                    </>
                                                 ) : (
                                                     <div className="h-full w-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center group-hover:bg-gray-50 transition-colors">
                                                         <IconChart />
