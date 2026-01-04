@@ -1,0 +1,41 @@
+{
+  "name": "balghapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "security:scan": "npm audit --omit=dev"
+  },
+  "dependencies": {
+    "@google/genai": "^1.34.0",
+    "@google/generative-ai": "^0.24.1",
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.1.0",
+    "bcryptjs": "^3.0.3",
+    "googleapis": "^166.0.0",
+    "jimp": "^1.6.0",
+    "jsonwebtoken": "^9.0.3",
+    "mime": "^4.1.0",
+    "next": "^16.0.10",
+    "next-intl": "^4.5.6",
+    "pg": "^8.16.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "sweetalert2": "^11.26.10"
+  },
+  "devDependencies": {
+    "@prisma/config": "^7.2.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.10",
+    "prisma": "^7.1.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

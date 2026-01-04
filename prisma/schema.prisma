@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NewsCategory {
+  TRAINING
+  MEDIA
+  EVENT
+  ACHIEVEMENT
+  STATEMENT
+  PRESS_RELEASES
+  EVENTS
+  ANNOUNCEMENTS
+  OTHER
+}
+
+enum ReportStudyCategory {
+  MONTHLY_REPORT
+  RESEARCH
+  INFOGRAPHIC
+  POLICY_BRIEF
+  OTHER
+}
+
+enum FeedbackStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+model AdminUser {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
+}
+
+model TeamMember {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      Json     @db.Json
+  role      Json     @db.Json
+  bio       String?
+  imageUrl  String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([sortOrder])
+}
+
+model AnalysisLog {
+  id               String    @id @default(uuid()) @db.Uuid
+  inputText        String
+  classification   String
+  riskLevel        RiskLevel
+  confidenceScore  Decimal   @db.Decimal(5, 4)
+  detectedKeywords String[]  @default([])
+  aiScores         Json?     @db.Json
+  createdAt        DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @db.Timestamptz(6)
+
+  feedbackSubmissions FeedbackSubmission[]
+  legalReports        LegalReport[]
+
+  @@index([riskLevel])
+  @@index([createdAt])
+}
+
+model FeedbackSubmission {
+  id            String         @id @default(uuid()) @db.Uuid
+  analysisLogId String         @db.Uuid
+  message       String
+  contactEmail  String?
+  status        FeedbackStatus @default(PENDING)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime       @updatedAt @db.Timestamptz(6)
+
+  analysisLog AnalysisLog @relation(fields: [analysisLogId], references: [id], onDelete: Cascade)
+
+  @@index([analysisLogId])
+  @@index([status])
+}
+
+model LegalReport {
+  id            String    @id @default(uuid()) @db.Uuid
+  analysisLogId String    @db.Uuid
+  title         String
+  details       String
+  reporterEmail String?
+  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @db.Timestamptz(6)
+
+  analysisLog AnalysisLog @relation(fields: [analysisLogId], references: [id], onDelete: Cascade)
+
+  @@index([analysisLogId])
+}
+
+model NewsArticle {
+  id          String        @id @default(uuid()) @db.Uuid
+  title       Json          @db.Json
+  summary     Json          @db.Json
+  body        Json          @db.Json
+  category    NewsCategory
+  slug        String        @unique
+  authorName  String?
+  authorNameEn String?
+  imageUrl    String?
+  videoUrl    String?
+  tags        String[]      @default([])
+  isPublished Boolean       @default(false)
+  publishedAt DateTime?     @db.Timestamptz(6)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime      @updatedAt @db.Timestamptz(6)
+
+  @@index([category])
+  @@index([publishedAt])
+}
+
+model ReportStudy {
+  id          String               @id @default(uuid()) @db.Uuid
+  title       Json                 @db.Json
+  summary     Json?                @db.Json
+  body        Json                 @db.Json
+  category    ReportStudyCategory
+  authorName  String?
+  authorNameEn String?
+  documentUrl String?
+  imageUrl    String?
+  isPublished Boolean              @default(false)
+  publishedAt DateTime?            @db.Timestamptz(6)
+  createdAt   DateTime             @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime             @updatedAt @db.Timestamptz(6)
+
+  @@index([category])
+  @@index([publishedAt])
+}

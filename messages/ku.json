@@ -1,0 +1,1057 @@
+{
+  "header": {
+    "brand": {
+      "title": "بَلِّغ",
+      "subtitle": "Ji bo Rûbirûbûna Gotara Tundî û Kînê"
+    },
+    "topBar": {
+      "about": "Em kî ne?",
+      "vision": "Vision",
+      "methodology": "Metodolojî"
+    },
+    "nav": {
+      "home": "Destpêk",
+      "about": "Em kî ne?",
+      "vision": "Vision",
+      "methodology": "Metodolojî",
+      "legal": "Parastina Yasayî",
+      "protection": "Parastina Dîjîtal",
+      "monitoring": "Reports & Research",
+      "training": "Perwerdeyên Taybet",
+      "reports": "Rapor û Lêkolîn",
+      "news": "Nûçeyên Me",
+      "faq": "Pirsên Dubare"
+    },
+    "cta": "Start Analysis",
+    "menuLabel": "Menu",
+    "backToHome": "Back to Home"
+  },
+  "landing": {
+    "hero": {
+      "title": "Alîkar be ji bo ewlekirina qada dîjîtal",
+      "subtitle": "Amûreke analîzê ya ku li ser metodolojiyeke zanistî ji hêla tîma destpêşxeriyê ve hatiye pêşxistin, ku hişê çêkirî û pêdaçûna mirovî dike yek",
+      "cta1": "Dest bi Analîzê Bike",
+      "cta2": "Xizmetan Bibîne"
+    },
+    "trustIndicators": {
+      "ai": {
+        "title": "Bi Hêza AI",
+        "subtitle": "Analîza pêşketî û hûr"
+      },
+      "countries": {
+        "title": "9 Welatên Piştgirîkirî",
+        "subtitle": "Erebî û Ewropî"
+      },
+      "free": {
+        "title": "100% Belaş",
+        "subtitle": "Ewle û şîfrekirî"
+      }
+    },
+    "services": {
+      "title": "Xizmetên Me",
+      "subtitle": "Komek berfireh ji xizmetan bibîne ku ji bo parastin û piştgiriya te hatine sêwirandin",
+      "legal": {
+        "title": "Parastina Yasayî",
+        "description": "Çarçoveya yasayî û mekanîzmayên ragihandinê",
+        "cta": "Zêdetir Fêr Bibe"
+      },
+      "protection": {
+        "title": "Parastina Dîjîtal",
+        "description": "Amûr û rêberên ji bo ewlehiya serhêl",
+        "cta": "Zêdetir Fêr Bibe"
+      },
+      "training": {
+        "title": "Perwerdeyên Taybet",
+        "description": "Bernameyên perwerdehiyê û komxebat",
+        "cta": "Zêdetir Fêr Bibe"
+      },
+      "tool": {
+        "title": "Amûra Analîzê",
+        "description": "Tesbîtkirina Gotara Kînê bi hêza AI",
+        "cta": "Niha Biceribîne"
+      },
+      "features": "✓ Analîza bi hêza AI • ✓ Piştgirî ji bo 9 welatan • ✓ Ewle û 100% belaş"
+    },
+    "news": {
+      "title": "Nûçe û Çavkanî",
+      "subtitle": "Nûçe û çavkaniyên perwerdehiyê yên dawî bişopîne",
+      "noNews": "Ti nûçe nînin",
+      "videoBadge": "Vîdyo",
+      "readMore": "Zêdetir Bixwîne",
+      "viewAll": "Hemû Nûçeyan Bibîne"
+    },
+    "finalCta": {
+      "title": "Ma tu rûbirûyî Gotara Kînê bûyî?",
+      "subtitle": "Dudilî nebe di bikaranîna amûra me ya belaş de ji bo analîza lezgîn û bidestxistina raporeke yasayî ya amade",
+      "primaryButton": "Niha Dest bi Analîzê Bike",
+      "secondaryButton": "Têkiliyê Danîn",
+      "trustBadge": "100% Ewle û Belaş • Daneyên te parastî ne"
+    }
+  },
+  "footer": {
+    "brand": {
+      "description": "Destpêşxeriyeke serbixwe ji bo rûbirûbûna Gotara Tundî û Kînê di qada dîjîtal a Sûriyeyî de"
+    },
+    "quickLinks": {
+      "title": "Zencîreyên Lez"
+    },
+    "services": {
+      "title": "Xizmetên Me"
+    },
+    "contact": {
+      "title": "Têkiliyê Danîn",
+      "socialMedia": "Ji bo Pirs û Hevkariyan",
+      "cta": "Dest bi Analîzê Bike"
+    },
+    "copyright": "© 2024 Violence and Hate Speech Combat Initiative - All Rights Reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions"
+  },
+  "home": {
+    "hero": {
+      "title": "Alîkar be ji bo ewlekirina qada dîjîtal",
+      "subtitle": "Amûreke analîzê ya ku li ser metodolojiyeke zanistî ji hêla tîma destpêşxeriyê ve hatiye pêşxistin, ku hişê çêkirî û pêdaçûna mirovî dike yek"
+    },
+    "form": {
+      "label": "Nivîsê ji bo analîzê binivîse:",
+      "placeholder": "Her nivîs, şîrove, post an paragrafa ku tu dixwazî kontrol bikî li vir bixe...",
+      "charCount": "{count} tîp",
+      "submitButton": "Dest bi Analîza Nivîsê Bike",
+      "analyzingButton": "Tê analîzkirin...",
+      "uploadImage": "Wêneyekî Bar Bike"
+    },
+    "trustIndicators": {
+      "ai": "Analîza bi Hêza AI",
+      "review": "Pêdaçûna Mirovî Dema Hewce be",
+      "methodology": "Metodolojî li gorî Çarçoveya Sûriyeyî"
+    }
+  },
+  "results": {
+    "title": "Encama Analîzê",
+    "subtitle": "Encamên analîzê û vebijarkên ragihandina naveroka binpêker",
+    "classification": "Dabeşkirin",
+    "riskLevel": "Asta Xetereyê",
+    "criteria": "Pîvanên Nirxandinê",
+    "severity": "Tûjî",
+    "vulnerability": "Lawazî",
+    "context": "Çarçove",
+    "reasoning": "Analîza Berfireh",
+    "actions": "Çalakiyên Pêşniyarkirî",
+    "reportButton": "Rapora Yasayî",
+    "feedbackButton": "Şaşiyekê Ragihîne",
+    "share": "Encamê Parve Bike",
+    "shareDesc": "Encamê li ser medyaya civakî parve bike an kopî bike",
+    "reportingScreen": "Ekrana Ragihandinê",
+    "reportSelf": "Bi Xwe Ragihîne",
+    "reportSelfDesc": "Rapora rasterast ji bo rayedaran",
+    "reportInitiative": "Bi Rêya Destpêşxeriyê Ragihîne",
+    "reportInitiativeDesc": "Em alîkariya te dikin di ragihandinê de",
+    "selectCountry": "Welat Hilbijêre",
+    "legalInfo": "Agahiyên Yasayî",
+    "laws": "Yasa",
+    "agencies": "Saziyên Ragihandinê",
+    "directLink": "Lînka Rasterast",
+    "generateReport": "Rapora Yasayî Derxîne",
+    "generating": "Rapor tê amadekirin...",
+    "copyReport": "Raporê Kopî Bike",
+    "postLink": "Lînka Postê",
+    "reporterCountry": "Welatê Kesê Ragihandî",
+    "targetGroup": "Li Dijî Kîjan Komê?",
+    "submitReport": "Raporê Bişîne",
+    "reportSuccess": "Rapor bi serkeftî hate şandin.",
+    "reportError": "Di şandina raporê de şaşiyek çêbû",
+    "fillAllFields": "Ji kerema xwe hemû qadan dagire",
+    "reviewMessage": "Rapora te dê ji hêla tîma destpêşxeriyê ve were nirxandin û em ê di demek nêzîk de bi te re têkiliyê daynin",
+    "detectedDeterminants": "Diyarkerên Hatine Tesbîtkirin",
+    "intentSignal": "Îşareta Niyetê",
+    "detectedMarkers": "Nîşaneyên Zimanî",
+    "targetGroupLabel": "Koma Hedef",
+    "categories": {
+      "hate_speech": "Gotara Kînê",
+      "harassment": "Tacîz",
+      "not_hate_speech": "Ne gotara kînê",
+      "safe": "Ewle"
+    },
+    "risk": {
+      "high": "Bilind",
+      "medium": "Navîn",
+      "low": "Nizim"
+    },
+    "target_groups": {
+      "Alawites": "Alawites",
+      "Druze": "Druze",
+      "Sunnis": "Sunnis",
+      "Kurds": "Kurds",
+      "Christians": "Christians",
+      "Shia": "Shia",
+      "Women": "Women",
+      "None": "None"
+    },
+    "intent_signals": {
+      "Explicit violence": "Explicit violence",
+      "Dehumanization": "Dehumanization",
+      "Stereotyping": "Stereotyping",
+      "Insult": "Insult",
+      "Treason Accusation": "Treason Accusation",
+      "Mockery of Suffering": "Mockery of Suffering",
+      "None": "None"
+    }
+  },
+  "monitoring": {
+    "title": "Çavdêrî û Ragihandin",
+    "subtitle": "Encamên analîzê û vebijarkên ragihandina naveroka binpêker",
+    "noResultsTitle": "Ti encam nînin",
+    "noResultsDesc": "Pêşî nivîsekê analîz bike da ku encaman li vir bibînî",
+    "analyzeButton": "Niha Naverokê Analîz Bike"
+  },
+  "feedback": {
+    "title": "Ma encam rast e?",
+    "description": "Alîkariya me bike ji bo baştirkirina pergalê",
+    "correctCategory": "Divê dabeşkirina rast çi be?",
+    "explanation": "Ravekirin (bijarî)",
+    "explanationPlaceholder": "Çima tu difikirî ku ev dabeşkirin şaş e?",
+    "submitButton": "Bersivê Bişîne",
+    "cancelButton": "Betal Bike",
+    "submittingButton": "Tê şandin...",
+    "successMessage": "Spas! Bersiva te bi serkeftî hate şandin",
+    "errorMessage": "Şaşiyek çêbû, ji kerema xwe paşê dîsa hewl bide"
+  },
+  "training": {
+    "title": "Specialized Training",
+    "subtitle": "Bernameyên perwerdehiyê yên taybet ji bo bihêzkirina takekes û rêxistinan di rûbirûbûna Gotara Kînê de.",
+    "tabs": {
+      "programs": "Bernameyên Perwerdehiyê",
+      "formats": "Teşeyên Perwerdehiyê",
+      "audience": "Koma Hedef",
+      "importance": "Girîngî û Bandor"
+    },
+    "quote": "We build awareness… We create safety… Towards resilient Syrian communities",
+    "programsTitle": "Our Training Programs",
+    "programs": {
+      "hateSpeech": {
+        "title": "Hate Speech Combating Program",
+        "description": "A comprehensive training program that introduces basic concepts, levels of hate speech, and analysis of real-world examples",
+        "duration": "3 days",
+        "target": "Activists, civil society organizations"
+      },
+      "narrative": {
+        "title": "Narrative Analysis Program",
+        "description": "Designed for activists and journalists to understand how sectarian and regional narratives are formed",
+        "duration": "2-3 days",
+        "target": "Journalists, researchers"
+      },
+      "digitalProtection": {
+        "title": "Digital Protection & Combating Cyber Violence",
+        "description": "A practical program to protect youth and activists from bullying and sectarian targeting",
+        "duration": "1 day",
+        "target": "Youth, activists"
+      },
+      "monitoring": {
+        "title": "Monitoring Team Training",
+        "description": "A specialized program to build a team capable of data extraction and content classification",
+        "duration": "5 days",
+        "target": "Monitors, analysts"
+      },
+      "counterSpeech": {
+        "title": "Alternative Speech Production",
+        "description": "An innovative program that trains participants to create positive content that counters hate speech",
+        "duration": "2-3 days",
+        "target": "Content creators, media professionals"
+      }
+    },
+    "durationLabel": "Duration:",
+    "targetLabel": "Target Audience:",
+    "formatsTitle": "Training Formats",
+    "formats": {
+      "faceToFace": {
+        "title": "Face-to-Face",
+        "desc": "In-person training in classrooms"
+      },
+      "online": {
+        "title": "Online",
+        "desc": "Interactive online sessions"
+      },
+      "shortSessions": {
+        "title": "Short Sessions",
+        "desc": "Intensive workshops"
+      },
+      "trainers": {
+        "title": "Training of Trainers",
+        "desc": "Building trainer capacity"
+      }
+    },
+    "audienceTitle": "Target Audience",
+    "audience": {
+      "civilSociety": {
+        "title": "Civil Society Organizations",
+        "items": [
+          "Protection teams",
+          "Humanitarian organizations",
+          "Local initiatives"
+        ]
+      },
+      "media": {
+        "title": "Media Professionals & Researchers",
+        "items": [
+          "Journalists",
+          "Researchers",
+          "University students"
+        ]
+      },
+      "youth": {
+        "title": "Youth & Activists",
+        "items": [
+          "Youth initiatives",
+          "Digital activists",
+          "Community leaders"
+        ]
+      }
+    },
+    "importanceTitle": "Why Are These Programs Important?",
+    "importance": [
+      "Much of the violence in Syria began with words",
+      "Training helps build community awareness",
+      "Protecting targeted groups from hate speech",
+      "Promoting <strong>Peace Journalism</strong> and responsible conflict coverage",
+      "Enhancing organizations' capacity to deal with harmful speech",
+      "Supporting social cohesion and coexistence"
+    ],
+    "ctaTitle": "Interested in Training?",
+    "ctaSubtitle": "Contact us to learn more about our training programs",
+    "ctaButton": "Contact Us",
+    "footerTitle": "Contact Us",
+    "footerSubtitle": "For inquiries, partnerships, and content reporting",
+    "footerCopyright": "© 2024 Initiative to Combat Violence and Hate Speech - All Rights Reserved"
+  },
+  "news": {
+    "title": "Nûçe û Çalakî",
+    "subtitle": "Çalakî û bûyerên me yên dawî di qada rûbirûbûna Gotara Kînê û xurtkirina aştiya civakî de bişopîne",
+    "categories": {
+      "all": "Hemû",
+      "training": "Perwerde",
+      "media": "Hevpeyvînên Medyayî",
+      "event": "Beşdarî di Bûyeran de",
+      "achievement": "Nûvekirin",
+      "statement": "Daxuyanî",
+      "other": "Yên din"
+    },
+    "noNews": "Ti nûçe nînin",
+    "videoBadge": "Vîdyo",
+    "readMore": "Zêdetir Bixwîne",
+    "share": "Parve Bike",
+    "dateFormat": "ku",
+    "loading": "Loading..."
+  },
+  "protection": {
+    "title": "🛡️ Parastina Dîjîtal – Tu Çawa Xwe Ji Gotara Kînê Diparêzî?",
+    "subtitle": "Ev beş amûrên kiryarî û zanistî pêşkêş dike ji bo parastina xwe ya dîjîtal, têgihiştina mekanîzmayên belavbûna Gotara Kînê, û rola me ya hevpar di rûbirûbûna wê de.",
+    "tabs": {
+      "awareness": "🧠 Têgihiştin û Analîz",
+      "tools": "⚙️ Parastin û Ragihandin",
+      "responsibility": "🤝 Hevgirtin û Rûbirûbûn"
+    },
+    "content": {
+      "awareness": {
+        "title": "🧠 Têgihiştin û Analîz – Hişyariya li hember Gotara Kînê",
+        "intro": "Berî ku tu bikaribî xwe biparêzî, divê tu fêm bikî ka nefret çawa tê avakirin û çawa belav dibe. Ev beş alîkariya te dike ku tu 'çavekî rexnegir' pêş bixî da ku gotara zirarê bibînî berî ku bandorê li te bike.",
+        "timeline": {
+          "title": "🔍 Bibîne ka nefret çawa tê avakirin... da ku tu bikaribî rawestînî",
+          "intro": "Gotara Kînê ji nişka ve dernakeve; ew di sê qonaxên zelal re derbas dibe:",
+          "stages": {
+            "1": {
+              "title": "Bêmirovkirin û Amadekarî",
+              "desc": "Peyvên biçûk tên bikaranîn ji bo bêmirovkirina yê din: 'kêzik', 'mîkrob', 'xayîn'... peyvên hêsan in lê zemînê ji bo qebûlkirina tundiyê amade dikin."
+            },
+            "2": {
+              "title": "Rewakirina Medyayî",
+              "desc": "Ev ziman bi rêya rûpelên medyayî an hesabên bibandor tê dubarekirin, û vediguhere gotareke 'meşrû' an 'civakî tê qebûlkirin'."
+            },
+            "3": {
+              "title": "Belavbûna Bilez û Vegirtin",
+              "desc": "Bi rêya haştagon, mîm (memes), vîdyoyên kurt û hesabên sexte belav dibe, digihîje girseyeke mezin ku bêyî hay jê hebe dubare dike."
+            }
+          },
+          "tip": "💡 Şîret: Dema ku tu van qonaxan fêm bikî, naskirina gotara zirarê dibe gaveke otomatîk ku alîkariya te dike ku tu wê rawestînî û tevlî nebî."
+        },
+        "checklist": {
+          "title": "❓ Naverokê analîz bike berî ku pê re têkilî daynî",
+          "intro": "Dema ku tu postekê derbarê komekê, mezhebekê an herêmekê de dibînî, vê parzûna bilez bikar bîne da ku cewhera wê diyar bikî:",
+          "questions": {
+            "0": "Ma ew nasnameyê dike hedef? (Li şûna çalakiya kesane)",
+            "1": "Ma ew bêmirovkirin an heqaretê dihewîne?",
+            "2": "Ma ew te ber bi tirs an hêrsê ve dibe li şûna têgihiştinê?",
+            "3": "Ma ew li ser bingeha çalakiya kesekî hukmê li tevahiya komekê dike?",
+            "4": "Ma ew zimanê tehrîkkar an tund bikar tîne?"
+          },
+          "results": {
+            "low": "Dest bi analîzkirina naverokê bike...",
+            "medium": "⚠️ Îhtîmala Navîn - Naverokê bi baldarî binirxîne",
+            "high": "🚨 Îhtîmala Bilind - Ev bi îhtîmaleke mezin Gotara Kînê ye"
+          },
+          "contextAlert": "⚠️ Nîşana hişyariyê ya zelal di çarçoveya Sûriyeyî de: Gelek naverok bi hevokeke asayî dest pê dike û bi giştîkirineke temam bi dawî dibe: 'Hemû Durzî...', 'Hemû Sunnî...', 'Elewî her tim...'. Ev bazdana ji kesane bo komî nîşaneke xurt a Gotara Kînê ye."
+        },
+        "misinfo": {
+          "title": "🛑 Nekeve xefika agahiyên çewt ên ku nefretê diafirînin",
+          "intro": "Berî ku tu her postekê parve bikî, bala xwe bide çar mekanîzmayên ku rojane tên bikaranîn ji bo afirandina vegotinên mezhebî û herêmî:",
+          "headers": {
+            "mechanism": "Mekanîzmaya Agahiyên Çewt",
+            "definition": "Pênase û Sepandin",
+            "example": "Mînak"
+          },
+          "mechanisms": {
+            "framing": {
+              "name": "Çarçovekirin (Framing)",
+              "def": "Dema ku çîrok tenê ji aliyekî ve tê pêşkêşkirin da ku bigihîje encameke pêşwext diyarkirî.",
+              "ex": "Nîşandana bûyereke yekane wekî 'xwezaya' tevahiya komekê"
+            },
+            "generalization": {
+              "name": "Giştîkirin",
+              "def": "Dema ku çalakiya kesekî (bûyereke yekane) vediguhere 'taybetmendiyên komê' an taybetmendiya herêmeke tevahî.",
+              "ex": "'Hemû xelkê herêma X wisa ne...' li ser bingeha çalakiya kesekî"
+            },
+            "halfTruth": {
+              "name": "Nîv-Rastî",
+              "def": "Dema ku naverok agahiyên rast pêşkêş dike lê beşê mayî yê çarçoveyê vedişêre da ku vegotineke xapînok û tehrîkkar biafirîne.",
+              "ex": "Behskirina beşekî ji bûyerê û veşartina çarçoveya tevahî"
+            },
+            "echoChambers": {
+              "name": "Odeyên Dengvedanê",
+              "def": "Dema ku platform naveroka ku dişibe baweriyên te tenê nîşanî te dide, û dike ku tu hîs bikî ku 'her kes' wekî te difikire.",
+              "ex": "Li Sûriyeyê, odeyên dengvedanê berpirsiyar in ji afirandina pêlên hêrsa komî ku gotegotan mezin dikin"
+            },
+            "tip": "💡 Bîr bîne: Dema ku tu van qaliban nas bikî, hilweşandina Gotara Kînê hêsantir dibe ji parvekirina wê."
+          },
+          "tip": "💡 Remember: When you recognize these patterns, deconstructing hateful speech becomes easier than resharing it."
+        },
+        "cta": {
+          "title": "Tu amade yî ku xwe biparêzî?",
+          "desc": "Niha ku te fêm kir ka nefret çawa tê avakirin, fêr bibe ka tu çawa xwe bi awayekî teknîkî biparêzî û çawa naveroka zirarê ragihînî.",
+          "button": "⚙️ Here Amûr û Parastinê ←"
+        }
+      },
+      "tools": {
+        "title": "⚙️ Parastin û Ragihandin – Amûrên Teknîkî",
+        "intro": "Niha ku te fêm kir ka nefret çawa tê avakirin, dem hatiye ku tu fêr bibî ka tu çawa xwe bi awayekî teknîkî biparêzî û çawa naveroka zirarê bi awayekî bibandor ragihînî.",
+        "protection": {
+          "title": "🔒 Xwe Biparêze",
+          "intro": "Qada xwe ya dîjîtal ewle bike heman wekî ku tu deriyê mala xwe ewle dikî:",
+          "items": {
+            "privacy": {
+              "title": "Taybetmendî Pêşî Ye",
+              "desc": "Mîhengên taybetmendiyê bi awayekî periyodîk biguherîne"
+            },
+            "unknown": {
+              "title": "Ji Nenas Dûr Bikeve",
+              "desc": "Hişyar be ji daxwazên hevaltiyê/nameyên ji hesabên nenas"
+            },
+            "data": {
+              "title": "Ewlehiya Daneyan",
+              "desc": "Rê li ber her sepanê bigire ku bigihîje daneyên kesane yên nehewce"
+            },
+            "password": {
+              "title": "Şîfreyên Xurt",
+              "desc": "Ji bo her platformekê şîfreyên tevlihev û cuda bikar bîne"
+            },
+            "twofactor": {
+              "title": "Erêkirina Du-Qonaxî",
+              "desc": "Li ser hemû hesabên xwe 2FA çalak bike"
+            }
+          },
+          "completion": "🎉 Gelek baş e! Hesabê te niha baştir parastî ye"
+        },
+        "immediate": {
+          "title": "🚩 Dema ku tu rûbirûyî naveroka tehrîkkar dibî",
+          "document": {
+            "title": "Belge Bike",
+            "desc": "Wêneyekî ekranê (screenshot) bi lînk û dîrokê wekî delîl bigire"
+          },
+          "report": {
+            "title": "Ragihîne",
+            "desc": "Rasterast di nav platformê de ji bo binpêkirina naverokê ragihîne"
+          },
+          "ignore": {
+            "title": "Têkilî Daneyne",
+            "desc": "Tewra têkiliya neyînî jî belavbûnê zêde dike"
+          },
+          "warning": "⚠️ Bîr bîne: Hesabên sexte bi rêya têkiliya bikarhênerên rastîn bi wan re mezin dibin û biser dikevin"
+        },
+        "reporting": {
+          "title": "⚖️ Ragihandin û Belgekirin",
+          "intro": "💡 Ragihandin ne sînordarkirina azadiyê ye - ew amûreke parastina civakî ye",
+          "steps": {
+            "1": {
+              "title": "Belgekirina Zêde",
+              "desc": "Postê bi tevahî belge bike: wêneya ekranê ligel lînk, dîrok, navê hesab, û naveroka tevahî.",
+              "tips": {
+                "0": "Wêneyê bi dîroka zelal hilîne",
+                "1": "Lînka rasterast tomar bike",
+                "2": "Şîroveyên êrîşkar belge bike"
+              }
+            },
+            "2": {
+              "title": "Ragihandina Navxweyî",
+              "desc": "Di nav platformê de (Facebook, Twitter, Instagram, hwd.) bi rêya vebijarka 'Report' ragihîne.",
+              "tips": {
+                "0": "'Gotara Kînê' wekî sedem hilbijêre",
+                "1": "Di danasînê de diyarker be",
+                "2": "Rewşa raporê bişopîne"
+              }
+            },
+            "3": {
+              "title": "Têkiliya Yasayî",
+              "desc": "Dozê (eger bixwazî) bi saziyên pispor an destpêşxeriyên yasayî yên ku binpêkirinên dîjîtal belge dikin re parve bike.",
+              "tips": {
+                "0": "Ji bo saziyên pêwendîdar rûpela yasayan kontrol bike",
+                "1": "Kopyeyeke belgekirinê biparêze",
+                "2": "Agahiyên kesane yên hestiyar parve neke"
+              }
+            }
+          },
+          "note": "⚠️ Bîr bîne: Pêvajoya ragihandinê ne çalakiyeke cezakirinê ye, lê amûreke parastina civakî ye"
+        },
+        "cta": {
+          "title": "Tu rûbirûyî Gotara Kînê bûyî?",
+          "desc": "Yasayên pêwendîdar û saziyên berpirsiyar ji bo wergirtina raporan kontrol bike",
+          "button": "⚖️ Here Rûpela Yasa û Ragihandinê ←"
+        }
+      },
+      "responsibility": {
+        "title": "🤝 Hevgirtin û Rûbirûbûn – Berpirsyariya Civakî",
+        "intro": "Parastina dîjîtal ne tenê parastina xwe ye, lê parastina kesên din û avakirina qadeke dîjîtal a ewle ji bo hemûyan e.",
+        "protectOthers": {
+          "title": "🤝 Beşdar be di parastina kesên din de ji hedefgirtinê",
+          "intro": "Dema ku tu kesekî dibînî ku bi gotara mezhebî, zayendî an herêmî tê hedefgirtin, wî bi tenê nehêle:",
+          "support": {
+            "title": "Piştgiriya Lezgîn",
+            "desc": "Yek peyva piştgiriyê bandora derûnî ya êrîşê dişkîne. Têkilî bi kesê hedefgirtî re dayne û jê re bêje ku tu li cem wî yî."
+          },
+          "reporting": {
+            "title": "Ragihandina Komî",
+            "desc": "Gelek rapor li ser heman naverokê belavbûna wê kêm dikin û leza rakirina wê ji platformê zêde dikin."
+          },
+          "note": "💡 Bîr bîne: Gotara Kînê pir caran komên herî lawaz di civakê de dike hedef. Hevgirtin ne çalakiyeke sembolîk e, lê parastineke rasterast e ku rê li ber veguhertina ziman bo çalakiyê digire, û beşdarî avakirina qadeke dîjîtal a ewletir ji bo hemûyan dibe."
+        },
+        "bystander": {
+          "title": "🗣️ Tenê 'temaşevan' nebe: Tu beşek ji çîrokê yî",
+          "intro": "Bêdengî li hember Gotara Kînê tê wateya destûrdana berdewamiya wê. Her tim çalakiyeke biçûk hilbijêre:",
+          "stop": {
+            "title": "Parvekirinê Rawestîne",
+            "desc": "Naveroka zirarê parve neke tewra eger armanca te şermezarkirin be jî"
+          },
+          "warn": {
+            "title": "Hevalan Hişyar Bike",
+            "desc": "Derdora xwe derbarê agahiyên çewt û gotegotan de hişyar bike"
+          },
+          "positive": {
+            "title": "Erênîbûnê Belav Bike",
+            "desc": "Çîrokên hevkariya di navbera Sûriyeyiyan de parve bike"
+          },
+          "note": "💡 Bîr bîne ku peyv tirsan diafirînin, û baweriyê jî diafirînin. Di çarçoveyeke nazik wekî Sûriyeyê de, her hilbijartineke zimanî bandorê li aştiya navxweyî dike zêdetirî ku em xeyal dikin."
+        },
+        "safeSpace": {
+          "title": "✨ Qada dîjîtal bike qadeke ewle",
+          "intro": "Parastina dîjîtal ne tenê ew e ku tu çi nakî, lê ew e ku tu çi hildibijêrî ku bikî:",
+          "reduce": "Belavbûna gotara zirarê kêm bike",
+          "share": "Zanyariya rast parve bike",
+          "create": "Naverokekê biafirîne ku têgihiştinê li şûna tirsê datîne",
+          "quote": "Nefret zû belav dibe ji ber ku dispêre bertekên lezgîn. Rûbirûbûna nefretê dispêre hişyariya hêdî û kûr: hişyariya ku ji yek bikarhênerî dest pê dike... û dikare tevahiya qadê biguherîne."
+        },
+        "cta": {
+          "title": "Tu rûbirûyî Gotara Kînê bûyî?",
+          "desc": "Dest bi analîzkirina naverokê bike û raporeke yasayî bi dest bixe",
+          "button": "🔍 Dest bi Analîzê Bike"
+        }
+      }
+    }
+  },
+  "metadata": {
+    "title": "Violence and Hate Speech Combat Initiative",
+    "description": "An AI-powered analysis tool for detecting and classifying hate speech"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Answers to the most frequently asked questions about the initiative and how it works",
+    "items": [
+      {
+        "q": "What is the Baligh Initiative?",
+        "a": "The Baligh Initiative is a civic-tech project aimed at monitoring and combating violence and hate speech in the Syrian digital space. The initiative relies on combining automated text analysis with human review, and is based on research and legal expertise to provide accurate content classification and reliable reporting services."
+      },
+      {
+        "q": "How is the text analyzed?",
+        "a": "Analysis begins with an AI model trained on Syrian dialects and context to determine the severity of the speech. In complex or sensitive cases, a specialized team reviews the results to ensure accuracy and minimize bias. This dual approach combines the speed of technology with the expertise of specialists."
+      },
+      {
+        "q": "Is my data safe when using the tool?",
+        "a": "Yes. The initiative stores input texts to improve monitoring and analysis accuracy, without linking them to users or their identities. Data related to reports is stored with high privacy measures and used exclusively for legal and research purposes related to combating hate speech."
+      },
+      {
+        "q": "How can I report offensive content?",
+        "a": "After analyzing the text, the classification result is shown to the user. If the content contains hate speech or dangerous incitement, a legal report can be generated according to the laws of the chosen country, whether inside or outside Syria. Reports are sent to competent authorities or can be downloaded and used directly in the reporting process."
+      },
+      {
+        "q": "What is hate speech? And how do we distinguish it from freedom of expression?",
+        "a": "Hate speech is expression that targets an individual or group based on their religious, sectarian, gender, or regional identity, and is based on incitement, stigmatization, or dehumanization. Freedom of expression remains protected unless it turns into incitement or collective abuse. This distinction helps protect public debate without normalizing verbal violence."
+      },
+      {
+        "q": "Does the analysis rely entirely on AI?",
+        "a": "No. AI is an assisting tool, not the final arbiter. The model performs the initial classification, while sensitive cases are reviewed by humans to ensure higher accuracy in understanding the context, language, and narratives prevalent in Syrian discourse."
+      },
+      {
+        "q": "What should I do if I think the system made a mistake?",
+        "a": "You can submit a request for manual review. The text and context are re-read, and the classification is corrected if an error is proven. This process aims to build user trust and continuously develop the system."
+      },
+      {
+        "q": "What happens after submitting a formal report?",
+        "a": "A legal report is generated containing the violating text, risk level analysis, and the legal basis related to the chosen country. It is then forwarded to the initiative's partners or downloaded directly by the user for use in reporting to competent authorities."
+      },
+      {
+        "q": "Do I need to create an account?",
+        "a": "No. Everyone can use the analysis tool without registration. An account becomes useful for those who wish to save a record of reports or track them."
+      },
+      {
+        "q": "Can the tool be used for research or educational purposes?",
+        "a": "Yes. The tool is used in training programs, research on digital media and civil peace, and in building anti-hate speech curricula. The initiative can provide technical or methodological support to interested parties."
+      },
+      {
+        "q": "Is the tool only for Syrians?",
+        "a": "Although the tool is specifically developed for Syrian dialects and narratives, its use is available to anyone who wishes to understand hate speech in Arabic or monitor incitement patterns in similar contexts."
+      },
+      {
+        "q": "What type of content cannot be analyzed currently?",
+        "a": "The system cannot analyze non-textual images, long videos, or audio recordings. Work is underway to add OCR and audio processing tools to expand the scope of analysis in the future."
+      },
+      {
+        "q": "Why should hate speech be reported?",
+        "a": "Because hate speech is not just words, but a precursor to violence and division. Numerous experiences in conflict countries have shown that ignoring this speech leads to mass crimes and threatens civil peace. Reporting is a preventive practice aimed at protecting society and promoting accountability."
+      },
+      {
+        "q": "What should I do if I receive a direct threat?",
+        "a": "It is advised to save full evidence (text, link, date), analyze the content via the tool, generate a legal report, and then inform competent authorities in the country of residence. You can also contact the initiative for technical or guidance support."
+      },
+      {
+        "q": "Who are the initiative's partners?",
+        "a": "The initiative operates within a wide cooperation network including lawyers inside and outside Syria, civil society organizations, media institutions, and researchers in digital rights fields, allowing it to combine legal expertise, technical capability, and research knowledge in a comprehensive approach to hate speech."
+      },
+      {
+        "q": "How can I join or volunteer?",
+        "a": "You can contact us via the 'Join Us' page. The initiative welcomes volunteers in the fields of monitoring, research, design, translation, and legal analysis."
+      },
+      {
+        "q": "Is the initiative a political entity?",
+        "a": "No. The initiative is completely independent and does not belong to any political or partisan entity. Its goal is to curb hate speech, promote citizenship values, and build a safe and responsible digital space."
+      }
+    ]
+  },
+  "reports": {
+    "author": "Nivîskar",
+    "categories": {
+      "all": "Hemû",
+      "initiative": "Raporên Înîsiyatîfê",
+      "analytical": "Raporên Analîtîk",
+      "study": "Lêkolîn",
+      "infographic": "Infographics",
+      "policy": "Policy Briefs",
+      "other": "Yên din"
+    },
+    "title": "Rapor û Lêkolîn",
+    "subtitle": "Analîzên kûr û raporên demkî li ser meylên Gotara Kînê",
+    "readMore": "Raporê Bixwîne",
+    "download": "PDF Daxîne",
+    "dateFormat": "ckb-IQ",
+    "share": "Parve Bike",
+    "noReports": "Niha ti rapor nînin",
+    "loading": "Tê barkirin...",
+    "viewAll": "Hemû raporên bibîne",
+    "intro": "",
+    "callForSubmissions": {
+      "title": "Banga ji bo Lêkolînan",
+      "description": "Ma tu lêkolîner an akademîsyen î û eleqeya te bi mafên dîjîtal û Gotara Kînê heye? Em te vedixwînin ku lêkolîn û xebatên xwe bi rêya platforma me biweşînî. Em pêşwaziya beşdariyên ku alîkariya dewlemendkirina naveroka Erebî û Kurdî di vê qadê de dikin, dikin.",
+      "button": "Lêkolîna Xwe Bişîne"
+    }
+  },
+  "legal": {
+    "title": "Parastina Yasayî",
+    "description": "Ev beş rêbernameyeke yasayî ya hêsanî pêşkêş dike da ku hûn Gotara Kînê, rêbazên belgekirin û ragihandinê, û sînorên azadiya derbirînê fêm bikin.",
+    "modal": {
+      "relevantLaws": "Yasayên Pêwendîdar",
+      "reportingAgencies": "Saziyên Ragihandinê",
+      "visitWebsite": "Serdana Malperê Bike",
+      "importantNote": "Nîşeya Girîng",
+      "evidenceNote": "Bawer bin ku hûn delîlan (wêneyên ekranê, girêdan) berî ragihandinê diparêzin. Dibe ku hinek platform agahdariyên zêde bixwazin.",
+      "close": "Girtin"
+    },
+    "tabs": {
+      "hateSpeech": "Gotina Nefretê ya Yasayî",
+      "documentation": "Meriv Çawa Sûcê Belge Dike?",
+      "laws": "Yasayên Derbasdar",
+      "reporting": "Mekanîzmaya Ragihandinê",
+      "faq": "Pirsên Dubare"
+    },
+    "hateSpeechContent": {
+      "definitionTitle": "Pênaseya Yasayî ya Gotara Kînê",
+      "definitionText": "Her cûre vegotinek ku tundî, cihêkarî an dijminatiyê li dijî kes an koman li ser bingeha nasnameya wan teşwîq dike:",
+      "identityCategories": [
+        "Nijad an Etnîkî",
+        "Ol an Bawerî",
+        "Neteweyî an Kok",
+        "Zayend an Nasname",
+        "Kêmasî",
+        "Têkiliya Siyasî",
+        "Çîna Civakî"
+      ],
+      "keyElements": "Hêmanên Sereke:",
+      "keyElementsText": "Gotara Kînê divê teşwîqkirin an banga tundiyê/cihêkariyê bihewîne, ne tenê vegotina raya dijber.",
+      "crimeAssessment": {
+        "title": "Kengê naverok dibe sûc?",
+        "intro": "Naverok li gorî çarçoveyê tê nirxandin.",
+        "clearCrime": {
+          "title": "Sûcê Zelal",
+          "list": [
+            "Gefên tundiyê",
+            "Banga tundiyê",
+            "Teşwîqa jenosîdê",
+            "Belavkirina daneyan",
+            "Rastkirina sûcan"
+          ],
+          "conclusion": "Ev naverok sînorên azadiya derbirînê derbas dike."
+        },
+        "greyArea": {
+          "title": "Herêma Gewr",
+          "list": [
+            "Tinazên tund",
+            "Giştîkirina neyînî",
+            "Belavkirina gotegotan",
+            "Zimanê nemirovî",
+            "Naveroka nîqaşî"
+          ],
+          "conclusion": "Pêdivî bi analîza çarçoveyê heye."
+        },
+        "notCrime": {
+          "title": "Ne Sûc e",
+          "list": [
+            "Rexneya ramanan",
+            "Rexneya polîtîkayan",
+            "Nîqaşa akademîk",
+            "Tinaz bê teşwîq",
+            "Ramanên dijber"
+          ],
+          "conclusion": "Azadiya derbirînê tê parastin."
+        },
+        "note": {
+          "title": "Nîşeya Girîng",
+          "text": "Çarçove girîng e."
+        }
+      },
+      "whatWeMonitorTitle": "Em çi bi awayekî yasayî dişopînin?",
+      "whatWeMonitorIntro": "We focus our legal monitoring on content that exceeds the limits of opinion and expression, and constitutes an actual danger or direct incitement against individuals or groups, including:",
+      "whatWeMonitor": [
+        "Explicit or implicit calls for extermination or collective violence",
+        "Systematic incitement to harm a specific group",
+        "Spreading intentional misinformation to cause harm or incitement",
+        "Serious threats targeting people or groups based on their identity"
+      ],
+      "whatWeMonitorConclusion": "These cases are evaluated according to context, apparent intent, and likelihood of harm.",
+      "whatWeDoNotTitle": "Çi ne mijara şopandina yasayî ye?",
+      "whatWeDoNotIntro": "The following cases do not fall within the initiative's legal monitoring scope:",
+      "whatWeDoNot": [
+        "Personal disputes or individual conflicts not related to hate speech",
+        "Individual insults or abuse that do not involve incitement or threats",
+        "Non-public content or private messages posing no public danger",
+        "Reports lacking evidence, a reliable link, or clear context"
+      ],
+      "whatWeDoNotConclusion": "In these cases, reporting via platforms or seeking non-legal avenues may be advised.",
+      "differenceTitle": "Gotara Kînê li hember Azadiya Derbirînê",
+      "differenceIntro": "We believe that protecting freedom of expression is a fundamental condition for any democratic society, but it is not absolute when it turns into a tool for harm or incitement.",
+      "protectedTitle": "Azadiya derbirînê ya parastî",
+      "protectedIntro": "Includes, but is not limited to:",
+      "protectedItems": [
+        "Objective criticism of ideas, beliefs, or ideologies",
+        "Expressing opposing political or social opinions",
+        "Constructive critique of public policies and practices",
+        "Non-offensive satire and humor",
+        "Academic, research, and professional media discussion"
+      ],
+      "notProtectedTitle": "Ne parastî ye (Gotara Kînê)",
+      "notProtectedIntro": "Includes content that:",
+      "notProtectedItems": [
+        "Incites violence against a specific group",
+        "Calls for discrimination or exclusion based on identity",
+        "Defames a group or dehumanizes them",
+        "Contains direct or indirect threats",
+        "Uses false information to incite hostility or hatred"
+      ],
+      "boundaryTitle": "Sînor:",
+      "boundaryText": "Azadiya derbirînê li wir bi dawî dibe ku teşwîqa nefret an tundiyê dest pê dike. Tu dikarî ramanan rexne bikî, lê tu nikarî teşwîqa zirarê li dijî mirovan bikî ji ber ku ew kî ne."
+    },
+    "documentationContent": {
+      "screenshotTitle": "Girtina Wêneya Ekranê ya Yasayî ya Rast",
+      "screenshotIntro": "Wêneya ekranê (screenshot) delîlê sereke ye di her raporekê de. Divê ew agahiyên temam bihewîne da ku binpêkirinê îsbat bike û çarçoveyê biparêze.",
+      "mustIncludeTitle": "Çi divê di wêneyekî derbasdar de hebe",
+      "mustInclude": [
+        "naveroka tam a nivîsa binpêker",
+        "navê hesab an rûpelê bi zelalî xuya be",
+        "dîrok û dema weşandinê",
+        "hejmarên têkiliyê (likes, shares, comments)",
+        "lînka postê (URL) eger hebe",
+        "wêneya profîla weşangerê naverokê"
+      ],
+      "mistakesTitle": "Şaşiyên belgekirinê yên dubare",
+      "mistakes": [
+        "birîna beşekî ji nivîsê an rakirina çarçoveyê",
+        "navê hesab ne xuya ye",
+        "girtina nezelal an kêm-kalîte",
+        "nebûna dîrok û demê",
+        "girtina wêneyê piştî ku post hate jêbirin",
+        "nehiştina lînka orîjînal a postê"
+      ],
+      "proTip": "Şîreta Pispor:",
+      "proTipText": "Her tim wêneyê tevahiya rûpelê bigire li şûna ku beşekî jê bibirî. Çarçoveya tevahî pêbaweriyê zêde dike û ji hêla yasayî ve tê qebûlkirin.",
+      "archivingTitle": "Arşîvkirin û parastina pîşeyî",
+      "archivingIntro": "Ji bilî wêneya ekranê, amûrên arşîvkirinê bikar bîne da ku kopyeyeke mayînde ji naverokê biafirînî.",
+      "archiveTools": [
+        {
+          "name": "Archive.today",
+          "icon": "🌐",
+          "description": "Arşîvkirina lezgîn a her rûpeleke webê",
+          "link": "https://archive.today"
+        },
+        {
+          "name": "Wayback Machine",
+          "icon": "⏰",
+          "description": "Arşîva dîrokî ya înternetê",
+          "link": "https://web.archive.org"
+        },
+        {
+          "name": "Perma.cc",
+          "icon": "🔗",
+          "description": "Afirandina lînka mayînde ji bo naveroka rûpelê",
+          "link": "https://perma.cc"
+        }
+      ],
+      "visitWebsite": "Serdana malperê bike ↗",
+      "archivingStepsTitle": "Pêngavên arşîvkirinê",
+      "archivingSteps": [
+        "Lînka posta binpêker kopî bike",
+        "Yek ji amûrên arşîvkirinê yên li jor veke",
+        "Lînkê di qada şandina arşîvê de bixin (paste)",
+        "Lînka arşîvê ya ku piştî wê tê hilberandin hilîne",
+        "Lînka arşîvê ligel rapora xwe pêve bike"
+      ],
+      "storageTitle": "Hilgirtina ewle ya delîlan",
+      "whereToStoreTitle": "Li ku derê delîlan hilgirî?",
+      "whereToStore": [
+        {
+          "title": "hilanîna ewrî ya şîfrekirî",
+          "desc": "Google Drive, Dropbox bi 2FA"
+        },
+        {
+          "title": "hard dîska derveyî",
+          "desc": "hilanîna herêmî ya offline"
+        },
+        {
+          "title": "kopyeyekê ji xwe re bi e-nameyê bişîne",
+          "desc": "bi mohra demê (timestamp)"
+        }
+      ],
+      "securityTitle": "Rêbernameyên ewlehiyê",
+      "securityTips": [
+        "şîfreyên xurt û bêhempa bikar bîne",
+        "erêkirina du-qonaxî (2FA) çalak bike",
+        "delîlan bi awayekî giştî parve neke",
+        "gelek kopyeyan li cihên cuda biparêze",
+        "dîrok û dema hilanîna her pelî tomar bike"
+      ],
+      "retentionTitle": "Dema parastinê:",
+      "retentionText": "delîlan herî kêm salekê ji dîroka ragihandinê biparêze, ji ber ku dibe ku ji bo şopandina yasayî an îtîrazê hewce be.",
+      "quickTipsTitle": "Şîretên belgekirinê yên bilez",
+      "quickTips": [
+        "tavilê belge bike — dibe ku naverok were jêbirin",
+        "gelek wêneyan ji xalên cuda yên gerokê bigire",
+        "beşên şîroveyan eger girêdayî çarçoveyê bin hilîne",
+        "vîdyoya ekranê tomar bike eger naverok livdar be",
+        "lînka profîla weşanger hilîne",
+        "gefên rasterast cuda belge bike"
+      ]
+    },
+    "countries": {
+      "Syria": "Sûriye",
+      "Germany": "Almanya",
+      "Turkey": "Tirkiye",
+      "France": "Fransa",
+      "Belgium": "Belçîka",
+      "Sweden": "Swêd",
+      "Netherlands": "Hollanda",
+      "USA": "DYA",
+      "UK": "Keyaniya Yekbûyî",
+      "Canada": "Kanada",
+      "Austria": "Awûstûrya",
+      "Switzerland": "Swîsre",
+      "Spain": "Spanya"
+    },
+    "reportingContent": {
+      "title": "Mekanîzmaya Ragihandinê",
+      "guide": {
+        "intro": "Riya ragihandinê li gorî cihê rêder û cewhera naverokê diguhere. Hin rewş dikarin bi amûrên platforman bigihîjin, hin rewş hewceyî belgekirin û rêberiya hiqûqî ne.",
+        "stepsTitle": "Gavên ragihandinê",
+        "steps": [
+          {
+            "title": "Cureyê naverokê diyar bike",
+            "desc": "Benne ku naverok dihewîne teşwîq, tehdit, an jî nîvîsandina nefretê."
+          },
+          {
+            "title": "Cihê rêderê diyar bike",
+            "desc": "Heke rêder di nav Sûriyeyê, yek ji welatên EU, an cihê din de ye — ev rêya hiqûqî diyar dike."
+          },
+          {
+            "title": "Belgeyên dijîtal biparêze",
+            "desc": "Lînkê naverokê، roja weşanê، û screenshotek zelal biparêze bêyî ku naverok dubare belav bikî."
+          },
+          {
+            "title": "Rêya hiqûqî ya guncaw hilbijêre",
+            "desc": ""
+          },
+          {
+            "title": "Amûrên ragihandinê yên platforman bi kar bîne",
+            "desc": "Ji bo hişyarkirina rêveberiyên platforman."
+          },
+          {
+            "title": "Bi rêderê naverokê re têkiliyê nekê",
+            "desc": ""
+          }
+        ],
+        "conclusion": "Ev gav alî dikene ragihandin bi bersivdarî bike û şandina nefretê kêm bike."
+      },
+      "decisionTitle": "Ez çawa ragihînim?",
+      "decisionIntro": "Riya ragihandinê li gorî welatê rûniştina kesê teşwîqkar û cewhera naverokê diguhere. Vebijarka herî guncaw li jêr hilbijêre.",
+      "options": {
+        "inside": {
+          "title": "Li Hundirê Welêt",
+          "desc": "Ragihandin bi Rêya Rayedarên Fermî"
+        },
+        "outside": {
+          "title": "Li Derveyî Welêt",
+          "desc": "Ragihandin li Welatên Niştecîbûnê"
+        },
+        "platforms": {
+          "title": "Bi Rêya Platforman",
+          "desc": "Amûrên Ragihandina Dîjîtal"
+        }
+      },
+      "insideSyria": {
+        "title": "Ragihandin bi Rêya Rayedarên Fermî",
+        "authority": "Rayedarê Şareza: Dozgeriya Giştî",
+        "scope": "Şarezayî: Wergirtina nûçeyên têkildarî sûcan",
+        "method": "Rêbaz: Pêşkêşkirina nûçeyek fermî bi kesane an bi rêya parêzer",
+        "website": "Malpera Fermî:",
+        "alert": "Hişyariya Pêvajoyî: Kopiyek ji nûçeyê û jimara qeydê ji bo şopandinê biparêze."
+      },
+      "countries": {
+        "germany": "Almanya",
+        "france": "Fransa",
+        "sweden": "Swêd",
+        "belgium": "Belçîka",
+        "netherlands": "Hollanda",
+        "turkey": "Tirkiye"
+      },
+      "outsideSyria": {
+        "title": "Ragihandin li Welatên Niştecîbûnê",
+        "desc": "Heke tu li derveyî welatê xwe dijî, tu dikarî li gorî yasayên welatê mêvandar ragihînî. Rayedarên şareza ji welatekî bo welatekî din diguhere.",
+        "action": "Biçe beşa Yasayên Bicihbûyî da ku welat hilbijêrî û raya şareza bibînî.",
+        "examples": "Mînakên Rayedarên Şareza:"
+      },
+      "platforms": {
+        "title": "Ragihandin bi Rêya Platformên Dîjîtal",
+        "desc": "Amûrên ragihandinê yên platforman dikarin werin bikaranîn ji bo rakirina naveroka ku şertên bikaranînê binpê dike.",
+        "warning": "Girîng: Ragihandin bi rêya platforman di rewşên xeter de şûna ragihandina yasayî nagire."
+      },
+      "highRisk": {
+        "title": "Em çawa bi raporên xeternak re mijûl dibin?",
+        "intro": "Di rewşên ku xeteriya rastî heye, em rêyek hundurîn dişopînin ku armanca wê nirxandina bilez û rêberiya guncaw e.",
+        "steps": {
+          "1": "Wergirtina Raporê & Dabeşkirin",
+          "2": "Piştrastkirina Teknîkî & Yasayî",
+          "3": "Rêberî bo Rayedarê Şareza",
+          "4": "Şopandina Rewşê (Dema Mumkun)"
+        }
+      },
+      "limitations": {
+        "title": "Sînorên Rola Me",
+        "text": "Înîsiyatîfa Baligh nûnertiya yasayî nade an karûbarên dozgeriyê nagire ser xwe. Rola me tenê di analîzkirina raporan, pêşkêşkirina rêberiya destpêkê ya ne-girêder, û rêberkirina kesan bo rayadarên şareza an parêzerên serbixwe de sînordar e."
+      }
+    },
+    "lawsContent": {
+      "title": "Çarçoveyên Yasayî yên Têkoşîna li Dijî Gotina Nefretê",
+      "description": "Çarçoveyên yasayî yên têkoşîna li dijî gotina nefretê ji welatekî bo welatekî din diguhere, lê piraniya dewletan handana tundiyê an nefretê li dijî kes an koman li ser bingeha taybetmendiyên parastî sûc dibînin.",
+      "sectionInfo": "<strong class=\"text-green-700\">Rêbernameya Yasayî:</strong> Di vê beşê de, em agahdariya yasayî ya rêbernameyî pêşkêş dikin da ku hûn yasayan û rayadarên şareza li her welatekî fêm bikin.",
+      "mapInstruction": "🗺️ Welatekî hilbijêre da ku yasayên derbasdar û rayadarên ragihandinê bibînî.",
+      "regions": {
+        "syria": {
+          "label": "Sûriye",
+          "content": "Çarçoveya Yasayî ya Xwecihî"
+        },
+        "eu": {
+          "label": "Yekîtiya Ewropayê",
+          "content": "Yasayên Ewropî yên Hevbeş"
+        },
+        "others": {
+          "label": "Welatên Din",
+          "content": "Çarçoveyên Yasayî yên Navneteweyî"
+        }
+      }
+    },
+    "map": {
+      "title": "Nexşeya Yasayî",
+      "mapView": "Dîtina Nexşeyê",
+      "listView": "Dîtina Lîsteyê",
+      "clickMore": "Ji bo hûrguliyan bitikîne",
+      "mobileHint": "Li ser her alekî bitikîne",
+      "noData": "Niha dane tune ye"
+    },
+    "faqContent": {
+      "checklistTitle": "Conditions for a Valid Legal Report",
+      "checklist": [
+        {
+          "title": "Public Content",
+          "desc": "The post must be publicly available and not in a private message."
+        },
+        {
+          "title": "Complete Evidence",
+          "desc": "Ensure the original link, clear screenshot, and publication date are available."
+        },
+        {
+          "title": "Clear Incitement",
+          "desc": "The content must clearly incite violence or discrimination and not be just an opposing opinion."
+        }
+      ],
+      "faqTitle": "Specialized Legal Inquiries",
+      "faqs": [
+        {
+          "q": "Is this report considered an official legal document?",
+          "a": "The report is a 'documentary proof' based on legal standards, and serves as strong supporting evidence. However, submitting it to judicial authorities requires a formal procedure by you (or your lawyer) with the competent authority."
+        },
+        {
+          "q": "Is my data legally protected when using the tool?",
+          "a": "Yes, the tool is designed to protect the reporter's identity. Your data is not shared with any third party, and the issued report does not include your personal name unless you manually add it for documentation purposes."
+        },
+        {
+          "q": "Does this report replace hiring a lawyer?",
+          "a": "No, this report is a tool to strengthen your legal file and save research time, but it does not replace direct legal advice in complex criminal cases."
+        }
+      ],
+      "helpTitle": "Have a special case?",
+      "helpText": "Our legal team can help you assess complex cases",
+      "contactButton": "Contact Us"
+    }
+  },
+  "about": {
+    "title": "Der barê Me de",
+    "subtitle": "Destpêşxeriyeke Sûriyeyî ya serbixwe ku li hevdîtina lêkolîna civakî, parêzvaniya mafan û teknolojiya dîjîtal dixebite",
+    "tabs": {
+      "vision": "Dîtina Me",
+      "change": "Teoriya Guherînê",
+      "team": "Tîma Me",
+      "partners": "Hevkarî",
+      "volunteer": "Dilxwazî"
+    }
+  }
+}
