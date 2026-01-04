@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   images: {
+    // Disable Next.js Image Optimization to avoid 400s with dynamic uploads from /public/uploads
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

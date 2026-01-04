@@ -38,34 +38,36 @@ type ReportItem = {
     createdAt?: string | null;
 };
 
-const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\\?v=|embed\/|shorts\/)|youtu\.be\/)[A-Za-z0-9_-]{11}[^\s]*)/gi;
+const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)[^\s]+)/gi;
 
-function youtubeToEmbed(url: string): string | null {
+function extractYouTubeId(url: string): string | null {
     try {
-        const u = new URL(url);
-        // youtu.be/<id>
+        const u = new URL(url.trim());
         if (u.hostname.includes('youtu.be')) {
-            const id = u.pathname.split('/')[1];
-            return id ? `https://www.youtube.com/embed/${id}` : null;
+            const id = u.pathname.split('/').filter(Boolean)[0];
+            return id || null;
         }
-        // youtube.com/shorts/<id>
-        if (u.pathname.startsWith('/shorts/')) {
-            const id = u.pathname.split('/')[2] || u.pathname.split('/')[1];
-            return id ? `https://www.youtube.com/embed/${id}` : null;
+        if (u.pathname.startsWith('/shorts/') || u.pathname.startsWith('/live/')) {
+            const [, , id] = u.pathname.split('/');
+            return id || null;
         }
-        // youtube.com/watch?v=<id> or embed/<id>
         if (u.searchParams.get('v')) {
-            return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+            return u.searchParams.get('v');
         }
         const parts = u.pathname.split('/');
         const embedIndex = parts.findIndex((p) => p === 'embed');
         if (embedIndex !== -1 && parts[embedIndex + 1]) {
-            return `https://www.youtube.com/embed/${parts[embedIndex + 1]}`;
+            return parts[embedIndex + 1];
         }
         return null;
     } catch {
         return null;
     }
+}
+
+function youtubeToEmbed(url: string): string | null {
+    const id = extractYouTubeId(url);
+    return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
 }
 
 function renderBodyWithEmbeds(body: string) {
