@@ -38,16 +38,24 @@ type ReportItem = {
     createdAt?: string | null;
 };
 
-const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/)|youtu\.be\/)[^\s]+)/gi;
+const YT_REGEX = /(https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/)|youtu\.be\/)[^\s]+)/gi;
 
-function extractYouTubeId(url: string): string | null {
+function extractYouTubeId(rawUrl: string): string | null {
     try {
-        const u = new URL(url.trim());
+        // Ensure protocol
+        const normalized = rawUrl.trim().startsWith('http') ? rawUrl.trim() : `https://${rawUrl.trim()}`;
+        const u = new URL(normalized);
+        // strip trailing punctuation
+        u.pathname = u.pathname.replace(/[.,)]+$/, '');
         if (u.hostname.includes('youtu.be')) {
             const id = u.pathname.split('/').filter(Boolean)[0];
             return id || null;
         }
-        if (u.pathname.startsWith('/shorts/') || u.pathname.startsWith('/live/')) {
+        if (u.pathname.startsWith('/shorts/')) {
+            const [, , id] = u.pathname.split('/');
+            return id || null;
+        }
+        if (u.pathname.startsWith('/live/')) {
             const [, , id] = u.pathname.split('/');
             return id || null;
         }
@@ -67,7 +75,7 @@ function extractYouTubeId(url: string): string | null {
 
 function youtubeToEmbed(url: string): string | null {
     const id = extractYouTubeId(url);
-    return id ? `https://www.youtube-nocookie.com/embed/${id}` : null;
+    return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestBranding=1` : null;
 }
 
 function renderBodyWithEmbeds(body: string) {
