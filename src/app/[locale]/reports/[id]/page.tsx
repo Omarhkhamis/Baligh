@@ -7,7 +7,7 @@ import AppHeader from '../../../../components/AppHeader';
 import AppFooter from '../../../../components/AppFooter';
 import ShareButtons from '../../../../components/ShareButtons';
 import { useLocale, useTranslations } from 'next-intl';
-import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { normalizeReportCategory, REPORT_CATEGORIES } from '@/data/reportCategories';
 
 const IconDownload = () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -193,7 +193,9 @@ export default function ReportDetailPage() {
         );
     }
 
-    const category = REPORT_CATEGORIES[report.category as ReportCategoryKey] || REPORT_CATEGORIES.other;
+    const categoryKey = normalizeReportCategory(report.category);
+    const category = REPORT_CATEGORIES[categoryKey] || REPORT_CATEGORIES.other;
+    const categoryLabel = t(`categories.${categoryKey}`, { defaultMessage: category.label });
     const title = report.title?.[locale] || report.title?.ar || report.title?.en || '';
     const body = report.body?.[locale] || report.body?.ar || report.body?.en || '';
     const author = locale === 'en'
@@ -252,7 +254,7 @@ export default function ReportDetailPage() {
                         return (
                             <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${colorClass}`}>
                                 <span className="text-lg">{category.icon}</span>
-                                <span>{category.label}</span>
+                                <span>{categoryLabel}</span>
                             </span>
                         );
                     })()}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
-import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { normalizeReportCategory, REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -34,7 +34,6 @@ type FormState = {
     authorName: string;
     authorNameEn: string;
     imageUrl: string;
-    documentUrl: string;
     documentUrlAr: string;
     documentUrlEn: string;
     publishNow: boolean;
@@ -51,7 +50,6 @@ const defaultForm: FormState = {
     authorName: '',
     authorNameEn: '',
     imageUrl: '',
-    documentUrl: '',
     documentUrlAr: '',
     documentUrlEn: '',
     publishNow: true,
@@ -91,6 +89,23 @@ export function AdminReportsManager() {
             }
         }
         load();
+    }, []);
+
+    useEffect(() => {
+        const handlePdfDeleted = (event: Event) => {
+            const detail = (event as CustomEvent<{ url: string }>).detail;
+            if (!detail?.url) return;
+            setForm((prev) => ({
+                ...prev,
+                documentUrlAr: prev.documentUrlAr === detail.url ? '' : prev.documentUrlAr,
+                documentUrlEn: prev.documentUrlEn === detail.url ? '' : prev.documentUrlEn,
+            }));
+        };
+
+        window.addEventListener('upload:pdf-deleted', handlePdfDeleted);
+        return () => {
+            window.removeEventListener('upload:pdf-deleted', handlePdfDeleted);
+        };
     }, []);
 
     const handleChange = (key: keyof FormState, value: string | boolean) => {
@@ -170,9 +185,9 @@ export function AdminReportsManager() {
                     authorName: form.authorName || null,
                     authorNameEn: form.authorNameEn || null,
                     imageUrl: form.imageUrl || null,
-                    documentUrl: form.documentUrl || null,
-                    documentUrlAr: form.documentUrlAr || form.documentUrl || null,
-                    documentUrlEn: form.documentUrlEn || form.documentUrl || null,
+                    documentUrl: null,
+                    documentUrlAr: form.documentUrlAr || null,
+                    documentUrlEn: form.documentUrlEn || null,
                     publishNow: form.publishNow,
                 }),
             });
@@ -274,15 +289,14 @@ export function AdminReportsManager() {
                                                 summaryEn: item.summary?.en || '',
                                                 bodyAr: item.body?.ar || '',
                                                 bodyEn: item.body?.en || '',
-                                            category: (item.category.toLowerCase() as ReportCategoryKey) || 'initiative',
-                                            authorName: item.authorName || '',
-                                            authorNameEn: item.authorNameEn || '',
-                                            imageUrl: item.imageUrl || '',
-                                            documentUrl: item.documentUrl || '',
-                                            documentUrlAr: (item as any).documentUrlAr || item.documentUrl || '',
-                                            documentUrlEn: (item as any).documentUrlEn || item.documentUrl || '',
-                                            publishNow: item.isPublished ?? true,
-                                        });
+                                                category: normalizeReportCategory(item.category),
+                                                authorName: item.authorName || '',
+                                                authorNameEn: item.authorNameEn || '',
+                                                imageUrl: item.imageUrl || '',
+                                                documentUrlAr: (item as any).documentUrlAr || '',
+                                                documentUrlEn: (item as any).documentUrlEn || '',
+                                                publishNow: item.isPublished ?? true,
+                                            });
                                             setMessage(null);
                                             setError(null);
                                             setShowModal(true);
@@ -462,18 +476,6 @@ export function AdminReportsManager() {
                                             <p className="text-xs text-emerald-700">Attached (EN): {form.documentUrlEn}</p>
                                         )}
                                         {uploadingPdfEn && <p className="text-xs text-gray-500">Uploading English PDF...</p>}
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="block text-sm font-semibold text-gray-700">Fallback / legacy PDF link (optional)</label>
-                                        <input
-                                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                            placeholder="Optional fallback PDF link"
-                                            value={form.documentUrl}
-                                            onChange={(e) => handleChange('documentUrl', e.target.value)}
-                                        />
-                                        {form.documentUrl && (
-                                            <p className="text-xs text-emerald-700">Attached (fallback): {form.documentUrl}</p>
-                                        )}
                                     </div>
                                 </div>
                             </div>

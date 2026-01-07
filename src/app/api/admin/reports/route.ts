@@ -126,22 +126,31 @@ export async function PATCH(req: NextRequest) {
 
         const prismaCategory = CATEGORY_MAP[category] ?? 'OTHER';
 
+        const data: Record<string, unknown> = {
+            ...(titleAr ? { title: { ar: titleAr, en: titleEn || titleAr } } : {}),
+            ...(summaryAr ? { summary: { ar: summaryAr, en: summaryEn || summaryAr } } : {}),
+            ...(bodyAr ? { body: { ar: bodyAr || summaryAr, en: bodyEn || bodyAr || summaryAr } } : {}),
+            category: prismaCategory,
+            authorName: authorName ?? undefined,
+            authorNameEn: authorNameEn ?? undefined,
+            imageUrl: imageUrl ?? undefined,
+            isPublished: publishNow !== undefined ? !!publishNow : undefined,
+            publishedAt: publishNow ? new Date() : undefined,
+        };
+
+        if (Object.prototype.hasOwnProperty.call(body, 'documentUrl')) {
+            data.documentUrl = documentUrl;
+        }
+        if (Object.prototype.hasOwnProperty.call(body, 'documentUrlAr')) {
+            data.documentUrlAr = documentUrlAr;
+        }
+        if (Object.prototype.hasOwnProperty.call(body, 'documentUrlEn')) {
+            data.documentUrlEn = documentUrlEn;
+        }
+
         const report = await prisma.reportStudy.update({
             where: { id },
-            data: {
-                ...(titleAr ? { title: { ar: titleAr, en: titleEn || titleAr } } : {}),
-                ...(summaryAr ? { summary: { ar: summaryAr, en: summaryEn || summaryAr } } : {}),
-                ...(bodyAr ? { body: { ar: bodyAr || summaryAr, en: bodyEn || bodyAr || summaryAr } } : {}),
-                category: prismaCategory,
-                authorName: authorName ?? undefined,
-                authorNameEn: authorNameEn ?? undefined,
-                documentUrl: documentUrl ?? undefined,
-                documentUrlAr: documentUrlAr ?? undefined,
-                documentUrlEn: documentUrlEn ?? undefined,
-                imageUrl: imageUrl ?? undefined,
-                isPublished: publishNow !== undefined ? !!publishNow : undefined,
-                publishedAt: publishNow ? new Date() : undefined,
-            },
+            data,
         });
 
         return NextResponse.json(report);

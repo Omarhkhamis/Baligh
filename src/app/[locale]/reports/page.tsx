@@ -5,7 +5,7 @@ import Image from 'next/image';
 import AppHeader from '../../../components/AppHeader';
 import AppFooter from '../../../components/AppFooter';
 import { useTranslations, useLocale } from 'next-intl';
-import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { normalizeReportCategory, REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
 
 // Icons
 const IconChart = (props: React.SVGProps<SVGSVGElement>) => (
@@ -60,6 +60,8 @@ type ReportItem = {
     authorNameEn?: string | null;
     imageUrl?: string | null;
     documentUrl?: string | null;
+    documentUrlAr?: string | null;
+    documentUrlEn?: string | null;
     publishedAt?: string | null;
     createdAt?: string | null;
 };
@@ -185,10 +187,17 @@ export default function ReportsPage() {
                                 {filteredReports.map((item) => {
                                     const title = item.title?.[locale] || item.title?.ar || item.title?.en || '';
                                     const description = item.summary?.[locale] || item.summary?.ar || item.summary?.en || '';
-                                    const category = REPORT_CATEGORIES[item.category as ReportCategoryKey] || REPORT_CATEGORIES.other;
+                                    const categoryKey = normalizeReportCategory(item.category);
+                                    const category = REPORT_CATEGORIES[categoryKey] || REPORT_CATEGORIES.other;
+                                    const categoryLabel = t(`categories.${categoryKey}`, { defaultMessage: category.label });
                                     const author = locale === 'en'
                                         ? (item.authorNameEn || item.authorName)
                                         : (item.authorName || item.authorNameEn);
+                                    const pdfUrl = (() => {
+                                        if (locale === 'ar') return item.documentUrlAr || item.documentUrlEn || item.documentUrl || null;
+                                        if (locale === 'en') return item.documentUrlEn || item.documentUrlAr || item.documentUrl || null;
+                                        return item.documentUrlEn || item.documentUrlAr || item.documentUrl || null;
+                                    })();
 
                                     return (
                                         <article
@@ -242,12 +251,12 @@ export default function ReportsPage() {
                                                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
                                                     <div className="text-sm text-gray-500 flex items-center gap-2">
                                                         <IconFolder className="w-4 h-4" />
-                                                        <span>{category.label}</span>
+                                                        <span>{categoryLabel}</span>
                                                     </div>
 
-                                                    {item.documentUrl && (
+                                                    {pdfUrl && (
                                                         <a
-                                                            href={item.documentUrl}
+                                                            href={pdfUrl}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-2 text-[#1E8C4E] font-semibold text-sm hover:gap-3 transition-all"

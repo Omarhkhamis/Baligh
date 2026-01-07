@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
+import { prisma } from '@/lib/prisma';
 
 const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
@@ -69,6 +70,21 @@ export async function DELETE(req: NextRequest) {
 
         const targetPath = path.join(uploadDir, name);
         await fs.unlink(targetPath);
+        if (name.toLowerCase().endsWith('.pdf')) {
+            const url = `/uploads/${name}`;
+            await prisma.reportStudy.updateMany({
+                where: { documentUrlAr: url },
+                data: { documentUrlAr: null },
+            });
+            await prisma.reportStudy.updateMany({
+                where: { documentUrlEn: url },
+                data: { documentUrlEn: null },
+            });
+            await prisma.reportStudy.updateMany({
+                where: { documentUrl: url },
+                data: { documentUrl: null },
+            });
+        }
         return NextResponse.json({ ok: true });
     } catch (error) {
         console.error('Delete failed', error);

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
-import { REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { normalizeReportCategory, REPORT_CATEGORIES } from '@/data/reportCategories';
 
 const IconChart = () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -19,6 +19,8 @@ type ReportItem = {
     category: string;
     imageUrl?: string | null;
     documentUrl?: string | null;
+    documentUrlAr?: string | null;
+    documentUrlEn?: string | null;
     authorName?: string | null;
     authorNameEn?: string | null;
     publishedAt?: string | null;
@@ -89,7 +91,14 @@ export default function ReportsSection() {
                         latestReports.map((item) => {
                             const title = item.title?.[locale] || item.title?.ar || item.title?.en || '';
                             const description = item.summary?.[locale] || item.summary?.ar || item.summary?.en || '';
-                            const category = REPORT_CATEGORIES[item.category as ReportCategoryKey] || REPORT_CATEGORIES.other;
+                            const categoryKey = normalizeReportCategory(item.category);
+                            const category = REPORT_CATEGORIES[categoryKey] || REPORT_CATEGORIES.other;
+                            const categoryLabel = t(`categories.${categoryKey}`, { defaultMessage: category.label });
+                            const pdfUrl = (() => {
+                                if (locale === 'ar') return item.documentUrlAr || item.documentUrlEn || item.documentUrl || null;
+                                if (locale === 'en') return item.documentUrlEn || item.documentUrlAr || item.documentUrl || null;
+                                return item.documentUrlEn || item.documentUrlAr || item.documentUrl || null;
+                            })();
 
                             return (
                                 <Link
@@ -128,7 +137,7 @@ export default function ReportsSection() {
                                                 return (
                                                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border ${colorClass}`}>
                                                         <span>{category.icon}</span>
-                                                        <span>{category.label}</span>
+                                                        <span>{categoryLabel}</span>
                                                     </span>
                                                 );
                                             })()}
@@ -150,13 +159,21 @@ export default function ReportsSection() {
                                                 <IconChart />
                                                 <span>{formatDate(item.publishedAt || item.createdAt)}</span>
                                             </div>
-                                            {item.documentUrl && (
-                                                <div className="flex items-center gap-2 text-green-700 font-bold text-sm group-hover:gap-3 transition-all">
+                                            {pdfUrl && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        event.stopPropagation();
+                                                        window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+                                                    }}
+                                                    className="flex items-center gap-2 text-green-700 font-bold text-sm hover:gap-3 transition-all"
+                                                >
                                                     <span>{t('download')}</span>
                                                     <svg className="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                                     </svg>
-                                                </div>
+                                                </button>
                                             )}
                                         </div>
                                     </div>
