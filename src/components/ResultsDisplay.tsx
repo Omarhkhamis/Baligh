@@ -106,14 +106,23 @@ export default function ResultsDisplay({ result }: { result: AnalysisResult }) {
     }
 
     try {
-      const response = await fetch("/api/log-analysis", {
+      const riskLevel =
+        result.violation_type === "A"
+          ? "High"
+          : result.violation_type === "B" || result.violation_type === "C"
+            ? "Medium"
+            : result.violation_type === "D"
+              ? "Low"
+              : result.risk_level || "Low";
+
+      const response = await fetch("/api/legal-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: result.text || "",
           classification: result.classification,
           severity_score: result.severity_score,
-          risk_level: result.violation_type, // Use violation type as risk level proxy
+          risk_level: riskLevel,
           reasoning_ar: result.rationale_arabic,
           image_description: result.image_description,
           post_link: postLink,
@@ -123,12 +132,15 @@ export default function ResultsDisplay({ result }: { result: AnalysisResult }) {
         }),
       });
 
-      if (response.ok) {
-        alert(t("reportSuccess"));
-        setPostLink("");
-        setReporterCountry("");
-        setTargetGroup("");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || t("reportError"));
       }
+
+      alert(t("reportSuccess"));
+      setPostLink("");
+      setReporterCountry("");
+      setTargetGroup("");
     } catch (error) {
       console.error("Error submitting report:", error);
       alert(t("reportError"));
