@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { locales, type Locale } from '../../i18n.config';
 import DirectionUpdater from '@/components/DirectionUpdater';
+import { ReportModalProvider } from '@/components/reporting/ReportModalProvider';
 import type { Metadata } from 'next';
 
 type LayoutProps = {
@@ -41,7 +42,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps) {
             <div className="bg-noise"></div>
             <NextIntlClientProvider locale={requestedLocale} messages={messages}>
                 <DirectionUpdater />
-                {children}
+                <ReportModalProvider>
+                    {children}
+                </ReportModalProvider>
             </NextIntlClientProvider>
         </>
     );

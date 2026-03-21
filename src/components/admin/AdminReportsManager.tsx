@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { normalizeReportCategory, REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
+import { RequirePermission, usePermissions } from './AdminPermissions';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -56,6 +57,7 @@ const defaultForm: FormState = {
 };
 
 export function AdminReportsManager() {
+    const { can } = usePermissions();
     const [items, setItems] = useState<ReportItem[]>([]);
     const [form, setForm] = useState<FormState>(defaultForm);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -165,6 +167,11 @@ export function AdminReportsManager() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const action = editingId ? 'PATCH' : 'POST';
+        if (!can('studies', action)) {
+            setError('You do not have permission to perform this action');
+            return;
+        }
         setSaving(true);
         setError(null);
         setMessage(null);
@@ -191,9 +198,9 @@ export function AdminReportsManager() {
                     publishNow: form.publishNow,
                 }),
             });
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
             if (!res.ok) {
-                setError(data.error || 'Failed to save report');
+                setError(data?.error || 'Failed to save report');
                 setSaving(false);
                 return;
             }
@@ -228,17 +235,19 @@ export function AdminReportsManager() {
                     <h3 className="text-lg font-semibold text-gray-900">Reports & Studies</h3>
                     <p className="text-xs text-gray-500">{items.length} entries</p>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => {
-                        resetForm();
-                        setShowModal(true);
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
-                >
-                    <span className="text-lg">＋</span>
-                    <span>Add report</span>
-                </button>
+                <RequirePermission resource="studies" action="POST">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            resetForm();
+                            setShowModal(true);
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
+                    >
+                        <span className="text-lg">＋</span>
+                        <span>Add report</span>
+                    </button>
+                </RequirePermission>
             </div>
 
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
@@ -276,56 +285,63 @@ export function AdminReportsManager() {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <button
-                                        type="button"
-                                        className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
-                                        title="Edit"
-                                        onClick={() => {
-                                            setEditingId(item.id);
-                                            setForm({
-                                                titleAr: item.title?.ar || '',
-                                                titleEn: item.title?.en || '',
-                                                summaryAr: item.summary?.ar || '',
-                                                summaryEn: item.summary?.en || '',
-                                                bodyAr: item.body?.ar || '',
-                                                bodyEn: item.body?.en || '',
-                                                category: normalizeReportCategory(item.category),
-                                                authorName: item.authorName || '',
-                                                authorNameEn: item.authorNameEn || '',
-                                                imageUrl: item.imageUrl || '',
-                                                documentUrlAr: (item as any).documentUrlAr || '',
-                                                documentUrlEn: (item as any).documentUrlEn || '',
-                                                publishNow: item.isPublished ?? true,
-                                            });
-                                            setMessage(null);
-                                            setError(null);
-                                            setShowModal(true);
-                                        }}
-                                    >
-                                        ✏️
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
-                                        title="Delete"
-                                        onClick={async () => {
-                                            const result = await Swal.fire({
-                                                title: 'Delete this report?',
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                confirmButtonColor: '#d33',
-                                                cancelButtonColor: '#3085d6',
-                                                confirmButtonText: 'Yes, delete',
-                                            });
-                                            if (!result.isConfirmed) return;
-                                            const res = await fetch(`/api/admin/reports?id=${item.id}`, { method: 'DELETE' });
-                                            if (res.ok) {
-                                                setItems((prev) => prev.filter((i) => i.id !== item.id));
-                                            }
-                                        }}
-                                    >
-                                        ×
-                                    </button>
+                                    <RequirePermission resource="studies" action="PATCH">
+                                        <button
+                                            type="button"
+                                            className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
+                                            title="Edit"
+                                            onClick={() => {
+                                                setEditingId(item.id);
+                                                setForm({
+                                                    titleAr: item.title?.ar || '',
+                                                    titleEn: item.title?.en || '',
+                                                    summaryAr: item.summary?.ar || '',
+                                                    summaryEn: item.summary?.en || '',
+                                                    bodyAr: item.body?.ar || '',
+                                                    bodyEn: item.body?.en || '',
+                                                    category: normalizeReportCategory(item.category),
+                                                    authorName: item.authorName || '',
+                                                    authorNameEn: item.authorNameEn || '',
+                                                    imageUrl: item.imageUrl || '',
+                                                    documentUrlAr: (item as any).documentUrlAr || '',
+                                                    documentUrlEn: (item as any).documentUrlEn || '',
+                                                    publishNow: item.isPublished ?? true,
+                                                });
+                                                setMessage(null);
+                                                setError(null);
+                                                setShowModal(true);
+                                            }}
+                                        >
+                                            ✏️
+                                        </button>
+                                    </RequirePermission>
+                                    <RequirePermission resource="studies" action="DELETE">
+                                        <button
+                                            type="button"
+                                            className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
+                                            title="Delete"
+                                            onClick={async () => {
+                                                const result = await Swal.fire({
+                                                    title: 'Delete this report?',
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#d33',
+                                                    cancelButtonColor: '#3085d6',
+                                                    confirmButtonText: 'Yes, delete',
+                                                });
+                                                if (!result.isConfirmed) return;
+                                                const res = await fetch(`/api/admin/reports?id=${item.id}`, { method: 'DELETE' });
+                                                const data = await res.json().catch(() => null);
+                                                if (res.ok) {
+                                                    setItems((prev) => prev.filter((i) => i.id !== item.id));
+                                                } else {
+                                                    setError(data?.error || 'Failed to delete report');
+                                                }
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    </RequirePermission>
                                 </div>
                             </div>
                         ))}

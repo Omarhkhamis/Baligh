@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Swal from 'sweetalert2';
+import { RequirePermission, usePermissions } from './AdminPermissions';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -35,6 +36,7 @@ const defaultForm: FormState = {
 };
 
 export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }) {
+    const { can } = usePermissions();
     const [members, setMembers] = useState<TeamMember[]>(initialMembers);
     const [form, setForm] = useState<FormState>(defaultForm);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -49,6 +51,11 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        const action = editingId ? 'PATCH' : 'POST';
+        if (!can('team', action)) {
+            setError('You do not have permission to perform this action');
+            return;
+        }
         setError(null);
         setMessage(null);
         setSaving(true);
@@ -62,7 +69,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
 
             const data = await res.json();
             if (!res.ok) {
-                setError(data.error || 'تعذر حفظ البيانات');
+                setError(data?.error || 'تعذر حفظ البيانات');
                 setSaving(false);
                 return;
             }
@@ -94,21 +101,28 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                     <h3 className="text-lg font-bold text-gray-900">Team Members</h3>
                     <p className="text-xs text-gray-500">{members.length} members</p>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => {
-                        setEditingId(null);
-                        setForm(defaultForm);
-                        setMessage(null);
-                        setError(null);
-                        setShowModal(true);
-                    }}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
-                >
-                    <span className="text-lg">＋</span>
-                    <span>Add member</span>
-                </button>
+                <RequirePermission resource="team" action="POST">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setEditingId(null);
+                            setForm(defaultForm);
+                            setMessage(null);
+                            setError(null);
+                            setShowModal(true);
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
+                    >
+                        <span className="text-lg">＋</span>
+                        <span>Add member</span>
+                    </button>
+                </RequirePermission>
             </div>
+            {!can('team', 'POST') && (
+                <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    Team members are read-only for editor accounts.
+                </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {members.map((member) => (
                     <div key={member.id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm flex gap-3">
@@ -124,50 +138,57 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                     {member.bio && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{member.bio}</p>}
                                 </div>
                                 <div className="flex flex-col gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingId(member.id);
-                                    setForm({
-                                        nameAr: (member.name as any)?.ar || '',
-                                        nameEn: (member.name as any)?.en || '',
-                                        roleAr: (member.role as any)?.ar || '',
-                                        roleEn: (member.role as any)?.en || '',
-                                        bio: member.bio || '',
-                                        imageUrl: member.imageUrl || '',
-                                        sortOrder: member.sortOrder || 0,
-                                    });
-                                    setMessage(null);
-                                    setError(null);
-                                    setShowModal(true);
-                                }}
-                                        className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
-                                        title="Edit"
-                                    >
-                                        ✏️
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={async () => {
-                                            const result = await Swal.fire({
-                                                title: 'Delete this member?',
-                                                icon: 'warning',
-                                                showCancelButton: true,
-                                                confirmButtonColor: '#d33',
-                                                cancelButtonColor: '#3085d6',
-                                                confirmButtonText: 'Yes, delete',
-                                            });
-                                            if (!result.isConfirmed) return;
-                                            const res = await fetch(`/api/admin/team?id=${member.id}`, { method: 'DELETE' });
-                                            if (res.ok) {
-                                                setMembers((prev) => prev.filter((m) => m.id !== member.id));
-                                            }
-                                        }}
-                                        className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
-                                        title="Delete"
-                                    >
-                                        ×
-                                    </button>
+                                    <RequirePermission resource="team" action="PATCH">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setEditingId(member.id);
+                                                setForm({
+                                                    nameAr: (member.name as any)?.ar || '',
+                                                    nameEn: (member.name as any)?.en || '',
+                                                    roleAr: (member.role as any)?.ar || '',
+                                                    roleEn: (member.role as any)?.en || '',
+                                                    bio: member.bio || '',
+                                                    imageUrl: member.imageUrl || '',
+                                                    sortOrder: member.sortOrder || 0,
+                                                });
+                                                setMessage(null);
+                                                setError(null);
+                                                setShowModal(true);
+                                            }}
+                                            className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
+                                            title="Edit"
+                                        >
+                                            ✏️
+                                        </button>
+                                    </RequirePermission>
+                                    <RequirePermission resource="team" action="DELETE">
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const result = await Swal.fire({
+                                                    title: 'Delete this member?',
+                                                    icon: 'warning',
+                                                    showCancelButton: true,
+                                                    confirmButtonColor: '#d33',
+                                                    cancelButtonColor: '#3085d6',
+                                                    confirmButtonText: 'Yes, delete',
+                                                });
+                                                if (!result.isConfirmed) return;
+                                                const res = await fetch(`/api/admin/team?id=${member.id}`, { method: 'DELETE' });
+                                                const data = await res.json().catch(() => null);
+                                                if (res.ok) {
+                                                    setMembers((prev) => prev.filter((m) => m.id !== member.id));
+                                                } else {
+                                                    setError(data?.error || 'تعذر الحذف');
+                                                }
+                                            }}
+                                            className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
+                                            title="Delete"
+                                        >
+                                            ×
+                                        </button>
+                                    </RequirePermission>
                                 </div>
                             </div>
                         ))}

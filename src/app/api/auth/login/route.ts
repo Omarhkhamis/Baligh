@@ -15,7 +15,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'بيانات الدخول غير صحيحة' }, { status: 401 });
         }
 
-        const token = createSessionToken({ sub: admin.id, email: admin.email });
+        const token = createSessionToken({ sub: admin.id, email: admin.email, role: admin.role });
         await setSessionCookie(token);
         return NextResponse.json({ success: true });
     } catch (error) {

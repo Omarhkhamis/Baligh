@@ -21,6 +21,40 @@ export interface AnalysisResult {
     image_description?: string;
     legal_citation?: string;
     reasoning_ar?: string; // Mapped alias for rationale_arabic
+    ai_classification?: 'explicit' | 'implicit' | 'incitement' | 'none';
+    ai_severity?: number;
+    ai_severity_explanation?: string;
+    ai_speech_type?: 'direct' | 'implicit' | 'symbolic' | 'false_propaganda';
+    ai_confidence?: 'high' | 'medium' | 'low';
+    ai_context_sensitivity?: 'high' | 'medium' | 'low';
+    ai_target_groups?: string[];
+    ai_hate_keywords?: string[];
+    ai_symbolic_references?: string[];
+    ai_emotions_detected?: Array<
+        'hatred' | 'anger' | 'contempt' | 'gloating' | 'fear' | 'generalization' | 'revenge_desire' | 'other'
+    >;
+    ai_dehumanization_level?: 'none' | 'implicit' | 'explicit';
+    ai_generalization_type?: 'individual_to_group' | 'geographic' | 'religious' | 'ethnic' | 'none';
+    ai_account_type?: 'personal' | 'media' | 'political' | 'religious' | 'anonymous' | 'military';
+    ai_reach_level?: 'limited' | 'moderate' | 'wide';
+    ai_content_type?: 'text' | 'image' | 'video' | 'meme' | 'comment' | 'live_stream';
+    ai_language_register?: 'formal' | 'colloquial' | 'symbolic' | 'mixed';
+    ai_conflict_context?: 'active_conflict' | 'tense' | 'stable';
+    ai_publisher_location?: string | null;
+    ai_recommended_path?: 'legal_action' | 'documentation' | 'monitoring' | 'no_action';
+    ai_path_sentence?: string;
+    ai_legal_basis?: string | null;
+    ai_escalation_flag?: boolean;
+    ai_incitement_to_action?: boolean;
+    ai_glorification_of_violence?: boolean;
+    ai_notes?: string | null;
+    ai_processing_status?: 'pending' | 'done' | 'failed';
+    aiProcessingStatus?: 'pending' | 'done' | 'failed';
+    aiClassification?: 'explicit' | 'implicit' | 'incitement' | 'none';
+    aiSeverity?: number;
+    aiSeverityExplanation?: string;
+    aiRecommendedPath?: 'legal_action' | 'documentation' | 'monitoring' | 'no_action';
+    aiPathSentence?: string;
 }
 
 export interface LegalInfo {

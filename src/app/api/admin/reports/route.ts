@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth';
-import crypto from 'crypto';
+import { requirePermission } from '@/lib/auth';
 
 type ReportCategoryType = 'MONTHLY_REPORT' | 'RESEARCH' | 'INFOGRAPHIC' | 'POLICY_BRIEF' | 'OTHER';
 
@@ -14,23 +13,10 @@ const CATEGORY_MAP: Record<string, ReportCategoryType> = {
     other: 'OTHER',
 };
 
-function slugify(value: string) {
-    const base = value
-        .toString()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-    return base || `report-${crypto.randomBytes(4).toString('hex')}`;
-}
-
 export async function GET(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'studies', 'GET');
+    if (auth.response) {
+        return auth.response;
     }
 
     const reports = await prisma.reportStudy.findMany({
@@ -41,9 +27,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'studies', 'POST');
+    if (auth.response) {
+        return auth.response;
     }
 
     try {
@@ -70,8 +56,6 @@ export async function POST(req: NextRequest) {
         }
 
         const prismaCategory = CATEGORY_MAP[category] ?? 'OTHER';
-        const slug = slugify(titleEn || titleAr);
-
         const report = await prisma.reportStudy.create({
             data: {
                 title: { ar: titleAr, en: titleEn || titleAr },
@@ -97,9 +81,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'studies', 'PATCH');
+    if (auth.response) {
+        return auth.response;
     }
 
     try {
@@ -161,9 +145,9 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'studies', 'DELETE');
+    if (auth.response) {
+        return auth.response;
     }
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });

@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum RiskLevel {
@@ -40,13 +41,155 @@ enum FeedbackStatus {
   REJECTED
 }
 
+enum AdminRole {
+  SUPER_ADMIN
+  ANALYST
+  VIEWER
+  EDITOR
+}
+
+enum AiProcessingStatus {
+  pending
+  done
+  failed
+}
+
+enum HumanReviewStatus {
+  pending
+  reviewed
+  escalated
+  closed
+}
+
+enum ReportPlatform {
+  facebook
+  telegram
+  x
+  youtube
+  instagram
+  tiktok
+  other
+}
+
+enum DirectRiskAnswer {
+  yes
+  no
+  unknown
+}
+
+enum AiClassification {
+  explicit
+  implicit
+  incitement
+  none
+}
+
+enum AiSpeechType {
+  direct
+  implicit
+  symbolic
+  false_propaganda
+}
+
+enum AiConfidenceLevel {
+  high
+  medium
+  low
+}
+
+enum AiContextSensitivity {
+  high
+  medium
+  low
+}
+
+enum AiEmotionDetected {
+  hatred
+  anger
+  contempt
+  gloating
+  fear
+  generalization
+  revenge_desire
+  other
+}
+
+enum AiDehumanizationLevel {
+  none
+  implicit
+  explicit
+}
+
+enum AiGeneralizationType {
+  individual_to_group
+  geographic
+  religious
+  ethnic
+  none
+}
+
+enum AiAccountType {
+  personal
+  media
+  political
+  religious
+  anonymous
+  military
+}
+
+enum AiReachLevel {
+  limited
+  moderate
+  wide
+}
+
+enum AiContentType {
+  text
+  image
+  video
+  meme
+  comment
+  live_stream
+}
+
+enum AiLanguageRegister {
+  formal
+  colloquial
+  symbolic
+  mixed
+}
+
+enum AiConflictContext {
+  active_conflict
+  tense
+  stable
+}
+
+enum AiRecommendedPath {
+  legal_action
+  documentation
+  monitoring
+  no_action
+}
+
+enum FinalPath {
+  legal
+  documentation
+  monitoring
+  rejected
+}
+
 model AdminUser {
   id           String    @id @default(uuid()) @db.Uuid
   email        String    @unique
   passwordHash String
   name         String?
+  role         AdminRole @default(EDITOR)
   createdAt    DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
+
+  notifications     AdminNotification[]
+  reviewedReports   LegalReport[]      @relation("ReviewedByAdmin")
 }
 
 model TeamMember {
@@ -70,6 +213,30 @@ model AnalysisLog {
   confidenceScore  Decimal   @db.Decimal(5, 4)
   detectedKeywords String[]  @default([])
   aiScores         Json?     @db.Json
+  aiClassification AiClassification?
+  aiSeverity       Int?      @db.SmallInt
+  aiSeverityExplanation String?
+  aiSpeechType     AiSpeechType?
+  aiConfidence     AiConfidenceLevel?
+  aiContextSensitivity AiContextSensitivity?
+  aiTargetGroups   String[]  @default([])
+  aiSymbolicReferences String[] @default([])
+  aiEmotionsDetected AiEmotionDetected[] @default([])
+  aiDehumanizationLevel AiDehumanizationLevel?
+  aiGeneralizationType AiGeneralizationType?
+  aiAccountType    AiAccountType?
+  aiReachLevel     AiReachLevel?
+  aiContentType    AiContentType?
+  aiLanguageRegister AiLanguageRegister?
+  aiConflictContext AiConflictContext?
+  aiPublisherLocation String?
+  aiRecommendedPath AiRecommendedPath?
+  aiPathSentence   String?
+  aiLegalBasis     String?
+  aiEscalationFlag Boolean   @default(false)
+  aiIncitementToAction Boolean @default(false)
+  aiGlorificationOfViolence Boolean @default(false)
+  aiNotes          String?
   createdAt        DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime  @updatedAt @db.Timestamptz(6)
 
@@ -96,17 +263,48 @@ model FeedbackSubmission {
 }
 
 model LegalReport {
-  id            String    @id @default(uuid()) @db.Uuid
-  analysisLogId String    @db.Uuid
-  title         String
-  details       String
-  reporterEmail String?
-  createdAt     DateTime  @default(now()) @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @db.Timestamptz(6)
+  id               String             @id @default(uuid()) @db.Uuid
+  analysisLogId    String             @db.Uuid
+  reportNumber     String?            @unique
+  title            String
+  details          String
+  reporterEmail    String?
+  aiProcessingStatus AiProcessingStatus @default(pending)
+  escalationFlag   Boolean            @default(false)
+  humanReviewStatus HumanReviewStatus @default(pending)
+  reviewComment    String?
+  reviewedById     String?            @db.Uuid
+  reviewedAt       DateTime?          @db.Date
+  platform         ReportPlatform?
+  postUrl          String?
+  imageUrls        String[]           @default([])
+  targetGroupsUser String[]           @default([])
+  isDirectRisk     DirectRiskAnswer?
+  finalPath        FinalPath?
+  createdAt        DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime           @updatedAt @db.Timestamptz(6)
 
-  analysisLog AnalysisLog @relation(fields: [analysisLogId], references: [id], onDelete: Cascade)
+  analysisLog      AnalysisLog        @relation(fields: [analysisLogId], references: [id], onDelete: Cascade)
+  reviewedByAdmin  AdminUser?         @relation("ReviewedByAdmin", fields: [reviewedById], references: [id], onDelete: SetNull)
 
   @@index([analysisLogId])
+  @@index([reviewedById])
+}
+
+model AdminNotification {
+  id           String   @id @default(uuid()) @db.Uuid
+  recipientId  String   @db.Uuid
+  title        String
+  message      String
+  reportNumber String?
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+
+  recipient AdminUser @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead, createdAt])
+  @@index([reportNumber])
 }
 
 model NewsArticle {

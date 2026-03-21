@@ -1,11 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 export default function FinalCTA() {
     const locale = useLocale();
     const t = useTranslations('landing.finalCta');
+    const { openReportModal } = useReportModal();
 
     return (
         <section className="py-12 md:py-24 bg-white border-t border-gray-100">
@@ -24,15 +25,16 @@ export default function FinalCTA() {
                     {/* CTA Buttons - Mirrored from Hero */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         {/* Primary CTA */}
-                        <Link
-                            href={`/${locale}/analyze`}
-                            className="group relative px-12 py-5 bg-green-700 hover:bg-green-800 text-white font-bold text-xl rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex items-center gap-3 min-w-[280px] justify-center"
+                        <button
+                            type="button"
+                            onClick={openReportModal}
+                            className="group relative px-8 md:px-12 py-5 bg-green-700 hover:bg-green-800 text-white font-bold text-lg md:text-xl rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex items-center gap-3 min-w-[320px] md:min-w-[420px] justify-center"
                         >
                             <span>{t('primaryButton')}</span>
                             <svg className="w-6 h-6 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={locale === 'ar' ? "M10 19l-7-7 7-7" : "M14 5l7 7-7 7"} />
                             </svg>
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Trust Badge - Simplified */}

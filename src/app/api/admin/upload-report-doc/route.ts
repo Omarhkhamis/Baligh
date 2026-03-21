@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
 import path from 'path';
 import fs from 'fs/promises';
 import crypto from 'crypto';
@@ -15,9 +15,9 @@ async function ensureUploadDir() {
 }
 
 export async function POST(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'studies', 'POST');
+    if (auth.response) {
+        return auth.response;
     }
 
     try {

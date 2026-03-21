@@ -1,5 +1,12 @@
 import { GoogleGenerativeAI, type Part } from '@google/generative-ai';
 
+export const DEFAULT_GEMINI_MODEL = 'gemini-3-flash-preview';
+
+export const getGeminiModelName = () => {
+    const configuredModel = process.env.GEMINI_MODEL_NAME?.trim();
+    return configuredModel || DEFAULT_GEMINI_MODEL;
+};
+
 const getApiKeys = () => {
     const keys: string[] = [];
 

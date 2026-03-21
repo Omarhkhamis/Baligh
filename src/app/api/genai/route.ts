@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { getGeminiModelName } from '@/lib/gemini';
 
-const MODEL_NAME = 'gemini-3-flash-preview';
+const MODEL_NAME = getGeminiModelName();
 const ALLOWED_CLASSES = [
     'تحريض على العنف',
     'خطاب كراهية',

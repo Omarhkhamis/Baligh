@@ -5,6 +5,7 @@
 
 import { AnalysisRecord, createAnalysisRecord, InitiativeReport, createInitiativeReport } from './types';
 import { prisma } from '@/lib/prisma';
+import { buildEncryptedAnalysisLogFields, decryptAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
 
 /**
  * Database adapter interface - implement this for your chosen database
@@ -94,11 +95,10 @@ class PrismaAnalysisAdapter implements DatabaseAdapter {
     async saveAnalysis(record: AnalysisRecord): Promise<string> {
         const created = await prisma.analysisLog.create({
             data: {
-                inputText: record.input_text || '',
+                ...buildEncryptedAnalysisLogFields(record.input_text || '', record.detected_markers || []),
                 classification: record.classification,
                 riskLevel: this.mapRisk(record.risk_level) as any,
                 confidenceScore: record.intensity_score ?? 0,
-                detectedKeywords: record.detected_markers || [],
                 aiScores: {
                     speech_type: record.speech_type,
                     intensity_score: record.intensity_score,
@@ -107,11 +107,11 @@ class PrismaAnalysisAdapter implements DatabaseAdapter {
                     target_group: record.target_group,
                     rationale: record.rationale,
                     locale: record.locale,
-                    created_at: record.created_at,
+                    created_at: toDateOnlyTimestamp(record.created_at),
                     image_description: record.image_description,
                     has_image: record.has_image,
                 },
-                createdAt: record.created_at,
+                createdAt: toDateOnlyTimestamp(record.created_at),
             },
         });
         return created.id;
@@ -120,22 +120,23 @@ class PrismaAnalysisAdapter implements DatabaseAdapter {
     async getAnalysis(id: string): Promise<AnalysisRecord | null> {
         const found = await prisma.analysisLog.findUnique({ where: { id } });
         if (!found) return null;
+        const decrypted = decryptAnalysisLogFields(found);
         return {
-            id: found.id,
-            input_text: found.inputText,
-            image_description: (found.aiScores as any)?.image_description ?? null,
-            has_image: !!(found.aiScores as any)?.has_image,
-            classification: found.classification,
-            risk_level: found.riskLevel,
-            speech_type: (found.aiScores as any)?.speech_type ?? null,
-            intensity_score: Number((found.aiScores as any)?.intensity_score ?? found.confidenceScore ?? 0),
-            vulnerability_score: Number((found.aiScores as any)?.vulnerability_score ?? 0),
-            context_score: Number((found.aiScores as any)?.context_score ?? 0),
-            target_group: (found.aiScores as any)?.target_group ?? null,
-            detected_markers: found.detectedKeywords || [],
-            rationale: (found.aiScores as any)?.rationale ?? '',
-            locale: (found.aiScores as any)?.locale ?? 'ar',
-            created_at: found.createdAt,
+            id: decrypted.id,
+            input_text: decrypted.inputText,
+            image_description: (decrypted.aiScores as any)?.image_description ?? null,
+            has_image: !!(decrypted.aiScores as any)?.has_image,
+            classification: decrypted.classification,
+            risk_level: decrypted.riskLevel,
+            speech_type: (decrypted.aiScores as any)?.speech_type ?? null,
+            intensity_score: Number((decrypted.aiScores as any)?.intensity_score ?? decrypted.confidenceScore ?? 0),
+            vulnerability_score: Number((decrypted.aiScores as any)?.vulnerability_score ?? 0),
+            context_score: Number((decrypted.aiScores as any)?.context_score ?? 0),
+            target_group: (decrypted.aiScores as any)?.target_group ?? null,
+            detected_markers: decrypted.detectedKeywords || [],
+            rationale: (decrypted.aiScores as any)?.rationale ?? '',
+            locale: (decrypted.aiScores as any)?.locale ?? 'ar',
+            created_at: decrypted.createdAt,
         };
     }
 
@@ -146,23 +147,27 @@ class PrismaAnalysisAdapter implements DatabaseAdapter {
             skip: offset,
         });
         type AnalysisModel = Awaited<ReturnType<typeof prisma.analysisLog.findMany>>[number];
-        return list.map((found: AnalysisModel) => ({
-            id: found.id,
-            input_text: found.inputText,
-            image_description: (found.aiScores as any)?.image_description ?? null,
-            has_image: !!(found.aiScores as any)?.has_image,
-            classification: found.classification,
-            risk_level: found.riskLevel,
-            speech_type: (found.aiScores as any)?.speech_type ?? null,
-            intensity_score: Number((found.aiScores as any)?.intensity_score ?? found.confidenceScore ?? 0),
-            vulnerability_score: Number((found.aiScores as any)?.vulnerability_score ?? 0),
-            context_score: Number((found.aiScores as any)?.context_score ?? 0),
-            target_group: (found.aiScores as any)?.target_group ?? null,
-            detected_markers: found.detectedKeywords || [],
-            rationale: (found.aiScores as any)?.rationale ?? '',
-            locale: (found.aiScores as any)?.locale ?? 'ar',
-            created_at: found.createdAt,
-        }));
+        return list.map((found: AnalysisModel) => {
+            const decrypted = decryptAnalysisLogFields(found);
+
+            return {
+                id: decrypted.id,
+                input_text: decrypted.inputText,
+                image_description: (decrypted.aiScores as any)?.image_description ?? null,
+                has_image: !!(decrypted.aiScores as any)?.has_image,
+                classification: decrypted.classification,
+                risk_level: decrypted.riskLevel,
+                speech_type: (decrypted.aiScores as any)?.speech_type ?? null,
+                intensity_score: Number((decrypted.aiScores as any)?.intensity_score ?? decrypted.confidenceScore ?? 0),
+                vulnerability_score: Number((decrypted.aiScores as any)?.vulnerability_score ?? 0),
+                context_score: Number((decrypted.aiScores as any)?.context_score ?? 0),
+                target_group: (decrypted.aiScores as any)?.target_group ?? null,
+                detected_markers: decrypted.detectedKeywords || [],
+                rationale: (decrypted.aiScores as any)?.rationale ?? '',
+                locale: (decrypted.aiScores as any)?.locale ?? 'ar',
+                created_at: decrypted.createdAt,
+            };
+        });
     }
 
     async updateFeedback(id: string, feedback: AnalysisRecord['user_feedback']): Promise<void> {

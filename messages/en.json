@@ -22,7 +22,7 @@
       "news": "News",
       "faq": "FAQ"
     },
-    "cta": "Start Analysis",
+    "cta": "Report Now",
     "menuLabel": "Menu",
     "backToHome": "Back to Home"
   },
@@ -30,8 +30,8 @@
     "hero": {
       "title": "Help Make the Digital Space Safer",
       "subtitle": "An analysis tool based on a scientific methodology developed by the initiative team, combining artificial intelligence and human review",
-      "cta1": "Start Analysis",
-      "cta2": "Explore Services"
+      "cta1": "Report Now",
+      "cta2": "See How We Help"
     },
     "trustIndicators": {
       "ai": {
@@ -83,7 +83,7 @@
     "finalCta": {
       "title": "Have you been exposed to hate speech?",
       "subtitle": "Don't hesitate to use our free tool for a preliminary analysis and a guidance template for reporting.",
-      "primaryButton": "Start Analysis Now",
+      "primaryButton": "Report Now — Free & Secure",
       "secondaryButton": "Contact Us",
       "trustBadge": "100% Safe & Free • Your data is protected"
     }
@@ -101,7 +101,7 @@
     "contact": {
       "title": "Contact Us",
       "socialMedia": "For inquiries and partnerships",
-      "cta": "Start Analysis"
+      "cta": "Report Now"
     },
     "copyright": "© 2024 Violence and Hate Speech Combat Initiative - All Rights Reserved",
     "privacy": "Privacy Policy",
@@ -116,14 +116,118 @@
       "label": "Enter the text to analyze:",
       "placeholder": "Paste any text, comment, post or paragraph you want to check…",
       "charCount": "{count} characters",
-      "submitButton": "Start Text Analysis",
-      "analyzingButton": "Analyzing...",
+      "submitButton": "Submit Report for Analysis",
+      "analyzingButton": "Analyzing report...",
       "uploadImage": "Upload Image"
     },
     "trustIndicators": {
       "ai": "AI-Powered Analysis",
       "review": "Human Review When Needed",
       "methodology": "Methodology Based on Syrian Context"
+    }
+  },
+  "reportFlow": {
+    "trigger": "Report Now",
+    "subtitle": "Submit a report and review the analysis result",
+    "close": "Close",
+    "steps": {
+      "form": "Submit Report",
+      "results": "Analysis Results"
+    },
+    "actions": {
+      "newReport": "Submit new report",
+      "close": "Close"
+    },
+    "form": {
+      "notice": "Your report is completely anonymous — we do not store your name, email, or IP address. Content is used solely for documentation and analysis within Baligh Initiative's mission.",
+      "platformLabel": "Platform",
+      "platformPlaceholder": "Select a platform",
+      "platforms": {
+        "facebook": "Facebook",
+        "x": "X / Twitter",
+        "instagram": "Instagram",
+        "youtube": "YouTube",
+        "telegram": "Telegram",
+        "tiktok": "TikTok",
+        "other": "Other"
+      },
+      "postLinkLabel": "Post Link",
+      "postLinkPlaceholder": "https://...",
+      "postTextLabel": "Post Text",
+      "postTextHint": "Please enter the post text before submitting.",
+      "postTextPlaceholder": "Paste the text or content you want to analyze here...",
+      "imageLabel": "Attached Files",
+      "uploadImage": "Attach Image",
+      "changeImage": "Change Files",
+      "addMoreImages": "Add More Files",
+      "removeImage": "Delete File",
+      "imageHint": "You can optionally upload JPG, PNG, or PDF files, up to 3 files total and no more than {size}MB per file.",
+      "imageCount": "{count} / {max} files uploaded",
+      "imagePreviewAlt": "Attached file preview",
+      "imageInvalid": "Please upload image or PDF files only.",
+      "imageTooLarge": "Each image must be no larger than {size}MB.",
+      "imageLimitExceeded": "You can upload up to {count} images per report.",
+      "targetGroupLabel": "Target Group",
+      "targetGroups": {
+        "druze": "Druze",
+        "sunniMuslims": "Sunni Muslims",
+        "alawites": "Alawites",
+        "kurds": "Kurds",
+        "arabs": "Arabs",
+        "christians": "Christians",
+        "womenChildren": "Women/Children",
+        "otherGroupsMinorities": "Other Minorities",
+        "unspecified": "Unspecified"
+      },
+      "immediateDangerLabel": "Does it pose an immediate danger?",
+      "dangerOptions": {
+        "yes": "Yes",
+        "no": "No",
+        "unknown": "I Don't Know"
+      },
+      "submit": "Submit Report for Analysis",
+      "submitting": "Analyzing...",
+      "validation": "Please complete the required fields before submitting.",
+      "validationPlatform": "Which platform did you see this content on?",
+      "validationPostUrl": "Post URL is required",
+      "validationPostText": "Please enter the post text at minimum",
+      "validationRisk": "Do you think this poses a direct threat? Please select an answer",
+      "submitError": "The report could not be submitted right now. Please try again shortly."
+    },
+    "results": {
+      "successTitle": "Your report has been received — thank you for your contribution",
+      "successSubtitle": "AI analysis is complete. The Baligh team will review it within 48–72 hours.",
+      "analysisTitle": "The initial analysis is complete",
+      "analysisSubtitle": "This is an automated first assessment and can be followed through the appropriate reporting channels.",
+      "classificationTitle": "Content Classification",
+      "severityTitle": "Severity",
+      "statusTitle": "Status Message",
+      "reportPathTitle": "Report Path",
+      "reportPathFooter": "Human review is required before any action. This assessment is preliminary.",
+      "reportNumberTitle": "Report Number",
+      "reportNumberHint": "Keep this number to follow up on your report.",
+      "noReasoning": "The model did not provide additional reasoning.",
+      "aiDisclosure": "This report was analyzed using artificial intelligence based on international hate speech standards (Rabat Plan of Action) with attention to Syrian-specific context. The result is preliminary and subject to team review.",
+      "paths": {
+        "legal_action": "Legal Action",
+        "documentation": "Documentation",
+        "monitoring": "Monitoring",
+        "no_action": "No Action"
+      },
+      "statusMessages": {
+        "analysisFailed": "Your report has been received and will be reviewed manually by the Baligh team within 72 hours.",
+        "noHateOrSeverity1": "This content does not meet the definition of hate speech under international standards. The report has been documented and will undergo human review to confirm.",
+        "severity2": "Low risk level. The report will be added to the database under the documentation and monitoring track.",
+        "severity3": "Moderate risk level. The report will undergo human review and action may be taken to report to the platform.",
+        "severity4Or5": "High risk level. This report will be given priority in review and referred to partner lawyers to assess legal action."
+      },
+      "classifications": {
+        "explicit": "Explicit hate speech",
+        "implicit": "Implicit hate speech",
+        "incitement": "Incitement",
+        "none": "No hate speech",
+        "failed": "Automated analysis failed"
+      }
     }
   },
   "results": {
@@ -198,11 +302,133 @@
     }
   },
   "monitoring": {
-    "title": "Monitoring & Reporting",
-    "subtitle": "Analysis results and reporting options for violating content",
-    "noResultsTitle": "No Results",
-    "noResultsDesc": "Analyze text first to view results here",
-    "analyzeButton": "Analyze Content Now"
+    "eyebrow": "Balagh Radar",
+    "pageTitle": "Live Hate Speech Radar",
+    "pageSubtitle": "This radar is rebuilt from submitted reports directly in the database. It tracks classification, severity, targeting, platform spread, emotional tone, dehumanization, escalation, and estimated geographic spread across the last 52 weeks.",
+    "generatedAt": "Updated",
+    "weeksWindow": "Weeks tracked",
+    "emptyState": "No completed reports are available yet for the radar view.",
+    "estimatedLabel": "Estimated",
+    "internalOnly": "Internal only",
+    "methodologyTitle": "Methodology",
+    "methodologyNote": "The radar uses reports with AI processing status marked as done and excludes items rejected in the final path. Reach level is used as a weighting factor in the intensity score. Estimated location is inferred from text cues only and should not be used as precise geolocation.",
+    "peakIntensity": "Weighted intensity: {value}",
+    "peakNoContext": "No field context annotation",
+    "locationCount": "{count} reports",
+    "alerts": {
+      "eyebrow": "Emergency signal",
+      "escalation": "{count} high-priority escalated reports detected in the current radar window",
+      "note": "These cases carry the highest urgency and should be reviewed first."
+    },
+    "stats": {
+      "totalReports": "Total reports",
+      "averageSeverity": "Average severity",
+      "escalatedReports": "Escalated reports",
+      "activePlatforms": "Active platforms",
+      "targetedGroups": "Targeted groups"
+    },
+    "sections": {
+      "classification": {
+        "eyebrow": "Classification",
+        "title": "Classification Breakdown",
+        "subtitle": "Share of explicit, implicit, incitement, and non-hate reports."
+      },
+      "intensity": {
+        "eyebrow": "Intensity",
+        "title": "Severity Timeline",
+        "subtitle": "Weighted weekly intensity with average severity and peak context annotations.",
+        "weightedNoteTitle": "Weighting:",
+        "weightedNote": "reach level raises or lowers the intensity score before peak detection.",
+        "weightedSeries": "Weighted intensity",
+        "severitySeries": "Average severity"
+      },
+      "targetGroups": {
+        "eyebrow": "Targeting",
+        "title": "Most Targeted Groups",
+        "subtitle": "Descending distribution of targeted communities in the radar window.",
+        "countLabel": "Reports",
+        "trendEyebrow": "Tracking",
+        "trendTitle": "Target Group Time Tracking",
+        "trendSubtitle": "Weekly movement of the most frequently targeted groups."
+      },
+      "platforms": {
+        "eyebrow": "Platforms",
+        "title": "Platform Distribution",
+        "subtitle": "Where reported content is most frequently published.",
+        "trendEyebrow": "Historical trend",
+        "trendTitle": "Platform Trend",
+        "trendSubtitle": "Weekly movement of the dominant platforms."
+      },
+      "emotions": {
+        "eyebrow": "Tone",
+        "title": "Emotional Tone Radar",
+        "subtitle": "Fixed emotion categories aggregated from AI output."
+      },
+      "accountTypes": {
+        "eyebrow": "Publishers",
+        "title": "Publisher Type Breakdown",
+        "subtitle": "Distribution of personal, media, political, religious, anonymous, and military accounts."
+      },
+      "dehumanization": {
+        "eyebrow": "Dehumanization",
+        "title": "Dehumanization Trend",
+        "subtitle": "Stacked weekly distribution across none, implicit, and explicit dehumanization."
+      },
+      "actions": {
+        "eyebrow": "Action signals",
+        "title": "Incitement and Violence Indicators",
+        "incitementLabel": "Calls to specific action",
+        "glorificationLabel": "Violence glorification"
+      },
+      "location": {
+        "eyebrow": "Geography",
+        "title": "Estimated Geographic Spread",
+        "subtitle": "Location inferred from textual cues, hashtags, and naming patterns."
+      },
+      "keywords": {
+        "eyebrow": "Keywords",
+        "title": "Keyword Cloud and Frequency Table",
+        "subtitle": "Encrypted keyword frequencies visible only in the internal dashboard context.",
+        "keywordColumn": "Keyword",
+        "countColumn": "Count"
+      }
+    },
+    "labels": {
+      "classifications": {
+        "explicit": "Explicit hate speech",
+        "implicit": "Implicit hate speech",
+        "incitement": "Incitement",
+        "none": "No hate speech"
+      },
+      "emotions": {
+        "hatred": "Hatred",
+        "anger": "Anger",
+        "contempt": "Contempt",
+        "gloating": "Gloating",
+        "fear": "Fear",
+        "generalization": "Generalization",
+        "revenge_desire": "Revenge desire",
+        "other": "Other"
+      },
+      "dehumanization": {
+        "none": "None",
+        "implicit": "Implicit",
+        "explicit": "Explicit"
+      },
+      "accountTypes": {
+        "personal": "Personal",
+        "media": "Media",
+        "political": "Political",
+        "religious": "Religious",
+        "anonymous": "Anonymous",
+        "military": "Military"
+      },
+      "conflictContexts": {
+        "active_conflict": "Active conflict",
+        "tense": "Tense period",
+        "stable": "Stable period"
+      }
+    }
   },
   "feedback": {
     "title": "Report Incorrect Classification",
@@ -932,7 +1158,7 @@
         "cta": {
           "title": "Faced hate speech?",
           "desc": "Start analyzing content and getting a legal report",
-          "button": "🔍 Start Analysis Now"
+          "button": "📣 Report Now"
         }
       }
     }

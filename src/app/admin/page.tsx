@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
-import { verifySessionToken } from '@/lib/session';
+import { getSessionFromCookies } from '@/lib/auth';
+import { formatRoleLabel } from '@/lib/permissions';
 import { AdminDashboardTabs } from '@/components/admin/AdminDashboardTabs';
-async function getDashboardData() {
+import { decryptAnalysisLogFields } from '@/lib/data-security';
+
+async function getDashboardData(currentRole: string) {
     const rawTeamMembers = await prisma.teamMember.findMany({ orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
     type TeamMemberModel = Awaited<ReturnType<typeof prisma.teamMember.findMany>>[number];
     const teamMembers = rawTeamMembers.map((member: TeamMemberModel) => ({
@@ -20,32 +22,46 @@ async function getDashboardData() {
     ]);
 
     const analysisCount = analysesAll.length;
-    const feedbackCount = analysesAll.filter((a: { aiScores: unknown }) => {
-        const scores = (a.aiScores as Record<string, unknown>) || {};
-        return !scores.postLink && !scores.reporterCountry && !scores.targetGroup;
-    }).length;
 
-    const recentAnalysesRaw = await prisma.analysisLog.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 5,
+    const canReadRawReports = currentRole === 'SUPER_ADMIN' || currentRole === 'ANALYST';
+    const recentAnalysesRaw = canReadRawReports
+        ? await prisma.analysisLog.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            include: {
+                legalReports: {
+                    select: {
+                        reportNumber: true,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                    take: 1,
+                },
+            },
+        })
+        : [];
+    const recentAnalyses = recentAnalysesRaw.map((item: typeof recentAnalysesRaw[number]) => {
+        const decrypted = decryptAnalysisLogFields(item);
+
+        return {
+            id: decrypted.id,
+            inputText: decrypted.inputText,
+            classification: decrypted.classification,
+            riskLevel: decrypted.riskLevel,
+            reportNumber: item.legalReports[0]?.reportNumber || null,
+            confidenceScore: decrypted.confidenceScore?.toString() || '0',
+            detectedKeywords: decrypted.detectedKeywords,
+            aiScores: decrypted.aiScores,
+            createdAt: decrypted.createdAt.toISOString(),
+            updatedAt: decrypted.updatedAt.toISOString(),
+        };
     });
-    const recentAnalyses = recentAnalysesRaw.map((item: typeof recentAnalysesRaw[number]) => ({
-        id: item.id,
-        inputText: item.inputText,
-        classification: item.classification,
-        riskLevel: item.riskLevel,
-        confidenceScore: item.confidenceScore?.toString() || '0',
-        detectedKeywords: item.detectedKeywords,
-        aiScores: item.aiScores,
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-    }));
 
     return {
         teamMembers,
         stats: {
             analysisCount,
-            feedbackCount,
             legalReportCount,
             newsCount,
             reportCount,
@@ -55,15 +71,30 @@ async function getDashboardData() {
 }
 
 export default async function AdminPage() {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('balgh_session')?.value;
-    const session = token ? verifySessionToken(token) : null;
+    const session = await getSessionFromCookies();
 
     if (!session) {
         redirect('/login?redirect=/admin');
     }
 
-    const { teamMembers, stats, recentAnalyses } = await getDashboardData();
+    const [{ teamMembers, stats, recentAnalyses }, notifications] = await Promise.all([
+        getDashboardData(session.role),
+        session.role === 'SUPER_ADMIN' || session.role === 'ANALYST'
+            ? prisma.adminNotification.findMany({
+                where: { recipientId: session.sub },
+                orderBy: { createdAt: 'desc' },
+                take: 8,
+                select: {
+                    id: true,
+                    title: true,
+                    message: true,
+                    reportNumber: true,
+                    isRead: true,
+                    createdAt: true,
+                },
+            })
+            : Promise.resolve([]),
+    ]);
 
     return (
         <div className="min-h-screen bg-gray-50" dir="ltr">
@@ -71,6 +102,7 @@ export default async function AdminPage() {
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div>
                         <p className="text-sm text-gray-500">Signed in as {session.email}</p>
+                        <p className="text-sm text-emerald-700 font-medium">{formatRoleLabel(session.role)}</p>
                         <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
                         <p className="text-sm text-gray-500">Manage your application content</p>
                     </div>
@@ -83,7 +115,16 @@ export default async function AdminPage() {
             </header>
 
             <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-                <AdminDashboardTabs stats={stats} teamMembers={teamMembers} recentAnalyses={recentAnalyses} />
+                <AdminDashboardTabs
+                    currentRole={session.role}
+                    stats={stats}
+                    teamMembers={teamMembers}
+                    recentAnalyses={recentAnalyses}
+                    notifications={notifications.map((item) => ({
+                        ...item,
+                        createdAt: item.createdAt.toISOString(),
+                    }))}
+                />
             </main>
         </div>
     );

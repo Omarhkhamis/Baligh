@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 // Icons
 const IconHeart = () => (
@@ -34,6 +34,7 @@ const IconBulb = () => <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" 
 
 export default function ResponsibilityTab() {
     const t = useTranslations('protection.content.responsibility');
+    const { openReportModal } = useReportModal();
 
     return (
         <div className="space-y-12">
@@ -184,13 +185,14 @@ export default function ResponsibilityTab() {
 
             {/* Final CTA */}
             <div className="text-center py-8">
-                <Link
-                    href="/ar/analyze"
+                <button
+                    type="button"
+                    onClick={openReportModal}
                     className="inline-flex items-center gap-2 bg-[#1E8C4E] text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-[#166639] hover:shadow-xl transition-all transform hover:-translate-y-1 group"
                 >
                     {t('cta.title')}
                     <span className="group-hover:translate-x-1 transition-transform">←</span>
-                </Link>
+                </button>
                 <p className="text-gray-500 mt-4 text-sm">{t('cta.desc')}</p>
             </div>
         </div>

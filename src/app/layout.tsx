@@ -16,7 +16,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
     return (
         <html lang={locale} dir={dir}>
-            <body className="antialiased bg-gray-50 text-gray-900 font-sans">
+            <body suppressHydrationWarning className="antialiased bg-gray-50 text-gray-900 font-sans">
                 {children}
             </body>
         </html>

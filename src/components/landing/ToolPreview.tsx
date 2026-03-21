@@ -1,10 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 export default function ToolPreview() {
-    const locale = useLocale();
+    const { openReportModal } = useReportModal();
 
     return (
         <section className="py-20 bg-gray-50">
@@ -77,12 +76,13 @@ export default function ToolPreview() {
                         </div>
 
                         {/* CTA */}
-                        <Link
-                            href={`/${locale}/analyze`}
+                        <button
+                            type="button"
+                            onClick={openReportModal}
                             className="inline-block px-8 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5"
                         >
                             جرّب الأداة الآن →
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

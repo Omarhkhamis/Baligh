@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
-    const session = await requireAuth(request);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(request, 'team', 'GET');
+    if (auth.response) {
+        return auth.response;
     }
 
     const members = await prisma.teamMember.findMany({
@@ -19,9 +19,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-    const session = await requireAuth(request);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(request, 'team', 'POST');
+    if (auth.response) {
+        return auth.response;
     }
 
     try {
@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-    const session = await requireAuth(request);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(request, 'team', 'PATCH');
+    if (auth.response) return auth.response;
 
     try {
         const { id, nameAr, nameEn, roleAr, roleEn, bio, imageUrl, sortOrder } = await request.json();
@@ -83,8 +83,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-    const session = await requireAuth(request);
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(request, 'team', 'DELETE');
+    if (auth.response) return auth.response;
 
     const id = request.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });

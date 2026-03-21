@@ -22,7 +22,7 @@
       "news": "Nûçeyên Me",
       "faq": "Pirsên Dubare"
     },
-    "cta": "Start Analysis",
+    "cta": "Niha Ragihîne",
     "menuLabel": "Menu",
     "backToHome": "Back to Home"
   },
@@ -30,8 +30,8 @@
     "hero": {
       "title": "Alîkar be ji bo ewlekirina qada dîjîtal",
       "subtitle": "Amûreke analîzê ya ku li ser metodolojiyeke zanistî ji hêla tîma destpêşxeriyê ve hatiye pêşxistin, ku hişê çêkirî û pêdaçûna mirovî dike yek",
-      "cta1": "Dest bi Analîzê Bike",
-      "cta2": "Xizmetan Bibîne"
+      "cta1": "Niha Ragihîne",
+      "cta2": "Bibîne Em Çawa Alîkariyê Dikin"
     },
     "trustIndicators": {
       "ai": {
@@ -83,7 +83,7 @@
     "finalCta": {
       "title": "Ma tu rûbirûyî Gotara Kînê bûyî?",
       "subtitle": "Dudilî nebe di bikaranîna amûra me ya belaş de ji bo analîza lezgîn û bidestxistina raporeke yasayî ya amade",
-      "primaryButton": "Niha Dest bi Analîzê Bike",
+      "primaryButton": "Niha Ragihîne — Belaş û Ewle",
       "secondaryButton": "Têkiliyê Danîn",
       "trustBadge": "100% Ewle û Belaş • Daneyên te parastî ne"
     }
@@ -101,7 +101,7 @@
     "contact": {
       "title": "Têkiliyê Danîn",
       "socialMedia": "Ji bo Pirs û Hevkariyan",
-      "cta": "Dest bi Analîzê Bike"
+      "cta": "Niha Ragihîne"
     },
     "copyright": "© 2024 Violence and Hate Speech Combat Initiative - All Rights Reserved",
     "privacy": "Privacy Policy",
@@ -116,14 +116,118 @@
       "label": "Nivîsê ji bo analîzê binivîse:",
       "placeholder": "Her nivîs, şîrove, post an paragrafa ku tu dixwazî kontrol bikî li vir bixe...",
       "charCount": "{count} tîp",
-      "submitButton": "Dest bi Analîza Nivîsê Bike",
-      "analyzingButton": "Tê analîzkirin...",
+      "submitButton": "Ragihandinê ji bo analîzê bişîne",
+      "analyzingButton": "Ragihandin tê analîzkirin...",
       "uploadImage": "Wêneyekî Bar Bike"
     },
     "trustIndicators": {
       "ai": "Analîza bi Hêza AI",
       "review": "Pêdaçûna Mirovî Dema Hewce be",
       "methodology": "Metodolojî li gorî Çarçoveya Sûriyeyî"
+    }
+  },
+  "reportFlow": {
+    "trigger": "Niha Ragihîne",
+    "subtitle": "Ragihandinê têkeve û encamên analîzê bibîne",
+    "close": "Girtin",
+    "steps": {
+      "form": "Şandina Ragihandinê",
+      "results": "Encamên analîzê"
+    },
+    "actions": {
+      "newReport": "Ragihandinek nû bişîne",
+      "close": "Girtin"
+    },
+    "form": {
+      "notice": "Ragihandina te bi tevahî nepenî ye — em nav, email, an navnîşana IP ya te tomar nakin. Naverok tenê ji bo belgekirin û analîzê di çarçoveya armanca Destpêşxeriya Baligh de tê bikaranîn.",
+      "platformLabel": "Platform",
+      "platformPlaceholder": "Platformekê hilbijêre",
+      "platforms": {
+        "facebook": "Facebook",
+        "x": "X / Twitter",
+        "instagram": "Instagram",
+        "youtube": "YouTube",
+        "telegram": "Telegram",
+        "tiktok": "TikTok",
+        "other": "Yekî Din"
+      },
+      "postLinkLabel": "Lînka postê",
+      "postLinkPlaceholder": "https://...",
+      "postTextLabel": "Nivîsa postê",
+      "postTextHint": "Ji kerema xwe berî şandinê nivîsa postê binivîse.",
+      "postTextPlaceholder": "Nivîs an naveroka ku tu dixwazî were analîzkirin li vir bixe...",
+      "imageLabel": "Pelên pêvekirî",
+      "uploadImage": "Wêne pêveke",
+      "changeImage": "Pelan biguherîne",
+      "addMoreImages": "Pelên din zêde bike",
+      "removeImage": "Pelê jê bibe",
+      "imageHint": "Tu dikarî bi awayekî bijarte pelên JPG, PNG an PDF bar bikî, herî zêde 3 pel û her pel jî ne zêdetir ji {size}MB.",
+      "imageCount": "{count} / {max} pel barkirî",
+      "imagePreviewAlt": "Pêşdîtina pelê pêvekirî",
+      "imageInvalid": "Ji kerema xwe tenê pelên wêne an PDF bar bike.",
+      "imageTooLarge": "Her wêne divê ne zêdetir ji {size}MB be.",
+      "imageLimitExceeded": "Herî zêde {count} wêne di yek ragihandinê de dikarin werin barkirin.",
+      "targetGroupLabel": "Koma hedef",
+      "targetGroups": {
+        "druze": "Dîrûz",
+        "sunniMuslims": "Misilmanên Sunnî",
+        "alawites": "Elewî",
+        "kurds": "Kurd",
+        "arabs": "Ereb",
+        "christians": "Mesîhî",
+        "womenChildren": "Jin/Zarok",
+        "otherGroupsMinorities": "Kêmîneyên din",
+        "unspecified": "Nediyar"
+      },
+      "immediateDangerLabel": "Ma ew xetereyek rasterast pêk tîne?",
+      "dangerOptions": {
+        "yes": "Erê",
+        "no": "Na",
+        "unknown": "Nizanim"
+      },
+      "submit": "Ragihandinê ji bo analîzê bişîne",
+      "submitting": "Tê analîzkirin...",
+      "validation": "Ji kerema xwe qada pêwîst dagire berî şandinê.",
+      "validationPlatform": "Te vê naverokê li kîjan platformê dît?",
+      "validationPostUrl": "Lînka postê pêwîst e",
+      "validationPostText": "Ji kerema xwe herî kêm nivîsa postê binivîse",
+      "validationRisk": "Ma tu difikirî ku ev metirsiyeke rasterast e? Ji kerema xwe bersivekê hilbijêre",
+      "submitError": "Niha nekarî ragihandin bişîne. Ji kerema xwe paşê dîsa biceribîne."
+    },
+    "results": {
+      "successTitle": "Ragihandina te hate wergirtin — spas ji bo beşdariya te",
+      "successSubtitle": "Analîza AI qedîya. Tîma Baligh dê di navbera 48–72 saetan de wê pêdaçûne.",
+      "analysisTitle": "Analîza destpêkê qedîya",
+      "analysisSubtitle": "Ev nirxandineke xwerû ya destpêkê ye û dikare bi rêyên guncaw ên ragihandinê were şopandin.",
+      "classificationTitle": "Polînkirina naverokê",
+      "severityTitle": "Asta tûjbûnê",
+      "statusTitle": "Peyama rewşê",
+      "reportPathTitle": "Rêya ragihandinê",
+      "reportPathFooter": "Berî her çalakiyekê pêdaçûna mirovî pêwîst e. Ev nirxandin destpêkî ye.",
+      "reportNumberTitle": "Hejmara ragihandinê",
+      "reportNumberHint": "Ji bo şopandinê vê hejmarê biparêze.",
+      "noReasoning": "Model ravekirineke din neda.",
+      "aiDisclosure": "Ev ragihandin bi bikaranîna zîrekbûna artîfîsîel, li ser bingeha standardên navneteweyî yên gotara kînê (Rabat Plan of Action), bi guhdarîkirina taybetmendiyên çarçoveya Sûriyeyî hate analîzkirin. Encam destpêkî ye û bindestê pêdaçûna tîmê ye.",
+      "paths": {
+        "legal_action": "Rêça yasayî",
+        "documentation": "Rêça belgekirinê",
+        "monitoring": "Rêça çavdêriyê",
+        "no_action": "Bê çalakî"
+      },
+      "statusMessages": {
+        "analysisFailed": "Ragihandina te hat wergirtin û dê di nav 72 saetan de ji aliyê tîma Baligh ve bi destan were pêdaçûn.",
+        "noHateOrSeverity1": "Ev naverok li gorî standardên navneteweyî pênaseya gotara kînê pêk nayîne. Ragihandin hat belgekirin û dê ji bo piştrastkirinê bi awayekî mirovî were pêdaçûn.",
+        "severity2": "Asta xetereyê nizim e. Ragihandin dê di bin rêça belgekirin û çavdêriyê de li databeysê were zêdekirin.",
+        "severity3": "Asta xetereyê navîn e. Ragihandin dê bi awayekî mirovî were pêdaçûn û dibe ku ji bo ragihandinê li platformê gav were avêtin.",
+        "severity4Or5": "Asta xetereyê bilind e. Ev ragihandin dê di pêdaçûnê de pêşîniyarî bistîne û ji bo nirxandina çalakiya yasayî were şandin bo parêzerên hevkar."
+      },
+      "classifications": {
+        "explicit": "Gotara kînê ya aşkere",
+        "implicit": "Gotara kînê ya veşartî",
+        "incitement": "Teşwîq",
+        "none": "Tu gotara kînê tune",
+        "failed": "Analîza xwerû têk çû"
+      }
     }
   },
   "results": {
@@ -198,11 +302,133 @@
     }
   },
   "monitoring": {
-    "title": "Çavdêrî û Ragihandin",
-    "subtitle": "Encamên analîzê û vebijarkên ragihandina naveroka binpêker",
-    "noResultsTitle": "Ti encam nînin",
-    "noResultsDesc": "Pêşî nivîsekê analîz bike da ku encaman li vir bibînî",
-    "analyzeButton": "Niha Naverokê Analîz Bike"
+    "eyebrow": "Radar Baligh",
+    "pageTitle": "Radara zindî ya gotara kînê",
+    "pageSubtitle": "Ev radar rasterast ji ragihandinên ku di databeysê de hene ji nû ve hat avakirin. Ew di 52 hefteyên dawî de polînkirin, ast, komên hedef, platform, tona hestyarî, nehêlinasandin, nîşaneyên bilezkirinê û belavbûna cografyayî ya texmînkirî dişopîne.",
+    "generatedAt": "Nûkirin",
+    "weeksWindow": "Heftiyên şopandî",
+    "emptyState": "Hêj ji bo dîtina radarê ti ragihandina temam tune ye.",
+    "estimatedLabel": "Texmînkirî",
+    "internalOnly": "Tenê ji bo navxweyî",
+    "methodologyTitle": "Metodolojî",
+    "methodologyNote": "Radar li ser ragihandinên ku rewşa analîza AI ya wan done ye tê avakirin û hêmanên ku di rêça dawî de hatine redkirin derdixe derve. Asta gihîştinê wekî faktora giranî di hesabkirina şideta hevbeş de tê bikaranîn. Cihê cografyayî jî tenê texmînek e ji nîşaneyên nivîsî û divê wek cihnîşandina rast neyê bikaranîn.",
+    "peakIntensity": "Şideta giran: {value}",
+    "peakNoContext": "Têkiliya çarçoveya meydanê tune ye",
+    "locationCount": "{count} ragihandin",
+    "alerts": {
+      "eyebrow": "Nîşaneya lezgîn",
+      "escalation": "{count} ragihandina bilez a pêşîn di pencereya radarê ya niha de hatine dîtin",
+      "note": "Ev doz xwedî herî zêde lez in û divê pêşî werin pêdaçûn."
+    },
+    "stats": {
+      "totalReports": "Tevahî ragihandin",
+      "averageSeverity": "Navînîya astê",
+      "escalatedReports": "Ragihandinên bilezkirî",
+      "activePlatforms": "Platformên çalak",
+      "targetedGroups": "Komên hedef"
+    },
+    "sections": {
+      "classification": {
+        "eyebrow": "Polînkirin",
+        "title": "Parçebûna polînkirinê",
+        "subtitle": "Parêzeya ragihandinên aşkere, veşartî, teşwîqî û yên ku gotara kînê nayên hesibandin."
+      },
+      "intensity": {
+        "eyebrow": "Tûjbûn",
+        "title": "Hêla demê ya tûjbûnê",
+        "subtitle": "Tûjbûna heftane ya giran bi navînîya astê û şîroveyên lûtkeyan yên bi çarçoveyê ve girêdayî.",
+        "weightedNoteTitle": "Giranî:",
+        "weightedNote": "asta gihîştinê berî dîtina lûtkeyan nîşana tûjbûnê zêde an kêmtir dike.",
+        "weightedSeries": "Tûjbûna giran",
+        "severitySeries": "Navînîya astê"
+      },
+      "targetGroups": {
+        "eyebrow": "Armanc",
+        "title": "Herî zêde komên armanc",
+        "subtitle": "Belavbûna ji zêdetir bo kêmtir a komên hatine armanckirin di pencereya radarê de.",
+        "countLabel": "Ragihandin",
+        "trendEyebrow": "Şopandin",
+        "trendTitle": "Şopandina demî ya komên armanc",
+        "trendSubtitle": "Tevgera heftane ya komên ku herî zêde têne armanckirin."
+      },
+      "platforms": {
+        "eyebrow": "Platform",
+        "title": "Belavbûna platforman",
+        "subtitle": "Platformên ku naveroka ragihandî li ser wan zêdetir tê weşandin.",
+        "trendEyebrow": "Rêça dîrokî",
+        "trendTitle": "Rêça platforman",
+        "trendSubtitle": "Tevgera heftane ya platformên serdest."
+      },
+      "emotions": {
+        "eyebrow": "Tone",
+        "title": "Radara tona hestyarî",
+        "subtitle": "Komkirina kategoriya hestyarî ya sabît a ji derketina AI."
+      },
+      "accountTypes": {
+        "eyebrow": "Weşanger",
+        "title": "Parçebûna celebên hesabê",
+        "subtitle": "Belavbûna hesabên kesane, medyayî, siyasî, olî, nenas û leşkerî."
+      },
+      "dehumanization": {
+        "eyebrow": "Nehêlinasandin",
+        "title": "Rêça nehêlinasandinê",
+        "subtitle": "Belavbûna heftane ya perçebûyî di navbera tunebûna nehêlinasandinê, ya veşartî û ya aşkere de."
+      },
+      "actions": {
+        "eyebrow": "Nîşaneyên çalakî",
+        "title": "Nîşaneyên teşwîq û tundiyê",
+        "incitementLabel": "Bang li çalakiyek taybet",
+        "glorificationLabel": "Pîrozbahiya tundiyê"
+      },
+      "location": {
+        "eyebrow": "Belavbûn",
+        "title": "Belavbûna cografyayî ya texmînkirî",
+        "subtitle": "Cihê ku ji nîşaneyên nivîsî, hashtag û şêwazên navdanê tê texmînkirin."
+      },
+      "keywords": {
+        "eyebrow": "Gotinên sereke",
+        "title": "Ewrê gotinan û tabloya frekansê",
+        "subtitle": "Frekansên gotinên hesas ên şîfrekirî ku tenê di çarçoveya navxweyî de tên nîşandan.",
+        "keywordColumn": "Gotin",
+        "countColumn": "Hejmar"
+      }
+    },
+    "labels": {
+      "classifications": {
+        "explicit": "Gotara kînê ya aşkere",
+        "implicit": "Gotara kînê ya veşartî",
+        "incitement": "Teşwîq",
+        "none": "Tu gotara kînê tune"
+      },
+      "emotions": {
+        "hatred": "Kîn",
+        "anger": "Tirsandî / qehre",
+        "contempt": "Piçûkkirin",
+        "gloating": "Şemat",
+        "fear": "Tirs",
+        "generalization": "Giştandin",
+        "revenge_desire": "Xwesteka tolhildanê",
+        "other": "Yên din"
+      },
+      "dehumanization": {
+        "none": "Tune",
+        "implicit": "Veşartî",
+        "explicit": "Aşkere"
+      },
+      "accountTypes": {
+        "personal": "Kesane",
+        "media": "Medyayî",
+        "political": "Siyasî",
+        "religious": "Olî",
+        "anonymous": "Nenas",
+        "military": "Leşkerî"
+      },
+      "conflictContexts": {
+        "active_conflict": "Pevçûna çalak",
+        "tense": "Demeke gergîn",
+        "stable": "Demeke aram"
+      }
+    }
   },
   "feedback": {
     "title": "Ma encam rast e?",
@@ -559,7 +785,7 @@
         "cta": {
           "title": "Tu rûbirûyî Gotara Kînê bûyî?",
           "desc": "Dest bi analîzkirina naverokê bike û raporeke yasayî bi dest bixe",
-          "button": "🔍 Dest bi Analîzê Bike"
+          "button": "📣 Niha Ragihîne"
         }
       }
     }

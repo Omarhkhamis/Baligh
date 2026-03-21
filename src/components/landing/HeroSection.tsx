@@ -1,12 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 export default function HeroSection() {
     const locale = useLocale();
     const t = useTranslations('landing.hero');
     const tTrust = useTranslations('landing.trustIndicators');
+    const { openReportModal } = useReportModal();
 
     return (
         <section className="relative min-h-[85vh] flex items-center justify-center bg-white px-4 py-12 md:py-20 overflow-hidden">
@@ -24,15 +25,16 @@ export default function HeroSection() {
 
                 {/* Primary Action Only - Centered & Dominant */}
                 <div className="flex flex-col items-center gap-6 mb-12 animate-fade-up delay-200">
-                    <Link
-                        href={`/${locale}/analyze`}
+                    <button
+                        type="button"
+                        onClick={openReportModal}
                         className="group relative px-12 py-5 bg-green-700 hover:bg-green-800 text-white font-bold text-xl rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex items-center gap-3 min-w-[280px] justify-center"
                     >
                         <span>{t('cta1')}</span>
                         <svg className="w-6 h-6 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d={locale === 'ar' ? "M10 19l-7-7 7-7" : "M14 5l7 7-7 7"} />
                         </svg>
-                    </Link>
+                    </button>
 
                     {/* Secondary Action - Text Link Style */}
                     <a

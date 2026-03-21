@@ -1,0 +1,4 @@
+ALTER TYPE "AdminRole" ADD VALUE IF NOT EXISTS 'VIEWER';
+
+ALTER TABLE "LegalReport"
+ADD COLUMN "reviewComment" TEXT;

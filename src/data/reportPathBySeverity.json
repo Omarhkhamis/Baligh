@@ -1,0 +1,83 @@
+{
+  "ar": {
+    "1": {
+      "title": "توثيق ومراقبة",
+      "description": "يشير هذا المستوى إلى محتوى منخفض الشدة. يُحفظ البلاغ ضمن الرصد والتوثيق لمتابعة تكراره أو تطوره ضمن السياق العام.",
+      "note": "إذا ظهر تصعيد لاحق أو سياق إضافي، يمكن إعادة التقييم وتقديم بلاغ جديد."
+    },
+    "2": {
+      "title": "متابعة أولية",
+      "description": "المحتوى يحتاج إلى متابعة أولية لأنه يحمل مؤشرات سلبية أو تمييزية، لكن شدته الحالية لا ترجّح مساراً قانونياً مباشراً.",
+      "note": "يفيد إرفاق مزيد من السياق أو أمثلة مشابهة عند الحاجة إلى مراجعة أوسع."
+    },
+    "3": {
+      "title": "مراجعة متخصصة",
+      "description": "هذا البلاغ يقع في مستوى متوسط من الشدة، لذلك يحتاج إلى مراجعة بشرية متخصصة لتقدير السياق والنية واحتمال الضرر قبل تحديد الإجراء الأنسب.",
+      "note": "قد يتغير التقييم النهائي بعد مراجعة الفريق والمقارنة مع بيانات إضافية."
+    },
+    "4": {
+      "title": "إجراء قانوني أولي",
+      "description": "يشير هذا المستوى إلى محتوى مرتفع الشدة مع مؤشرات جدية تستدعي دراسة المسار القانوني الأولي وتقييم إمكانية المتابعة الرسمية.",
+      "note": "المراجعة البشرية تبقى ضرورية قبل أي إحالة أو إجراء رسمي."
+    },
+    "5": {
+      "title": "إجراء قانوني عاجل",
+      "description": "هذا المستوى يمثل أعلى درجات الشدة، ويشير إلى محتوى خطير قد يستدعي تحركاً قانونياً عاجلاً أو تصعيداً سريعاً بعد المراجعة المتخصصة.",
+      "note": "في الحالات الحساسة، يجب التعامل مع البلاغ بسرعة مع توثيق الأدلة والسياق بالكامل."
+    }
+  },
+  "en": {
+    "1": {
+      "title": "Documentation and Monitoring",
+      "description": "This level indicates low-severity content. The report is logged for monitoring and documentation in case similar patterns recur or escalate.",
+      "note": "If additional context or escalation appears later, the case can be reassessed through a new report."
+    },
+    "2": {
+      "title": "Initial Follow-up",
+      "description": "The content needs initial follow-up because it contains negative or discriminatory signals, but its current severity does not strongly suggest a direct legal path.",
+      "note": "Adding more context or similar examples can support a broader review if needed."
+    },
+    "3": {
+      "title": "Specialist Review",
+      "description": "This report falls into a medium-severity level and needs specialist human review to assess context, intent, and potential harm before deciding the next step.",
+      "note": "The final assessment may change after the team review and comparison with additional data."
+    },
+    "4": {
+      "title": "Initial Legal Action",
+      "description": "This level indicates high-severity content with serious indicators that justify reviewing an initial legal path and assessing whether formal follow-up is warranted.",
+      "note": "Human review remains necessary before any referral or formal action."
+    },
+    "5": {
+      "title": "Urgent Legal Action",
+      "description": "This is the highest severity level and points to dangerous content that may require urgent legal escalation after specialist review.",
+      "note": "In sensitive cases, the report should be handled quickly with full evidence and context preserved."
+    }
+  },
+  "ku": {
+    "1": {
+      "title": "Belgekirin û Çavdêrî",
+      "description": "Ev asta naveroka bi tundiya nizim nîşan dide. Ragihandin ji bo çavdêrî û belgekirinê tê tomar kirin da ku veger an bilindbûn were şopandin.",
+      "note": "Ger paşê çarçove an bilindbûnek nû derkeve holê, dikare dîsa were nirxandin."
+    },
+    "2": {
+      "title": "Şopandina Destpêkê",
+      "description": "Ev naverok hewceyê şopandina destpêkê ye ji ber ku nîşanên neyînî an cudaxwazî tê de hene, lê tundiya wê niha rêya yasayî rasterast napêşniyar dike.",
+      "note": "Zêdekirina çarçove an nimûneyên din dikare ji bo pêdaçûnek berfirehtir alîkar be."
+    },
+    "3": {
+      "title": "Pêdaçûna Taybet",
+      "description": "Ev ragihandin di asta tundiya navîn de ye û pêdivî bi pêdaçûna mirovî ya taybet heye da ku çarçove, niyet û zirara gengaz were nirxandin.",
+      "note": "Nirxandina dawî dikare piştî pêdaçûna tîmê û daneyên zêde biguhere."
+    },
+    "4": {
+      "title": "Çalakiya Yasayî ya Destpêkê",
+      "description": "Ev asta naveroka tund a bilind nîşan dide û hewce dike ku rêya yasayî ya destpêkê were vekolîn û şopandina fermî were nirxandin.",
+      "note": "Pêdaçûna mirovî berî her ragihandin an çalakiyek fermî hewce ye."
+    },
+    "5": {
+      "title": "Çalakiya Yasayî ya Lezgîn",
+      "description": "Ev bilindtirîn asta tundiyê ye û naverokek xeternak nîşan dide ku piştî pêdaçûna taybet dibe ku hewceyê bilez a yasayî hebe.",
+      "note": "Di rewşên hestiyar de, divê ragihandin bi lez were birêvebirin û hemû delîl û çarçove were parastin."
+    }
+  }
+}

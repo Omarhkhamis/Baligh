@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
+import { decryptAnalysisLogFields } from '@/lib/data-security';
 
 export async function GET(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'reports', 'GET');
+    if (auth.response) {
+        return auth.response;
     }
 
     const analyses = await prisma.analysisLog.findMany({
@@ -13,13 +14,13 @@ export async function GET(req: NextRequest) {
         take: 100,
     });
 
-    return NextResponse.json(analyses);
+    return NextResponse.json(analyses.map((analysis) => decryptAnalysisLogFields(analysis)));
 }
 
 export async function DELETE(req: NextRequest) {
-    const session = await requireAuth(req);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requirePermission(req, 'reports', 'DELETE');
+    if (auth.response) {
+        return auth.response;
     }
     const id = req.nextUrl.searchParams.get('id');
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });

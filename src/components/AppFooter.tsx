@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 export default function AppFooter() {
     const locale = useLocale();
     const t = useTranslations('footer');
     const tNav = useTranslations('header.nav');
+    const { openReportModal } = useReportModal();
 
     const quickLinks = [
         { href: `/${locale}`, label: tNav('home') },
@@ -123,13 +125,14 @@ export default function AppFooter() {
                                 <span>{t('contact.socialMedia')}</span>
                             </li>
                         </ul>
-                        <Link
-                            href={`/${locale}/#analyze`}
+                        <button
+                            type="button"
+                            onClick={openReportModal}
                             className="mt-6 inline-block px-6 py-3 rounded-lg font-bold text-white transition-all hover:shadow-lg hover:-translate-y-1 text-sm"
                             style={{ backgroundColor: '#1E8C4E' }}
                         >
                             {t('contact.cta')}
-                        </Link>
+                        </button>
                     </div>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 const services = [
     {
@@ -34,6 +35,7 @@ const services = [
 export default function ServiceCards() {
     const locale = useLocale();
     const t = useTranslations('landing.services');
+    const { openReportModal } = useReportModal();
 
     return (
         <section id="services" className="py-12 md:py-24 bg-gray-50/50">
@@ -50,48 +52,66 @@ export default function ServiceCards() {
 
                 {/* Service Cards Grid - Flex or Grid for hierarchy */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto align-stretch">
-                    {services.map((service) => (
-                        <Link
-                            key={service.id}
-                            href={`/${locale}${service.href}`}
-                            className={`group relative flex flex-col p-8 rounded-3xl transition-all duration-300 h-full border hover:border-transparent ${service.featured
-                                ? 'bg-white shadow-xl hover:shadow-2xl scale-[1.02] z-10 border-green-100 ring-1 ring-green-50'
-                                : 'bg-white shadow-sm hover:shadow-xl border-gray-100'
-                                }`}
-                        >
-                            {/* Featured Badge */}
-                            {service.featured && (
-                                <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md tracking-wide uppercase">
-                                    {t('tool.cta')} {/* Using existing text as label contextually */}
-                                </span>
-                            )}
+                    {services.map((service) => {
+                        const cardClassName = `group relative flex flex-col p-8 rounded-3xl transition-all duration-300 h-full border hover:border-transparent ${service.featured
+                            ? 'bg-white shadow-xl hover:shadow-2xl scale-[1.02] z-10 border-green-100 ring-1 ring-green-50'
+                            : 'bg-white shadow-sm hover:shadow-xl border-gray-100'
+                            }`;
 
-                            {/* Icon */}
-                            <div className={`text-5xl mb-8 transform group-hover:scale-110 transition-transform duration-300 w-16 h-16 flex items-center justify-center rounded-2xl mx-auto ${service.featured ? 'bg-green-50' : 'bg-gray-50'
-                                }`}>
-                                {service.icon}
-                            </div>
+                        const content = (
+                            <>
+                                {service.featured && (
+                                    <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md tracking-wide uppercase">
+                                        {t('tool.cta')}
+                                    </span>
+                                )}
 
-                            {/* Title */}
-                            <h3 className={`text-xl font-bold mb-4 text-center ${service.featured ? 'text-green-800' : 'text-gray-900'}`}>
-                                {t(`${service.id}.title`)}
-                            </h3>
+                                <div className={`text-5xl mb-8 transform group-hover:scale-110 transition-transform duration-300 w-16 h-16 flex items-center justify-center rounded-2xl mx-auto ${service.featured ? 'bg-green-50' : 'bg-gray-50'
+                                    }`}>
+                                    {service.icon}
+                                </div>
 
-                            {/* Description */}
-                            <p className="text-gray-500 text-base leading-loose text-center mb-8 flex-grow">
-                                {t(`${service.id}.description`)}
-                            </p>
+                                <h3 className={`text-xl font-bold mb-4 text-center ${service.featured ? 'text-green-800' : 'text-gray-900'}`}>
+                                    {t(`${service.id}.title`)}
+                                </h3>
 
-                            {/* CTA Arrow */}
-                            <div className={`flex items-center justify-center gap-2 font-bold text-sm mt-auto transition-colors ${service.featured ? 'text-green-700 group-hover:text-green-800' : 'text-gray-400 group-hover:text-gray-900'
-                                }`}>
-                                <span>{t(`${service.id}.cta`)}</span>
-                                <svg className="w-4 h-4 rtl:rotate-180 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </Link>
-                    ))}
+                                <p className="text-gray-500 text-base leading-loose text-center mb-8 flex-grow">
+                                    {t(`${service.id}.description`)}
+                                </p>
+
+                                <div className={`flex items-center justify-center gap-2 font-bold text-sm mt-auto transition-colors ${service.featured ? 'text-green-700 group-hover:text-green-800' : 'text-gray-400 group-hover:text-gray-900'
+                                    }`}>
+                                    <span>{t(`${service.id}.cta`)}</span>
+                                    <svg className="w-4 h-4 rtl:rotate-180 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </>
+                        );
+
+                        if (service.featured) {
+                            return (
+                                <button
+                                    key={service.id}
+                                    type="button"
+                                    onClick={openReportModal}
+                                    className={cardClassName}
+                                >
+                                    {content}
+                                </button>
+                            );
+                        }
+
+                        return (
+                            <Link
+                                key={service.id}
+                                href={`/${locale}${service.href}`}
+                                className={cardClassName}
+                            >
+                                {content}
+                            </Link>
+                        );
+                    })}
                 </div>
 
                 {/* Additional Info */}

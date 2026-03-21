@@ -4,6 +4,7 @@ import { useLocale } from 'next-intl';
 import AppHeader from '../../../components/AppHeader';
 import AppFooter from '../../../components/AppFooter';
 import PageHero from '../../../components/PageHero';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 // Icons
 const IconMonitor = (props: React.SVGProps<SVGSVGElement>) => (
@@ -38,6 +39,7 @@ const IconAwareness = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function MethodologyPage() {
     const locale = useLocale();
+    const { openReportModal } = useReportModal();
 
     // Content Data for cleaner rendering
     const content = {
@@ -92,7 +94,7 @@ export default function MethodologyPage() {
             flowTitle: "المسار المنهجي المتكامل",
             ctaTitle: "استخدم أدواتنا",
             ctaText: "ابدأ بتحليل محتوى مشبوه أو تعرّف على آليات الحماية الرقمية",
-            ctaButton1: "🔍 ابدأ التحليل",
+            ctaButton1: "📣 بلّغ الآن",
             ctaButton2: "🛡️ دليل الحماية"
         },
         en: {
@@ -146,7 +148,7 @@ export default function MethodologyPage() {
             flowTitle: "Our Integrated Process",
             ctaTitle: "Use Our Tools",
             ctaText: "Analyze suspicious content or explore practical digital protection methods",
-            ctaButton1: "🔍 Start Analysis",
+            ctaButton1: "📣 Report Now",
             ctaButton2: "🛡️ Digital Safety Guide"
         },
         ku: {
@@ -200,7 +202,7 @@ export default function MethodologyPage() {
             flowTitle: "Riya Metodolojîk a Yekgirtî",
             ctaTitle: "Amûrên Me Bikar Bîne",
             ctaText: "Dest bi analîzkirina naveroka gumanbar bike an jî mekanîzmayên parastina dîjîtal nas bike",
-            ctaButton1: "🔍 Dest bi Analîzê Bike",
+            ctaButton1: "📣 Niha Ragihîne",
             ctaButton2: "🛡️ Rêbera Parastinê"
         }
     };
@@ -272,9 +274,13 @@ export default function MethodologyPage() {
                         <h3 className="text-3xl font-bold mb-4">{t.ctaTitle}</h3>
                         <p className="text-xl text-green-50 mb-8 max-w-2xl mx-auto">{t.ctaText}</p>
                         <div className="flex flex-wrap gap-4 justify-center">
-                            <a href={`/${locale}/#analyze`} className="inline-block bg-white text-[#1E8C4E] px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-50 transition-all shadow-md hover:shadow-lg hover:-translate-y-1">
+                            <button
+                                type="button"
+                                onClick={openReportModal}
+                                className="inline-block bg-white text-[#1E8C4E] px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-50 transition-all shadow-md hover:shadow-lg hover:-translate-y-1"
+                            >
                                 {t.ctaButton1}
-                            </a>
+                            </button>
                             <a href={`/${locale}/protection`} className="inline-block bg-[#166639]/30 backdrop-blur-sm text-white border border-white/20 px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#166639]/50 transition-all">
                                 {t.ctaButton2}
                             </a>

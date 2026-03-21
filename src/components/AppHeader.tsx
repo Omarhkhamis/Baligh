@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { useReportModal } from '@/components/reporting/ReportModalProvider';
 
 export default function AppHeader() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,8 +12,10 @@ export default function AppHeader() {
     const [isScrolled, setIsScrolled] = useState(false);
     const locale = useLocale();
     const pathname = usePathname();
-        const t = useTranslations('header');
+    const t = useTranslations('header');
+    const { openReportModal } = useReportModal();
     const langMenuRef = useRef<HTMLDivElement>(null);
+    const monitoringNavLabel = locale === 'ar' ? 'مرصد بلغ' : t('nav.monitoring');
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 0);
@@ -40,6 +43,7 @@ export default function AppHeader() {
         { href: `/${locale}/legal`, label: t('nav.legal'), icon: '⚖️', description: locale === 'ar' ? 'الإطار القانوني' : 'Legal Framework' },
         { href: `/${locale}/protection`, label: t('nav.protection'), icon: '🛡️', description: locale === 'ar' ? 'الحماية الرقمية' : 'Digital Protection' },
         { href: `/${locale}/training`, label: t('nav.training'), icon: '🎓', description: locale === 'ar' ? 'التدريب' : 'Training' },
+        { href: `/${locale}/monitoring`, label: monitoringNavLabel, icon: '📈', description: locale === 'ar' ? 'تقارير الرصد' : 'Monitoring Reports' },
         { href: `/${locale}/reports`, label: t('nav.reports'), icon: '📊', description: locale === 'ar' ? 'التقارير' : 'Reports' },
         { href: `/${locale}/news`, label: t('nav.news'), icon: '📰', description: locale === 'ar' ? 'الأخبار' : 'News' },
         { href: `/${locale}/faq`, label: t('nav.faq'), icon: '❓', description: locale === 'ar' ? 'الأسئلة الشائعة' : 'FAQ' },
@@ -70,14 +74,15 @@ export default function AppHeader() {
                     {/* Desktop: Language Switcher + CTA */}
                     <div className="hidden lg:flex items-center gap-4">
                         {/* CTA Button */}
-                        <Link
-                            href={`/${locale}/analyze`}
+                        <button
+                            type="button"
+                            onClick={openReportModal}
                             className="px-6 py-2.5 rounded-full font-bold text-white text-sm transition-all hover:shadow-lg shadow-md hover:-translate-y-0.5 flex items-center gap-2"
                             style={{ backgroundColor: '#1E8C4E' }}
                         >
                             <span>🚀</span>
                             <span>{t('cta')}</span>
-                        </Link>
+                        </button>
 
                         {/* Language Switcher */}
                         <div className="relative" ref={langMenuRef}>
@@ -135,13 +140,14 @@ export default function AppHeader() {
                         </Link>
 
                         {/* CTA Button - Tablet+ */}
-                        <Link
-                            href={`/${locale}/analyze`}
+                        <button
+                            type="button"
+                            onClick={openReportModal}
                             className="hidden md:block px-6 py-2.5 rounded-full font-bold text-white text-sm transition-all hover:shadow-lg shadow-md hover:-translate-y-0.5"
                             style={{ backgroundColor: '#1E8C4E' }}
                         >
                             {t('cta')}
-                        </Link>
+                        </button>
 
                         {/* Menu Button - Modernized */}
                         <button
@@ -176,6 +182,7 @@ export default function AppHeader() {
                             { href: `/${locale}/legal`, label: t('nav.legal'), icon: '⚖️' },
                             { href: `/${locale}/protection`, label: t('nav.protection'), icon: '🛡️' },
                             { href: `/${locale}/training`, label: t('nav.training'), icon: '🎓' },
+                            { href: `/${locale}/monitoring`, label: monitoringNavLabel, icon: '📈' },
                             { href: `/${locale}/reports`, label: t('nav.reports'), icon: '📊' },
                             { href: `/${locale}/news`, label: t('nav.news'), icon: '📰' },
                         ].map((link) => (
@@ -214,15 +221,18 @@ export default function AppHeader() {
 
                         {/* Mobile Menu CTA */}
                         <div className="px-6 mt-8 mb-6">
-                            <Link
-                                href={`/${locale}/analyze`}
-                                onClick={() => setIsMenuOpen(false)}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    openReportModal();
+                                }}
                                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
                                 style={{ backgroundColor: '#1E8C4E' }}
                             >
                                 <span>🚀</span>
                                 <span>{t('cta')}</span>
-                            </Link>
+                            </button>
                         </div>
 
                         {/* Menu Heading */}

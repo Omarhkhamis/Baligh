@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import type { AdminRole } from './permissions';
 
 export const SESSION_COOKIE = 'balgh_session';
 export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
@@ -6,6 +7,7 @@ export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
 export type SessionPayload = {
     sub: string;
     email: string;
+    role?: AdminRole;
 };
 
 function getSecret(): string {

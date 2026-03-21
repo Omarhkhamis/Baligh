@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { buildEncryptedAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
 
 type RiskLevelType = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
@@ -31,20 +32,22 @@ export async function POST(req: NextRequest) {
 
         const riskLevel = mapRiskLevel(aiRiskLevel);
 
+        const createdAt = toDateOnlyTimestamp(timestamp ? new Date(timestamp) : new Date());
+
         const analysis = await prisma.analysisLog.create({
             data: {
-                inputText: originalText,
+                ...buildEncryptedAnalysisLogFields(originalText, []),
                 classification: aiClassification,
                 riskLevel,
                 confidenceScore: typeof severityScore === 'number' ? severityScore : 0,
-                detectedKeywords: [],
                 aiScores: {
                     aiRiskLevel,
                     severityScore: severityScore ?? null,
                     userCorrection,
                     additionalContext: additionalContext || '',
+                    received_date: createdAt.toISOString().slice(0, 10),
                 },
-                createdAt: timestamp ? new Date(timestamp) : undefined,
+                createdAt,
             },
         });
 
@@ -53,6 +56,7 @@ export async function POST(req: NextRequest) {
                 analysisLogId: analysis.id,
                 message: userReasoning,
                 contactEmail: null,
+                createdAt,
             },
         });
 
