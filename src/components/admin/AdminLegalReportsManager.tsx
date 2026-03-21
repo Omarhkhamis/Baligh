@@ -8,8 +8,10 @@ import { RequirePermission, usePermissions } from './AdminPermissions';
 
 type AnalysisScores = {
     platformLabel?: string;
+    platform_label?: string;
     platform?: string;
     postLink?: string;
+    post_link?: string;
     imageUrls?: string[];
     image_urls?: string[];
     reportImageUrl?: string;
@@ -36,9 +38,17 @@ type AnalysisScores = {
     rationale?: string;
     reasoning_ar?: string;
     reasoning?: string;
+    text?: string;
+    postText?: string;
+    post_text?: string;
+    content_text?: string;
     speech_type?: string;
     severity_score?: number | string;
     detected_markers?: string[];
+    immediate_danger?: string;
+    immediate_danger_label?: string;
+    imageContextDescription?: string;
+    image_context_description?: string;
 };
 
 type LegalItem = {
@@ -49,6 +59,7 @@ type LegalItem = {
     escalationFlag?: boolean;
     humanReviewStatus: string;
     reviewComment?: string | null;
+    postUrl?: string | null;
     imageUrls?: string[];
     createdAt: string;
     analysisLog: {
@@ -111,6 +122,37 @@ function getAnalysisScores(item: LegalItem): AnalysisScores {
     return ((item.analysisLog.aiScores as AnalysisScores | null) || {}) as AnalysisScores;
 }
 
+function getPostLink(item: LegalItem, scores: AnalysisScores) {
+    const value = item.postUrl || scores.postLink || scores.post_link || '';
+    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : '';
+}
+
+function getPostText(item: LegalItem, scores: AnalysisScores) {
+    const postLink = getPostLink(item, scores);
+    const candidates = [
+        item.analysisLog.inputText,
+        scores.content_text,
+        scores.text,
+        scores.postText,
+        scores.post_text,
+    ];
+
+    for (const candidate of candidates) {
+        const normalized = typeof candidate === 'string' ? candidate.trim() : '';
+        if (!normalized) {
+            continue;
+        }
+
+        if (postLink && (normalized === postLink || normalized === `Report link: ${postLink}` || normalized === `Post link: ${postLink}`)) {
+            continue;
+        }
+
+        return normalized;
+    }
+
+    return '';
+}
+
 function getTargetGroup(scores: AnalysisScores) {
     const targetGroupList = [
         ...(Array.isArray(scores.targetGroups) ? scores.targetGroups : []),
@@ -156,6 +198,10 @@ function getReportAttachments(item: LegalItem, scores: AnalysisScores): ReportAt
     }));
 }
 
+function getImageAttachments(item: LegalItem, scores: AnalysisScores) {
+    return getReportAttachments(item, scores).filter((attachment) => attachment.kind === 'image');
+}
+
 function getSpeechType(item: LegalItem, scores: AnalysisScores) {
     return scores.speech_type || classifyLabel(item.analysisLog.classification);
 }
@@ -197,7 +243,7 @@ function getReasoning(scores: AnalysisScores) {
 }
 
 function getImageDescription(scores: AnalysisScores) {
-    return scores.imageDescription || scores.image_description || '—';
+    return scores.imageDescription || scores.image_description || scores.imageContextDescription || scores.image_context_description || '—';
 }
 
 function getReviewStatusLabel(value: string) {
@@ -426,13 +472,13 @@ export function AdminLegalReportsManager() {
                 getSpeechType(item, scores),
                 getTargetGroup(scores),
                 getHatefulWords(item, scores).join(' | '),
-                scores.platformLabel || scores.platform || '',
-                scores.postLink || '',
-                scores.immediateDangerLabel || scores.immediateDanger || '',
+                scores.platformLabel || scores.platform_label || scores.platform || '',
+                getPostLink(item, scores),
+                scores.immediateDangerLabel || scores.immediateDanger || scores.immediate_danger_label || scores.immediate_danger || '',
                 getReasoning(scores),
                 getImageDescription(scores),
                 getReportAttachments(item, scores).map((attachment) => attachment.url).join(' | '),
-                item.analysisLog.inputText,
+                getPostText(item, scores),
             ].map(escapeCsvValue);
         });
 
@@ -457,19 +503,22 @@ export function AdminLegalReportsManager() {
 
     const renderMeta = (item: LegalItem) => {
         const scores = getAnalysisScores(item);
+        const postLink = getPostLink(item, scores);
         return (
             <div className="grid md:grid-cols-2 gap-3 mt-4">
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
                     <p className="text-xs text-gray-500">Platform</p>
-                    <p className="text-sm text-gray-900">{scores.platformLabel || scores.platform || '—'}</p>
+                    <p className="text-sm text-gray-900">{scores.platformLabel || scores.platform_label || scores.platform || '—'}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
                     <p className="text-xs text-gray-500">Post link</p>
-                    <p className="text-sm text-gray-900 break-all">{scores.postLink || '—'}</p>
+                    <p className="text-sm text-gray-900 break-all">{postLink || '—'}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
                     <p className="text-xs text-gray-500">Immediate danger</p>
-                    <p className="text-sm text-gray-900">{scores.immediateDangerLabel || scores.immediateDanger || '—'}</p>
+                    <p className="text-sm text-gray-900">
+                        {scores.immediateDangerLabel || scores.immediateDanger || scores.immediate_danger_label || scores.immediate_danger || '—'}
+                    </p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
                     <p className="text-xs text-gray-500">Target group</p>
@@ -589,6 +638,8 @@ export function AdminLegalReportsManager() {
                             const speechType = getSpeechType(item, scores);
                             const severity = getSeverity(item, scores);
                             const hatefulWords = getHatefulWords(item, scores);
+                            const postText = getPostText(item, scores);
+                            const imageAttachments = getImageAttachments(item, scores);
 
                             return (
                                 <div
@@ -619,6 +670,46 @@ export function AdminLegalReportsManager() {
                                     </div>
                                     <p className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{item.title}</p>
                                     <p className="text-xs text-gray-600 line-clamp-2">{item.details}</p>
+
+                                    {(postText || imageAttachments.length > 0) && (
+                                        <div className="mt-3 space-y-2">
+                                            {postText && (
+                                                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
+                                                    <p className="text-[11px] text-gray-500">Post text</p>
+                                                    <p className="mt-1 text-xs leading-5 text-gray-800 line-clamp-3 whitespace-pre-wrap break-words">
+                                                        {postText}
+                                                    </p>
+                                                </div>
+                                            )}
+                                            {imageAttachments.length > 0 && (
+                                                <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
+                                                    <div className="mb-2 flex items-center justify-between gap-2">
+                                                        <p className="text-[11px] text-gray-500">Post images</p>
+                                                        <span className="text-[11px] font-semibold text-emerald-700">
+                                                            {imageAttachments.length}
+                                                        </span>
+                                                    </div>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {imageAttachments.slice(0, 3).map((attachment, index) => (
+                                                            <div
+                                                                key={`${item.id}-${attachment.url}-${index}`}
+                                                                className="relative aspect-square overflow-hidden rounded-lg bg-gray-100"
+                                                            >
+                                                                <Image
+                                                                    src={attachment.url}
+                                                                    alt={`Post image preview ${index + 1}`}
+                                                                    fill
+                                                                    unoptimized
+                                                                    className="object-cover"
+                                                                    sizes="160px"
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div className="mt-3 grid grid-cols-2 gap-2">
                                         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
@@ -697,7 +788,10 @@ export function AdminLegalReportsManager() {
                             const speechType = getSpeechType(selected, scores);
                             const severity = getSeverity(selected, scores);
                             const hatefulWords = getHatefulWords(selected, scores);
+                            const postText = getPostText(selected, scores);
+                            const postLink = getPostLink(selected, scores);
                             const reportAttachments = getReportAttachments(selected, scores);
+                            const imageAttachments = reportAttachments.filter((attachment) => attachment.kind === 'image');
 
                             return (
                                 <>
@@ -758,11 +852,46 @@ export function AdminLegalReportsManager() {
                                         </div>
                                     </div>
 
+                                    <div className="grid gap-3 lg:grid-cols-[1.3fr_0.7fr]">
+                                        <div className="rounded-xl border border-gray-100 bg-white p-4">
+                                            <p className="text-xs text-gray-500 mb-2">Post text</p>
+                                            {postText ? (
+                                                <p className="text-gray-900 leading-7 whitespace-pre-wrap break-words">
+                                                    {postText}
+                                                </p>
+                                            ) : (
+                                                <p className="text-sm text-gray-500">
+                                                    No original post text was stored for this report.
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-3">
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-1">Post link</p>
+                                                <p className="text-sm text-gray-900 break-all">
+                                                    {postLink || '—'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-1">Image description</p>
+                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                                    {getImageDescription(scores)}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500 mb-1">Stored images</p>
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {imageAttachments.length}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {reportAttachments.length > 0 && (
                                         <div className="rounded-xl border border-gray-100 bg-white p-3">
                                             <div className="mb-2 flex items-center justify-between gap-3">
                                                 <p className="text-xs text-gray-500">
-                                                    Attached files ({reportAttachments.length})
+                                                    Post images and attachments ({reportAttachments.length})
                                                 </p>
                                             </div>
                                             <div className="grid gap-3 md:grid-cols-2">
@@ -817,6 +946,15 @@ export function AdminLegalReportsManager() {
                                                     </div>
                                                 ))}
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {reportAttachments.length === 0 && getImageDescription(scores) !== '—' && (
+                                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                            <p className="text-sm font-semibold text-amber-900">No original image file is stored</p>
+                                            <p className="mt-1 text-sm text-amber-800">
+                                                This report only has an image description in the analysis data. The dashboard can show the actual image only when the original upload URL was saved with the report.
+                                            </p>
                                         </div>
                                     )}
 
@@ -889,13 +1027,6 @@ export function AdminLegalReportsManager() {
                                 </>
                             );
                         })()}
-
-                        <div className="p-3 rounded-xl border border-gray-100 bg-white">
-                            <p className="text-xs text-gray-500 mb-1">Report link</p>
-                            <p className="text-gray-900 leading-relaxed break-all whitespace-pre-wrap">
-                                {selected.analysisLog.aiScores?.postLink || selected.analysisLog.inputText || '—'}
-                            </p>
-                        </div>
                         <div className="p-3 rounded-xl border border-gray-100 bg-white">
                             <p className="text-xs text-gray-500 mb-1">Reasoning</p>
                             <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
