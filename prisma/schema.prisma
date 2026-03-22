@@ -189,6 +189,7 @@ model AdminUser {
   updatedAt    DateTime  @updatedAt @db.Timestamptz(6)
 
   notifications     AdminNotification[]
+  radarPublications RadarPublication[]
   reviewedReports   LegalReport[]      @relation("ReviewedByAdmin")
 }
 
@@ -305,6 +306,23 @@ model AdminNotification {
 
   @@index([recipientId, isRead, createdAt])
   @@index([reportNumber])
+}
+
+model RadarPublication {
+  id           String   @id @default(uuid()) @db.Uuid
+  publishedById String? @db.Uuid
+  sourceDate   DateTime? @db.Date
+  data         Json     @db.Json
+  totalReports Int      @default(0)
+  weeksWindow  Int      @default(52)
+  publishedAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(6)
+
+  publishedBy AdminUser? @relation(fields: [publishedById], references: [id], onDelete: SetNull)
+
+  @@index([publishedAt])
+  @@index([sourceDate])
+  @@index([publishedById])
 }
 
 model NewsArticle {

@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { getSessionFromCookies } from '@/lib/auth';
-import { formatRoleLabel } from '@/lib/permissions';
-import { AdminDashboardTabs } from '@/components/admin/AdminDashboardTabs';
 import { decryptAnalysisLogFields } from '@/lib/data-security';
+import { getAdminLocaleFromCookieStore } from '@/lib/admin-locale';
+import { AdminPageShell } from '@/components/admin/AdminPageShell';
 
 async function getDashboardData(currentRole: string) {
     const rawTeamMembers = await prisma.teamMember.findMany({ orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
@@ -72,6 +73,8 @@ async function getDashboardData(currentRole: string) {
 
 export default async function AdminPage() {
     const session = await getSessionFromCookies();
+    const cookieStore = await cookies();
+    const locale = getAdminLocaleFromCookieStore(cookieStore);
 
     if (!session) {
         redirect('/login?redirect=/admin');
@@ -97,35 +100,17 @@ export default async function AdminPage() {
     ]);
 
     return (
-        <div className="min-h-screen bg-gray-50" dir="ltr">
-            <header className="border-b border-gray-200 bg-white">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-gray-500">Signed in as {session.email}</p>
-                        <p className="text-sm text-emerald-700 font-medium">{formatRoleLabel(session.role)}</p>
-                        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                        <p className="text-sm text-gray-500">Manage your application content</p>
-                    </div>
-                    <form action="/api/auth/logout" method="post">
-                        <button className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </header>
-
-            <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-                <AdminDashboardTabs
-                    currentRole={session.role}
-                    stats={stats}
-                    teamMembers={teamMembers}
-                    recentAnalyses={recentAnalyses}
-                    notifications={notifications.map((item) => ({
-                        ...item,
-                        createdAt: item.createdAt.toISOString(),
-                    }))}
-                />
-            </main>
-        </div>
+        <AdminPageShell
+            currentRole={session.role}
+            email={session.email}
+            locale={locale}
+            stats={stats}
+            teamMembers={teamMembers}
+            recentAnalyses={recentAnalyses}
+            notifications={notifications.map((item) => ({
+                ...item,
+                createdAt: item.createdAt.toISOString(),
+            }))}
+        />
     );
 }

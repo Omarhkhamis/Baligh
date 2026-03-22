@@ -24,6 +24,12 @@ import {
     toDateOnlyTimestamp,
 } from '@/lib/data-security';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
+import {
+    canonicalizeTargetGroupValues,
+    getCanonicalTargetGroupLabelsFromKeys,
+    getTargetGroupKeyFromValue,
+    type TargetGroupKey,
+} from '@/lib/target-groups';
 
 const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'report-evidence');
 const MAX_ATTACHMENT_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
@@ -716,12 +722,16 @@ export async function POST(req: NextRequest) {
         }
 
         const normalizedText = text?.trim() || '';
-        const selectedTargetGroupKeys = target_groups || [];
-        const selectedTargetGroupLabels = target_group_labels?.length
-            ? target_group_labels
-            : target_group
-                ? [target_group]
-                : [];
+        const selectedTargetGroupKeys: TargetGroupKey[] = (target_groups || [])
+            .map((value) => getTargetGroupKeyFromValue(value))
+            .filter((value): value is TargetGroupKey => value !== null);
+        const selectedTargetGroupLabels = canonicalizeTargetGroupValues(
+            target_group_labels?.length
+                ? target_group_labels
+                : target_group
+                    ? [target_group]
+                    : getCanonicalTargetGroupLabelsFromKeys(selectedTargetGroupKeys.length > 0 ? selectedTargetGroupKeys : target_groups || [])
+        );
         const selectedTargetGroupText = selectedTargetGroupLabels.join(', ');
 
         if (imageFiles.length > 0) {

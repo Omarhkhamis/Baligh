@@ -1,6 +1,12 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { decryptSensitiveStringArray } from '@/lib/data-security';
+import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
+import {
+    getDefaultRadarDescriptions,
+    normalizeRadarDescriptions,
+    type RadarDescriptions,
+} from '@/lib/radar-descriptions';
 
 const CLASSIFICATION_KEYS = ['explicit', 'implicit', 'incitement', 'none'] as const;
 const EMOTION_KEYS = [
@@ -106,6 +112,8 @@ type RadarSummary = {
 export type RadarDashboardData = {
     generatedAt: string;
     weeksWindow: number;
+    selectedRange: RadarSelectedRange;
+    descriptions: RadarDescriptions;
     summary: RadarSummary;
     escalationAlert: {
         active: boolean;
@@ -137,6 +145,33 @@ export type RadarDashboardData = {
     incitementToActionCount: number;
     glorificationTotal: number;
     mainQueryText: string;
+};
+
+export type RadarSelectedRange = {
+    startDate: string | null;
+    endDate: string | null;
+};
+
+export type RadarPublicationMeta = {
+    id: string;
+    publishedAt: string;
+    sourceDate: string | null;
+    selectedRange: RadarSelectedRange;
+    totalReports: number;
+    weeksWindow: number;
+    publishedByName: string | null;
+    publishedByEmail: string | null;
+};
+
+type RadarPublicationQueryRow = {
+    id: string;
+    sourceDate: Date | string | null;
+    data?: unknown;
+    totalReports: number;
+    weeksWindow: number;
+    publishedAt: Date | string;
+    publishedByName: string | null;
+    publishedByEmail: string | null;
 };
 
 type RadarRecord = Prisma.LegalReportGetPayload<{
@@ -221,6 +256,43 @@ function formatWeekLabel(weekStart: string) {
     }).format(date);
 }
 
+function toDateOnlyString(value: Date | null | undefined) {
+    if (!value) {
+        return null;
+    }
+
+    return value.toISOString().slice(0, 10);
+}
+
+function startOfUtcDay(date: Date) {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0));
+}
+
+function endOfUtcDay(date: Date) {
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59, 999));
+}
+
+function normalizeSelectedRange(input: unknown): RadarSelectedRange {
+    if (!input || typeof input !== 'object') {
+        return {
+            startDate: null,
+            endDate: null,
+        };
+    }
+
+    const startDate = typeof (input as Record<string, unknown>).startDate === 'string'
+        ? String((input as Record<string, unknown>).startDate).trim() || null
+        : null;
+    const endDate = typeof (input as Record<string, unknown>).endDate === 'string'
+        ? String((input as Record<string, unknown>).endDate).trim() || null
+        : null;
+
+    return {
+        startDate,
+        endDate,
+    };
+}
+
 function normalizeClassification(value: string | null | undefined): ClassificationKey {
     const normalized = String(value || '').trim().toLowerCase();
     if (CLASSIFICATION_KEYS.includes(normalized as ClassificationKey)) {
@@ -298,7 +370,16 @@ function createBreakdown(
         }));
 }
 
-const MAIN_RADAR_QUERY = `WITH weekly AS (
+function buildMainRadarQuery(startDate: Date | null, endDate: Date | null, useLatestWeeksWindow: boolean) {
+    const lowerBoundFilter = startDate
+        ? Prisma.sql`AND lr."createdAt" >= ${startDate}`
+        : Prisma.empty;
+    const upperBoundFilter = endDate
+        ? Prisma.sql`AND lr."createdAt" <= ${endDate}`
+        : Prisma.empty;
+
+    if (!useLatestWeeksWindow) {
+        return Prisma.sql`WITH weekly AS (
   SELECT
     DATE_TRUNC('week', lr."createdAt") AS week,
     COALESCE(al."aiClassification"::text, 'none') AS "aiClassification",
@@ -310,6 +391,29 @@ const MAIN_RADAR_QUERY = `WITH weekly AS (
   WHERE
     (lr."finalPath" IS NULL OR lr."finalPath" != 'rejected'::"FinalPath")
     AND lr."aiProcessingStatus" = 'done'::"AiProcessingStatus"
+    ${lowerBoundFilter}
+    ${upperBoundFilter}
+  GROUP BY week, "aiClassification"
+)
+SELECT weekly.*
+FROM weekly
+ORDER BY weekly.week DESC, weekly."aiClassification" ASC;`;
+    }
+
+    return Prisma.sql`WITH weekly AS (
+  SELECT
+    DATE_TRUNC('week', lr."createdAt") AS week,
+    COALESCE(al."aiClassification"::text, 'none') AS "aiClassification",
+    COUNT(*) AS count,
+    ROUND(AVG(al."aiSeverity")::numeric, 2) AS "avgSeverity",
+    COUNT(CASE WHEN al."aiEscalationFlag" = true THEN 1 END) AS escalated
+  FROM "LegalReport" lr
+  JOIN "AnalysisLog" al ON al.id = lr."analysisLogId"
+  WHERE
+    (lr."finalPath" IS NULL OR lr."finalPath" != 'rejected'::"FinalPath")
+    AND lr."aiProcessingStatus" = 'done'::"AiProcessingStatus"
+    ${lowerBoundFilter}
+    ${upperBoundFilter}
   GROUP BY week, "aiClassification"
 ),
 latest_weeks AS (
@@ -322,19 +426,346 @@ SELECT weekly.*
 FROM weekly
 JOIN latest_weeks USING (week)
 ORDER BY weekly.week DESC, weekly."aiClassification" ASC;`;
+}
 
-export async function getRadarDashboardData(options?: { includeKeywords?: boolean }) {
+function serializePublicationMeta(record: {
+    id: string;
+    sourceDate: Date | null;
+    data?: unknown;
+    totalReports: number;
+    weeksWindow: number;
+    publishedAt: Date;
+    publishedBy: { name: string | null; email: string } | null;
+}): RadarPublicationMeta {
+    return {
+        id: record.id,
+        publishedAt: record.publishedAt.toISOString(),
+        sourceDate: toDateOnlyString(record.sourceDate),
+        selectedRange: normalizeSelectedRange(
+            record.data && typeof record.data === 'object'
+                ? (record.data as Record<string, unknown>).selectedRange
+                : null
+        ),
+        totalReports: record.totalReports,
+        weeksWindow: record.weeksWindow,
+        publishedByName: record.publishedBy?.name || null,
+        publishedByEmail: record.publishedBy?.email || null,
+    };
+}
+
+function toSafeDate(value: Date | string | null | undefined) {
+    if (!value) {
+        return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function normalizePublicationRecord(row: RadarPublicationQueryRow | {
+    id: string;
+    sourceDate: Date | null;
+    data?: unknown;
+    totalReports: number;
+    weeksWindow: number;
+    publishedAt: Date;
+    publishedBy: { name: string | null; email: string } | null;
+}) {
+    if ('publishedBy' in row) {
+        return {
+            id: row.id,
+            sourceDate: row.sourceDate,
+            data: row.data,
+            totalReports: row.totalReports,
+            weeksWindow: row.weeksWindow,
+            publishedAt: row.publishedAt,
+            publishedBy: row.publishedBy,
+        };
+    }
+
+    return {
+        id: row.id,
+        sourceDate: toSafeDate(row.sourceDate),
+        data: row.data,
+        totalReports: row.totalReports,
+        weeksWindow: row.weeksWindow,
+        publishedAt: toSafeDate(row.publishedAt) || new Date(0),
+        publishedBy: row.publishedByEmail
+            ? {
+                name: row.publishedByName,
+                email: row.publishedByEmail,
+            }
+            : null,
+    };
+}
+
+function getRadarPublicationDelegate() {
+    return (prisma as typeof prisma & {
+        radarPublication?: {
+            create: typeof prisma.newsArticle.create;
+            findMany: typeof prisma.newsArticle.findMany;
+            findFirst: typeof prisma.newsArticle.findFirst;
+            update: typeof prisma.newsArticle.update;
+        };
+    }).radarPublication;
+}
+
+async function createRadarPublicationRecord(params: {
+    publishedById: string;
+    sourceDate?: Date | null;
+    snapshot: RadarDashboardData;
+}) {
+    const delegate = getRadarPublicationDelegate();
+
+    if (delegate) {
+        const created = await delegate.create({
+            data: {
+                publishedById: params.publishedById,
+                sourceDate: params.sourceDate ?? null,
+                data: params.snapshot as unknown as Prisma.InputJsonValue,
+                totalReports: params.snapshot.summary.totalReports,
+                weeksWindow: params.snapshot.weeksWindow,
+            },
+            include: {
+                publishedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+
+        return normalizePublicationRecord(created);
+    }
+
+    const rows = await prisma.$queryRaw<RadarPublicationQueryRow[]>(Prisma.sql`
+        WITH inserted AS (
+            INSERT INTO "RadarPublication" (
+                "publishedById",
+                "sourceDate",
+                "data",
+                "totalReports",
+                "weeksWindow"
+            )
+            VALUES (
+                ${params.publishedById}::uuid,
+                ${params.sourceDate ?? null}::date,
+                ${JSON.stringify(params.snapshot)}::jsonb,
+                ${params.snapshot.summary.totalReports},
+                ${params.snapshot.weeksWindow}
+            )
+            RETURNING
+                id,
+                "sourceDate",
+                data,
+                "totalReports",
+                "weeksWindow",
+                "publishedAt",
+                "publishedById"
+        )
+        SELECT
+            inserted.id,
+            inserted."sourceDate",
+            inserted.data,
+            inserted."totalReports",
+            inserted."weeksWindow",
+            inserted."publishedAt",
+            admin.name AS "publishedByName",
+            admin.email AS "publishedByEmail"
+        FROM inserted
+        LEFT JOIN "AdminUser" admin ON admin.id = inserted."publishedById"
+    `);
+
+    if (!rows[0]) {
+        throw new Error('Failed to create radar publication record');
+    }
+
+    return normalizePublicationRecord(rows[0]);
+}
+
+async function updateRadarPublicationRecord(params: {
+    id: string;
+    snapshot: RadarDashboardData;
+}) {
+    const delegate = getRadarPublicationDelegate();
+
+    if (delegate) {
+        const updated = await delegate.update({
+            where: {
+                id: params.id,
+            },
+            data: {
+                data: params.snapshot as unknown as Prisma.InputJsonValue,
+                totalReports: params.snapshot.summary.totalReports,
+                weeksWindow: params.snapshot.weeksWindow,
+            },
+            include: {
+                publishedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+
+        return normalizePublicationRecord(updated);
+    }
+
+    const rows = await prisma.$queryRaw<RadarPublicationQueryRow[]>(Prisma.sql`
+        UPDATE "RadarPublication"
+        SET
+            data = ${JSON.stringify(params.snapshot)}::jsonb,
+            "totalReports" = ${params.snapshot.summary.totalReports},
+            "weeksWindow" = ${params.snapshot.weeksWindow},
+            "updatedAt" = NOW()
+        WHERE id = ${params.id}::uuid
+        RETURNING
+            id,
+            "sourceDate",
+            data,
+            "totalReports",
+            "weeksWindow",
+            "publishedAt",
+            "publishedById"
+    `);
+
+    if (!rows[0]) {
+        throw new Error('Failed to update radar publication record');
+    }
+
+    const publicationRows = await prisma.$queryRaw<RadarPublicationQueryRow[]>(Prisma.sql`
+        SELECT
+            rp.id,
+            rp."sourceDate",
+            rp.data,
+            rp."totalReports",
+            rp."weeksWindow",
+            rp."publishedAt",
+            admin.name AS "publishedByName",
+            admin.email AS "publishedByEmail"
+        FROM "RadarPublication" rp
+        LEFT JOIN "AdminUser" admin ON admin.id = rp."publishedById"
+        WHERE rp.id = ${params.id}::uuid
+        LIMIT 1
+    `);
+
+    if (!publicationRows[0]) {
+        throw new Error('Failed to load updated radar publication record');
+    }
+
+    return normalizePublicationRecord(publicationRows[0]);
+}
+
+async function listRadarPublicationRecords(limit: number) {
+    const delegate = getRadarPublicationDelegate();
+
+    if (delegate) {
+        const publications = await delegate.findMany({
+            orderBy: {
+                publishedAt: 'desc',
+            },
+            take: limit,
+            include: {
+                publishedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+
+        return publications.map(normalizePublicationRecord);
+    }
+
+    const rows = await prisma.$queryRaw<RadarPublicationQueryRow[]>(Prisma.sql`
+        SELECT
+            rp.id,
+            rp."sourceDate",
+            rp.data,
+            rp."totalReports",
+            rp."weeksWindow",
+            rp."publishedAt",
+            admin.name AS "publishedByName",
+            admin.email AS "publishedByEmail"
+        FROM "RadarPublication" rp
+        LEFT JOIN "AdminUser" admin ON admin.id = rp."publishedById"
+        ORDER BY rp."publishedAt" DESC
+        LIMIT ${limit}
+    `);
+
+    return rows.map(normalizePublicationRecord);
+}
+
+async function getLatestRadarPublicationRecord() {
+    const delegate = getRadarPublicationDelegate();
+
+    if (delegate) {
+        const latest = await delegate.findFirst({
+            orderBy: {
+                publishedAt: 'desc',
+            },
+            include: {
+                publishedBy: {
+                    select: {
+                        name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+
+        return latest ? normalizePublicationRecord(latest) : null;
+    }
+
+    const rows = await prisma.$queryRaw<RadarPublicationQueryRow[]>(Prisma.sql`
+        SELECT
+            rp.id,
+            rp."sourceDate",
+            rp.data,
+            rp."totalReports",
+            rp."weeksWindow",
+            rp."publishedAt",
+            admin.name AS "publishedByName",
+            admin.email AS "publishedByEmail"
+        FROM "RadarPublication" rp
+        LEFT JOIN "AdminUser" admin ON admin.id = rp."publishedById"
+        ORDER BY rp."publishedAt" DESC
+        LIMIT 1
+    `);
+
+    return rows[0] ? normalizePublicationRecord(rows[0]) : null;
+}
+
+export async function getRadarDashboardData(options?: {
+    includeKeywords?: boolean;
+    startDate?: Date | null;
+    endDate?: Date | null;
+}) {
     const includeKeywords = options?.includeKeywords ?? false;
-    const currentWeek = startOfUtcWeek(new Date());
-    const earliestWeek = addWeeks(currentWeek, -51);
+    const rangeStartDate = options?.startDate ? startOfUtcDay(options.startDate) : null;
+    const rangeEndDate = options?.endDate ? endOfUtcDay(options.endDate) : null;
+    const hasCustomRange = Boolean(rangeStartDate && rangeEndDate);
+    const currentWeek = startOfUtcWeek(rangeEndDate ?? new Date());
+    const earliestWeek = hasCustomRange && rangeStartDate ? startOfUtcWeek(rangeStartDate) : addWeeks(currentWeek, -51);
+    const weeksWindow = Math.max(
+        1,
+        hasCustomRange
+            ? Math.floor((currentWeek.getTime() - earliestWeek.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1
+            : 52
+    );
+    const lowerBound = rangeStartDate ?? earliestWeek;
 
     const [weeklyRows, reports] = await Promise.all([
-        prisma.$queryRawUnsafe<RawWeeklyRow[]>(MAIN_RADAR_QUERY),
+        prisma.$queryRaw<RawWeeklyRow[]>(buildMainRadarQuery(rangeStartDate, rangeEndDate, !hasCustomRange)),
         prisma.legalReport.findMany({
             where: {
                 aiProcessingStatus: 'done',
                 createdAt: {
-                    gte: earliestWeek,
+                    gte: lowerBound,
+                    ...(rangeEndDate ? { lte: rangeEndDate } : {}),
                 },
                 OR: [
                     { finalPath: null },
@@ -389,7 +820,7 @@ export async function getRadarDashboardData(options?: { includeKeywords?: boolea
         emotionCounts.set(emotion, 0);
     }
 
-    for (let offset = 0; offset < 52; offset += 1) {
+    for (let offset = 0; offset < weeksWindow; offset += 1) {
         const week = addWeeks(earliestWeek, offset);
         const weekKey = toWeekKey(week);
         currentWeekIndex.set(weekKey, {
@@ -470,8 +901,7 @@ export async function getRadarDashboardData(options?: { includeKeywords?: boolea
         platformTrend.set(weekKey, (platformTrend.get(weekKey) || 0) + 1);
         platformWeeklyCounts.set(platform, platformTrend);
 
-        for (const targetGroup of report.analysisLog.aiTargetGroups) {
-            const label = String(targetGroup || '').trim();
+        for (const label of canonicalizeTargetGroupValues(report.analysisLog.aiTargetGroups)) {
             if (!label) {
                 continue;
             }
@@ -617,7 +1047,12 @@ export async function getRadarDashboardData(options?: { includeKeywords?: boolea
 
     return {
         generatedAt: new Date().toISOString(),
-        weeksWindow: 52,
+        weeksWindow,
+        selectedRange: {
+            startDate: toDateOnlyString(rangeStartDate),
+            endDate: toDateOnlyString(rangeEndDate),
+        },
+        descriptions: getDefaultRadarDescriptions(),
         summary,
         escalationAlert: {
             active: summary.escalatedReports > 0,
@@ -641,6 +1076,104 @@ export async function getRadarDashboardData(options?: { includeKeywords?: boolea
         peakAnnotations,
         incitementToActionCount: reports.filter((report) => report.analysisLog.aiIncitementToAction).length,
         glorificationTotal: reports.filter((report) => report.analysisLog.aiGlorificationOfViolence).length,
-        mainQueryText: MAIN_RADAR_QUERY,
+        mainQueryText: buildMainRadarQuery(rangeStartDate, rangeEndDate, !hasCustomRange).sql,
     } satisfies RadarDashboardData;
+}
+
+export async function publishRadarSnapshot(params: {
+    publishedById: string;
+    startDate?: Date | null;
+    endDate?: Date | null;
+    descriptions?: RadarDescriptions;
+}) {
+    const snapshot = await getRadarDashboardData({
+        includeKeywords: true,
+        startDate: params.startDate ?? null,
+        endDate: params.endDate ?? null,
+    });
+    const publishedSnapshot: RadarDashboardData = {
+        ...snapshot,
+        descriptions: normalizeRadarDescriptions(params.descriptions ?? snapshot.descriptions),
+    };
+
+    const created = await createRadarPublicationRecord({
+        publishedById: params.publishedById,
+        sourceDate: params.endDate ?? null,
+        snapshot: publishedSnapshot,
+    });
+
+    return {
+        publication: serializePublicationMeta(created),
+        data: publishedSnapshot,
+    };
+}
+
+export async function saveRadarDescriptionsOnly(params: {
+    descriptions: RadarDescriptions;
+}) {
+    const latest = await getLatestRadarPublicationRecord();
+
+    if (!latest) {
+        throw new Error('No published radar snapshot available');
+    }
+
+    const rawSnapshot = (latest.data || {}) as Partial<RadarDashboardData> & {
+        descriptions?: unknown;
+        selectedRange?: unknown;
+        keywordFrequencies?: RadarDashboardData['keywordFrequencies'];
+    };
+    const updatedSnapshot: RadarDashboardData = {
+        ...(rawSnapshot as RadarDashboardData),
+        selectedRange: normalizeSelectedRange(rawSnapshot.selectedRange),
+        descriptions: normalizeRadarDescriptions(params.descriptions),
+        keywordFrequencies: Array.isArray(rawSnapshot.keywordFrequencies) ? rawSnapshot.keywordFrequencies : [],
+    };
+
+    const updated = await updateRadarPublicationRecord({
+        id: latest.id,
+        snapshot: updatedSnapshot,
+    });
+
+    return {
+        publication: serializePublicationMeta(updated),
+        data: updatedSnapshot,
+    };
+}
+
+export async function getRadarPublicationHistory(limit = 5) {
+    const publications = await listRadarPublicationRecords(limit);
+
+    return publications.map(serializePublicationMeta);
+}
+
+export async function getPublishedRadarDashboardData(options?: { includeKeywords?: boolean }) {
+    const includeKeywords = options?.includeKeywords ?? false;
+    const latest = await getLatestRadarPublicationRecord();
+
+    if (!latest) {
+        return {
+            publication: null,
+            data: null,
+        };
+    }
+
+    const rawSnapshot = (latest.data || {}) as Partial<RadarDashboardData> & {
+        descriptions?: unknown;
+        selectedRange?: unknown;
+        keywordFrequencies?: RadarDashboardData['keywordFrequencies'];
+    };
+    const snapshot: RadarDashboardData = {
+        ...(rawSnapshot as RadarDashboardData),
+        selectedRange: normalizeSelectedRange(rawSnapshot.selectedRange),
+        descriptions: normalizeRadarDescriptions(rawSnapshot.descriptions),
+        keywordFrequencies: Array.isArray(rawSnapshot.keywordFrequencies) ? rawSnapshot.keywordFrequencies : [],
+    };
+
+    return {
+        publication: serializePublicationMeta(latest),
+        data: {
+            ...snapshot,
+            keywordFrequencies: includeKeywords ? snapshot.keywordFrequencies : [],
+        } satisfies RadarDashboardData,
+    };
 }

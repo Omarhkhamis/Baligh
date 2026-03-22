@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { formatRoleLabel, type AdminRole } from '@/lib/permissions';
+import { type AdminRole } from '@/lib/permissions';
+import { useAdminI18n } from './AdminI18n';
 import { toastSuccess } from './toast';
 
 type AdminInfo = {
@@ -20,6 +21,7 @@ type AccountResponse = AdminInfo & {
 const roleOptions: AdminRole[] = ['SUPER_ADMIN', 'ANALYST', 'EDITOR', 'VIEWER'];
 
 export function AdminAccountSettings() {
+    const { t, formatRole, formatDateTime, formatDate, translateApiError } = useAdminI18n();
     const [info, setInfo] = useState<AdminInfo | null>(null);
     const [adminUsers, setAdminUsers] = useState<AdminInfo[]>([]);
     const [email, setEmail] = useState('');
@@ -49,13 +51,13 @@ export function AdminAccountSettings() {
                 setName(data.name || '');
                 setAdminUsers(data.adminUsers || []);
             } catch {
-                setError('تعذر تحميل بيانات الحساب');
+                setError(t('errors.loadAccount'));
             } finally {
                 setLoading(false);
             }
         }
         load();
-    }, []);
+    }, [t]);
 
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -74,7 +76,7 @@ export function AdminAccountSettings() {
             });
             const data = await res.json();
             if (!res.ok) {
-                setError(data.error || 'تعذر الحفظ');
+                setError(translateApiError(data.error || t('errors.saveFailed')));
                 setSaving(false);
                 return;
             }
@@ -82,11 +84,11 @@ export function AdminAccountSettings() {
             setAdminUsers((currentUsers) =>
                 currentUsers.map((user) => (user.id === data.id ? { ...user, ...data } : user))
             );
-            setMessage('تم تحديث الحساب بنجاح');
-            void toastSuccess('تم تحديث الحساب بنجاح');
+            setMessage(t('account.updated'));
+            void toastSuccess(t('account.updated'));
             if (password) setPassword('');
         } catch {
-            setError('خطأ غير متوقع');
+            setError(t('common.unexpectedError'));
         } finally {
             setSaving(false);
         }
@@ -112,7 +114,7 @@ export function AdminAccountSettings() {
             const data = await res.json();
 
             if (!res.ok) {
-                setCreateError(data.error || 'تعذر إنشاء المستخدم');
+                setCreateError(translateApiError(data.error || t('errors.createFailed')));
                 return;
             }
 
@@ -121,10 +123,10 @@ export function AdminAccountSettings() {
             setCreateEmail('');
             setCreatePassword('');
             setCreateRole('EDITOR');
-            setCreateMessage('تم إنشاء المستخدم بنجاح');
-            void toastSuccess('تم إنشاء المستخدم بنجاح');
+            setCreateMessage(t('account.createSuccess'));
+            void toastSuccess(t('account.createSuccess'));
         } catch {
-            setCreateError('خطأ غير متوقع');
+            setCreateError(t('common.unexpectedError'));
         } finally {
             setCreating(false);
         }
@@ -135,34 +137,34 @@ export function AdminAccountSettings() {
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Admin account</h3>
-                        <p className="text-xs text-gray-500">Update the email and password used to sign in</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.title')}</h3>
+                        <p className="text-xs text-gray-500">{t('account.subtitle')}</p>
                         {info?.role && (
-                            <p className="text-xs text-emerald-700 mt-1">Role: {formatRoleLabel(info.role)}</p>
+                            <p className="text-xs text-emerald-700 mt-1">{t('account.role')}: {formatRole(info.role)}</p>
                         )}
                     </div>
                     {info?.updatedAt && (
                         <span className="text-xs text-gray-400">
-                            Last update: {new Date(info.updatedAt).toLocaleString('en-US')}
+                            {t('account.lastUpdate')}: {formatDateTime(info.updatedAt)}
                         </span>
                     )}
                 </div>
 
                 {loading ? (
-                    <p className="text-sm text-gray-500">Loading account...</p>
+                    <p className="text-sm text-gray-500">{t('account.loading')}</p>
                 ) : (
                     <form className="space-y-3" onSubmit={onSubmit}>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.name')}</label>
                             <input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Admin name (optional)"
+                                placeholder={t('account.namePlaceholder')}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.email')}</label>
                             <input
                                 type="email"
                                 value={email}
@@ -173,15 +175,15 @@ export function AdminAccountSettings() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">New password</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.password')}</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Leave blank to keep current password"
+                                placeholder={t('account.passwordPlaceholder')}
                             />
-                            <p className="text-xs text-gray-400 mt-1">Minimum 6 characters</p>
+                            <p className="text-xs text-gray-400 mt-1">{t('account.passwordHint')}</p>
                         </div>
 
                         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -192,7 +194,7 @@ export function AdminAccountSettings() {
                             disabled={saving}
                             className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
                         >
-                            {saving ? 'Saving...' : 'Save changes'}
+                            {saving ? t('common.saving') : t('common.saveChanges')}
                         </button>
                     </form>
                 )}
@@ -201,22 +203,22 @@ export function AdminAccountSettings() {
             {info?.role === 'SUPER_ADMIN' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm space-y-4">
                     <div>
-                        <h3 className="text-lg font-semibold text-gray-900">Admin users</h3>
-                        <p className="text-xs text-gray-500">Create a new admin user and choose the appropriate role.</p>
+                        <h3 className="text-lg font-semibold text-gray-900">{t('account.adminUsersTitle')}</h3>
+                        <p className="text-xs text-gray-500">{t('account.adminUsersSubtitle')}</p>
                     </div>
 
                     <form className="grid gap-3 md:grid-cols-2" onSubmit={onCreateSubmit}>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.name')}</label>
                             <input
                                 value={createName}
                                 onChange={(e) => setCreateName(e.target.value)}
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Optional"
+                                placeholder={t('common.optional')}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Role</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.createRole')}</label>
                             <select
                                 value={createRole}
                                 onChange={(e) => setCreateRole(e.target.value as AdminRole)}
@@ -224,30 +226,30 @@ export function AdminAccountSettings() {
                             >
                                 {roleOptions.map((role) => (
                                     <option key={role} value={role}>
-                                        {formatRoleLabel(role)}
+                                        {formatRole(role)}
                                     </option>
                                 ))}
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.email')}</label>
                             <input
                                 type="email"
                                 value={createEmail}
                                 onChange={(e) => setCreateEmail(e.target.value)}
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="new-admin@balgh.org"
+                                placeholder={t('account.createEmailPlaceholder')}
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1">{t('account.password')}</label>
                             <input
                                 type="password"
                                 value={createPassword}
                                 onChange={(e) => setCreatePassword(e.target.value)}
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Minimum 6 characters"
+                                placeholder={t('account.createPasswordPlaceholder')}
                                 required
                             />
                         </div>
@@ -261,15 +263,15 @@ export function AdminAccountSettings() {
                                 disabled={creating}
                                 className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
                             >
-                                {creating ? 'Creating...' : 'Create user'}
+                                {creating ? t('common.creating') : t('account.createUser')}
                             </button>
                         </div>
                     </form>
 
                     <div className="border-t border-gray-100 pt-4">
                         <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-sm font-semibold text-gray-900">Current admin users</h4>
-                            <span className="text-xs text-gray-500">{adminUsers.length} users</span>
+                            <h4 className="text-sm font-semibold text-gray-900">{t('account.currentAdmins')}</h4>
+                            <span className="text-xs text-gray-500">{t('account.usersCount', { count: adminUsers.length })}</span>
                         </div>
 
                         <div className="space-y-2">
@@ -281,11 +283,11 @@ export function AdminAccountSettings() {
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <p className="text-sm font-semibold text-gray-900">
-                                                {user.name || 'Unnamed admin'}
+                                                {user.name || t('common.unnamedAdmin')}
                                             </p>
                                             {info.id === user.id && (
                                                 <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                                                    You
+                                                    {t('common.you')}
                                                 </span>
                                             )}
                                         </div>
@@ -294,11 +296,11 @@ export function AdminAccountSettings() {
 
                                     <div className="text-right">
                                         <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                            {formatRoleLabel(user.role)}
+                                            {formatRole(user.role)}
                                         </span>
                                         {user.createdAt && (
                                             <p className="text-[11px] text-gray-400 mt-1">
-                                                Created {new Date(user.createdAt).toLocaleDateString('en-US')}
+                                                {t('account.createdOn', { date: formatDate(user.createdAt) })}
                                             </p>
                                         )}
                                     </div>

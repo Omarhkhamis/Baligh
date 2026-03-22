@@ -4,6 +4,7 @@ import { getSeverityScoreOutOfFive, mapRiskLevel } from '@/lib/analysis-utils';
 import { generateReportNumber, isUniqueConstraintError } from '@/lib/report-number';
 import { buildEncryptedAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
+import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
 
 const REPORT_PLATFORM_VALUES = ['facebook', 'telegram', 'x', 'youtube', 'instagram', 'tiktok', 'other'] as const;
 const DIRECT_RISK_VALUES = ['yes', 'no', 'unknown'] as const;
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         const numericSeverity = typeof severity_score === 'number' ? severity_score : 0;
         const escalationFlag = getSeverityScoreOutOfFive(numericSeverity) === 5;
         const humanReviewStatus = escalationFlag ? 'escalated' : 'pending';
+        const selectedTargetGroupLabels = canonicalizeTargetGroupValues(target_group ? [target_group] : []);
         const structuredAi = buildStructuredAiFields({
             analysis: {
                 classification: safeClassification,
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
                 rationale_arabic: reasoning_ar || '',
                 image_description: image_description || '',
             },
-            selectedTargetGroupLabels: target_group ? [target_group] : [],
+            selectedTargetGroupLabels,
             analysisText: safeText,
             hasImage: Boolean(image_description),
             escalationFlag,
@@ -88,7 +90,7 @@ export async function POST(req: NextRequest) {
                         data: {
                             ...buildEncryptedAnalysisLogFields(
                                 safeText,
-                                structuredAi.aiHateKeywords.length > 0 ? structuredAi.aiHateKeywords : target_group ? [target_group] : []
+                                structuredAi.aiHateKeywords.length > 0 ? structuredAi.aiHateKeywords : selectedTargetGroupLabels
                             ),
                             classification: safeClassification,
                             riskLevel,
@@ -123,7 +125,9 @@ export async function POST(req: NextRequest) {
                                 imageDescription: image_description || '',
                                 postLink: post_link || '',
                                 reporterCountry: reporter_country || '',
-                                targetGroup: target_group || '',
+                                targetGroup: selectedTargetGroupLabels.join(', ') || target_group || '',
+                                target_group: selectedTargetGroupLabels.join(', ') || target_group || '',
+                                target_group_label: selectedTargetGroupLabels.join(', ') || target_group || '',
                                 platform: platform || '',
                                 platformLabel: platform_label || platform || '',
                                 immediateDanger: immediate_danger || '',
@@ -150,7 +154,7 @@ export async function POST(req: NextRequest) {
                             humanReviewStatus,
                             platform: normalizePlatformValue(platform),
                             postUrl: post_link || null,
-                            targetGroupsUser: target_group ? [target_group] : [],
+                            targetGroupsUser: selectedTargetGroupLabels,
                             isDirectRisk: normalizeDirectRiskValue(immediate_danger),
                             createdAt: submittedAt,
                         },

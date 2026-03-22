@@ -3,11 +3,13 @@
 import { useMemo, useState } from 'react';
 import { type AdminRole } from '@/lib/permissions';
 import { AdminPermissionsProvider } from './AdminPermissions';
+import { useAdminI18n } from './AdminI18n';
 import { TeamManager } from './TeamManager';
 import { AdminAccountSettings } from './AdminAccountSettings';
 import { AdminNewsManager } from './AdminNewsManager';
 import { AdminReportsManager } from './AdminReportsManager';
 import { AdminLegalReportsManager } from './AdminLegalReportsManager';
+import { AdminRadarManager } from './AdminRadarManager';
 
 type TeamMember = Parameters<typeof TeamManager>[0]['initialMembers'][number];
 type Analysis = {
@@ -44,29 +46,32 @@ type Props = {
 };
 
 export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnalyses, notifications }: Props) {
+    const { t, formatDate, formatClassification, formatRiskLevel } = useAdminI18n();
+
     const tabs = useMemo(
         () => {
-            const items = [{ key: 'dashboard', label: 'Dashboard', icon: '📊' }];
+            const items = [{ key: 'dashboard', label: t('tabs.dashboard'), icon: '📊' }];
 
             if (currentRole === 'SUPER_ADMIN') {
-                items.push({ key: 'team', label: 'Team Members', icon: '👥' });
+                items.push({ key: 'team', label: t('tabs.team'), icon: '👥' });
             }
 
             if (currentRole === 'SUPER_ADMIN' || currentRole === 'EDITOR') {
-                items.push({ key: 'news', label: 'News Articles', icon: '📰' });
-                items.push({ key: 'reports', label: 'Report Studies', icon: '📑' });
+                items.push({ key: 'news', label: t('tabs.news'), icon: '📰' });
+                items.push({ key: 'reports', label: t('tabs.reports'), icon: '📑' });
             }
 
             if (currentRole === 'SUPER_ADMIN' || currentRole === 'ANALYST') {
-                items.push({ key: 'legal', label: 'Legal Reports', icon: '⚖️' });
+                items.push({ key: 'legal', label: t('tabs.legal'), icon: '⚖️' });
+                items.push({ key: 'radar', label: t('tabs.radar'), icon: '📡' });
             }
 
             if (currentRole !== 'VIEWER') {
-                items.push({ key: 'admin', label: 'Admin', icon: '👤' });
+                items.push({ key: 'admin', label: t('tabs.admin'), icon: '👤' });
             }
             return items;
         },
-        [currentRole]
+        [currentRole, t]
     );
     const [active, setActive] = useState<string>('dashboard');
 
@@ -98,26 +103,34 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
                             <div className="rounded-2xl border border-red-200 bg-red-50 p-4 shadow-sm">
                                 <div className="flex items-center justify-between gap-3">
                                     <div>
-                                        <h2 className="text-lg font-semibold text-red-900">Internal Alerts</h2>
-                                        <p className="text-sm text-red-700">High-priority escalations assigned to your role.</p>
+                                        <h2 className="text-lg font-semibold text-red-900">{t('dashboardView.internalAlerts')}</h2>
+                                        <p className="text-sm text-red-700">{t('dashboardView.internalAlertsSubtitle')}</p>
                                     </div>
                                     <span className="inline-flex rounded-full border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-700">
-                                        {notifications.length} alerts
+                                        {t('dashboardView.alertsCount', { count: notifications.length })}
                                     </span>
                                 </div>
                                 <div className="mt-3 space-y-3">
                                     {notifications.map((item) => (
                                         <div key={item.id} className="rounded-xl border border-red-100 bg-white px-3 py-3">
                                             <div className="flex items-center justify-between gap-3">
-                                                <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {item.reportNumber
+                                                        ? t('dashboardView.internalAlertTitle')
+                                                        : item.title}
+                                                </p>
                                                 <span className="text-xs text-gray-500">
-                                                    {new Date(item.createdAt).toLocaleDateString('en-US')}
+                                                    {formatDate(item.createdAt)}
                                                 </span>
                                             </div>
-                                            <p className="mt-1 text-sm text-gray-700">{item.message}</p>
+                                            <p className="mt-1 text-sm text-gray-700">
+                                                {item.reportNumber
+                                                    ? t('dashboardView.internalAlertMessage', { reportNumber: item.reportNumber })
+                                                    : item.message}
+                                            </p>
                                             {item.reportNumber && (
                                                 <p className="mt-2 text-xs font-semibold text-red-700">
-                                                    Report: {item.reportNumber}
+                                                    {t('dashboardView.report')}: {item.reportNumber}
                                                 </p>
                                             )}
                                         </div>
@@ -127,38 +140,38 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
                         )}
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <StatCard title="Analyses" value={stats.analysisCount} />
-                            <StatCard title="Legal Reports" value={stats.legalReportCount} />
-                            <StatCard title="News" value={stats.newsCount} />
-                            <StatCard title="Reports & Studies" value={stats.reportCount} />
-                            <StatCard title="Team Members" value={teamMembers.length} />
+                            <StatCard title={t('dashboardView.analyses')} value={stats.analysisCount} />
+                            <StatCard title={t('dashboardView.legalReports')} value={stats.legalReportCount} />
+                            <StatCard title={t('dashboardView.news')} value={stats.newsCount} />
+                            <StatCard title={t('dashboardView.reportsStudies')} value={stats.reportCount} />
+                            <StatCard title={t('dashboardView.teamMembers')} value={teamMembers.length} />
                         </div>
 
                         {(currentRole === 'SUPER_ADMIN' || currentRole === 'ANALYST') && (
                             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                                 <div className="flex items-center justify-between mb-3">
-                                    <h2 className="text-lg font-semibold text-gray-900">Latest Analyses</h2>
-                                    <span className="text-xs text-gray-500">Most recent 5 entries</span>
+                                    <h2 className="text-lg font-semibold text-gray-900">{t('dashboardView.latestAnalyses')}</h2>
+                                    <span className="text-xs text-gray-500">{t('dashboardView.latestEntries')}</span>
                                 </div>
                                 <div className="divide-y divide-gray-100">
                                     {recentAnalyses.length === 0 && (
-                                        <p className="text-sm text-gray-500">No records yet.</p>
+                                        <p className="text-sm text-gray-500">{t('dashboardView.noRecords')}</p>
                                     )}
                                     {recentAnalyses.map((item) => (
                                         <div key={item.id} className="py-3 flex items-start gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center">
-                                                {item.riskLevel.slice(0, 1)}
+                                                {formatRiskLevel(item.riskLevel).slice(0, 1)}
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-sm text-gray-900 line-clamp-2">{item.inputText}</p>
                                                 <div className="text-xs text-gray-500 flex gap-3 mt-1">
-                                                    <span>Classification: {item.classification}</span>
-                                                    <span>Risk: {item.riskLevel}</span>
-                                                    {item.reportNumber && <span>Report: {item.reportNumber}</span>}
+                                                    <span>{t('dashboardView.classification')}: {formatClassification(item.classification)}</span>
+                                                    <span>{t('dashboardView.risk')}: {formatRiskLevel(item.riskLevel)}</span>
+                                                    {item.reportNumber && <span>{t('dashboardView.report')}: {item.reportNumber}</span>}
                                                 </div>
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                                {new Date(item.createdAt).toLocaleDateString('en-US')}
+                                                {formatDate(item.createdAt)}
                                             </div>
                                         </div>
                                     ))}
@@ -170,20 +183,20 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
 
                 {active === 'team' && (
                     <div className="space-y-3">
-                        <h2 className="text-lg font-semibold text-gray-900">Team Members</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('tabs.team')}</h2>
                         <TeamManager initialMembers={teamMembers} />
                     </div>
                 )}
 
                 {active === 'news' && (
                     <div className="space-y-3">
-                        <h2 className="text-lg font-semibold text-gray-900">News Articles</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('tabs.news')}</h2>
                         <AdminNewsManager />
                     </div>
                 )}
                 {active === 'reports' && (
                     <div className="space-y-3">
-                        <h2 className="text-lg font-semibold text-gray-900">Reports & Studies</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('tabs.reports')}</h2>
                         <AdminReportsManager />
                     </div>
                 )}
@@ -192,9 +205,14 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
                         <AdminLegalReportsManager />
                     </div>
                 )}
+                {active === 'radar' && (
+                    <div className="space-y-3">
+                        <AdminRadarManager />
+                    </div>
+                )}
                 {active === 'admin' && (
                     <div className="space-y-3">
-                        <h2 className="text-lg font-semibold text-gray-900">Admin Account</h2>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('tabs.admin')}</h2>
                         <AdminAccountSettings />
                     </div>
                 )}

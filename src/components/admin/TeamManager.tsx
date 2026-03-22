@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 import { RequirePermission, usePermissions } from './AdminPermissions';
+import { useAdminI18n } from './AdminI18n';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -37,6 +38,7 @@ const defaultForm: FormState = {
 
 export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }) {
     const { can } = usePermissions();
+    const { t, pickLocalizedText, translateApiError, locale } = useAdminI18n();
     const [members, setMembers] = useState<TeamMember[]>(initialMembers);
     const [form, setForm] = useState<FormState>(defaultForm);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -53,7 +55,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
         event.preventDefault();
         const action = editingId ? 'PATCH' : 'POST';
         if (!can('team', action)) {
-            setError('You do not have permission to perform this action');
+            setError(t('common.permissionDenied'));
             return;
         }
         setError(null);
@@ -69,26 +71,26 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
 
             const data = await res.json();
             if (!res.ok) {
-                setError(data?.error || 'تعذر حفظ البيانات');
+                setError(translateApiError(data?.error));
                 setSaving(false);
                 return;
             }
 
             if (editingId) {
                 setMembers((prev) => prev.map((m) => (m.id === editingId ? data : m)).sort((a, b) => a.sortOrder - b.sortOrder));
-                setMessage('Updated successfully');
-                void toastSuccess('تم تحديث بيانات الفريق بنجاح');
+                setMessage(t('team.updated'));
+                void toastSuccess(t('team.updated'));
             } else {
                 setMembers((prev) => [...prev, data].sort((a, b) => a.sortOrder - b.sortOrder));
-                setMessage('Created successfully');
-                void toastSuccess('تم إضافة عضو الفريق بنجاح');
+                setMessage(t('team.created'));
+                void toastSuccess(t('team.created'));
             }
             setEditingId(null);
             setForm(defaultForm);
             setShowModal(false);
         } catch (err) {
             console.error(err);
-            setError('Unexpected error');
+            setError(t('common.unexpectedError'));
         } finally {
             setSaving(false);
         }
@@ -98,8 +100,8 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-bold text-gray-900">Team Members</h3>
-                    <p className="text-xs text-gray-500">{members.length} members</p>
+                    <h3 className="text-lg font-bold text-gray-900">{t('team.title')}</h3>
+                    <p className="text-xs text-gray-500">{t('team.count', { count: members.length })}</p>
                 </div>
                 <RequirePermission resource="team" action="POST">
                     <button
@@ -114,13 +116,13 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
                     >
                         <span className="text-lg">＋</span>
-                        <span>Add member</span>
+                        <span>{t('team.addMember')}</span>
                     </button>
                 </RequirePermission>
             </div>
             {!can('team', 'POST') && (
                 <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                    Team members are read-only for editor accounts.
+                    {t('team.readOnly')}
                 </p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,10 +133,10 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
-                                    <p className="font-semibold text-gray-900">{member.name?.ar || 'بدون اسم'}</p>
+                                    <p className="font-semibold text-gray-900">{pickLocalizedText(member.name) || t('common.untitled')}</p>
                                     <span className="text-xs text-gray-400">#{member.sortOrder}</span>
                                 </div>
-                                    <p className="text-sm text-gray-600">{member.role?.ar || ''}</p>
+                                    <p className="text-sm text-gray-600">{pickLocalizedText(member.role) || ''}</p>
                                     {member.bio && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{member.bio}</p>}
                                 </div>
                                 <div className="flex flex-col gap-2">
@@ -157,7 +159,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                                 setShowModal(true);
                                             }}
                                             className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
-                                            title="Edit"
+                                            title={t('common.edit')}
                                         >
                                             ✏️
                                         </button>
@@ -167,12 +169,14 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                             type="button"
                                             onClick={async () => {
                                                 const result = await Swal.fire({
-                                                    title: 'Delete this member?',
+                                                    title: t('team.deleteConfirm'),
                                                     icon: 'warning',
                                                     showCancelButton: true,
                                                     confirmButtonColor: '#d33',
                                                     cancelButtonColor: '#3085d6',
-                                                    confirmButtonText: 'Yes, delete',
+                                                    confirmButtonText: t('common.yesDelete'),
+                                                    cancelButtonText: t('common.cancel'),
+                                                    reverseButtons: locale === 'ar',
                                                 });
                                                 if (!result.isConfirmed) return;
                                                 const res = await fetch(`/api/admin/team?id=${member.id}`, { method: 'DELETE' });
@@ -180,11 +184,11 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                                 if (res.ok) {
                                                     setMembers((prev) => prev.filter((m) => m.id !== member.id));
                                                 } else {
-                                                    setError(data?.error || 'تعذر الحذف');
+                                                    setError(translateApiError(data?.error));
                                                 }
                                             }}
                                             className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
-                                            title="Delete"
+                                            title={t('common.delete')}
                                         >
                                             ×
                                         </button>
@@ -194,7 +198,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                         ))}
                     {members.length === 0 && (
                         <div className="col-span-full text-center text-gray-500 bg-white border border-dashed border-gray-200 rounded-xl p-6">
-                            No members yet. Add the first member to show on the About page.
+                            {t('team.noMembers')}
                         </div>
                     )}
                 </div>
@@ -203,7 +207,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50">
                     <div className="mt-[10vh] mb-[10vh] w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-[80vh] overflow-y-auto">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900">{editingId ? 'Edit Team Member' : 'Add Team Member'}</h3>
+                            <h3 className="text-lg font-bold text-gray-900">{editingId ? t('team.editMember') : t('team.addMemberTitle')}</h3>
                             <button
                                 type="button"
                                 onClick={() => {
@@ -214,7 +218,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                     setError(null);
                                 }}
                                 className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                aria-label="Close"
+                                aria-label={t('common.close')}
                             >
                                 ×
                             </button>
@@ -222,39 +226,39 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                         <form className="p-6 space-y-3" onSubmit={handleSubmit}>
                             <input
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Name (Arabic) *"
+                                placeholder={`${t('team.nameAr')} *`}
                                 value={form.nameAr}
                                 onChange={(e) => handleChange('nameAr', e.target.value)}
                                 required
                             />
                             <input
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Name (English)"
+                                placeholder={t('team.nameEn')}
                                 value={form.nameEn}
                                 onChange={(e) => handleChange('nameEn', e.target.value)}
                             />
                             <input
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Role (Arabic) *"
+                                placeholder={`${t('team.roleAr')} *`}
                                 value={form.roleAr}
                                 onChange={(e) => handleChange('roleAr', e.target.value)}
                                 required
                             />
                             <input
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Role (English)"
+                                placeholder={t('team.roleEn')}
                                 value={form.roleEn}
                                 onChange={(e) => handleChange('roleEn', e.target.value)}
                             />
                             <ImagePicker
-                                label="Image"
+                                label={t('news.image')}
                                 value={form.imageUrl}
                                 onChange={(url) => handleChange('imageUrl', url)}
-                                placeholder="Image URL"
+                                placeholder={t('imagePicker.imageUrl')}
                             />
                             <textarea
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Short bio"
+                                placeholder={t('team.bio')}
                                 rows={3}
                                 value={form.bio}
                                 onChange={(e) => handleChange('bio', e.target.value)}
@@ -262,7 +266,7 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                             <input
                                 type="number"
                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                placeholder="Sort order (smaller shows first)"
+                                placeholder={t('team.sortOrderPlaceholder')}
                                 value={form.sortOrder}
                                 onChange={(e) => handleChange('sortOrder', Number(e.target.value))}
                             />
@@ -280,14 +284,14 @@ export function TeamManager({ initialMembers }: { initialMembers: TeamMember[] }
                                     }}
                                     className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={saving}
                                     className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
                                 >
-                                    {saving ? 'Saving...' : editingId ? 'Update' : 'Save'}
+                                    {saving ? t('common.saving') : editingId ? t('common.update') : t('common.save')}
                                 </button>
                             </div>
                         </form>

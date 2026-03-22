@@ -304,10 +304,22 @@
   "monitoring": {
     "eyebrow": "Radar Baligh",
     "pageTitle": "Radara zindî ya gotara kînê",
-    "pageSubtitle": "Ev radar rasterast ji ragihandinên ku di databeysê de hene ji nû ve hat avakirin. Ew di 52 hefteyên dawî de polînkirin, ast, komên hedef, platform, tona hestyarî, nehêlinasandin, nîşaneyên bilezkirinê û belavbûna cografyayî ya texmînkirî dişopîne.",
+    "pageSubtitle": "Ev radar li ser çar nîşanderên bingehîn ên rasterast bi databeysê ve girêdayî disekine: cureyê axaftinê, koma armanc, nexşeya tona hestyarî, û ewrika peyvên nefretê.",
     "generatedAt": "Nûkirin",
+    "sourceDate": "Daneyên heta roja",
+    "displayedRange": "Navbera tê nîşandan",
+    "currentIntensity": "Asta tûjbûna niha",
+    "intensityLevels": {
+      "calm": "Aram",
+      "elevated": "Bilind",
+      "critical": "Krizî"
+    },
+    "latestAvailable": "Dane yên herî dawî yên weşandî",
     "weeksWindow": "Heftiyên şopandî",
     "emptyState": "Hêj ji bo dîtina radarê ti ragihandina temam tune ye.",
+    "unpublishedTitle": "Hêj tu versiyona radarê nehatiye weşandin",
+    "unpublishedNote": "Ev rûpel tenê dawîn versiyona ku ji tabloya rêveberiyê bi destan hatiye weşandin nîşan dide. Daneyên nû li vir xuya nakin heta ku radar ji dashboardê were nûkirin.",
+    "publishedNote": "Ev rûpel tenê versiyona weşandî ya radarê nîşan dide. Ragihandin û nûkirinên nû di databeysê de tên parastin, lê li vir nayên xuyang kirin heta ku nûkirinekî destan ji dashboardê were çalak kirin.",
     "estimatedLabel": "Texmînkirî",
     "internalOnly": "Tenê ji bo navxweyî",
     "methodologyTitle": "Metodolojî",
@@ -330,8 +342,8 @@
     "sections": {
       "classification": {
         "eyebrow": "Polînkirin",
-        "title": "Parçebûna polînkirinê",
-        "subtitle": "Parêzeya ragihandinên aşkere, veşartî, teşwîqî û yên ku gotara kînê nayên hesibandin."
+      "title": "Cureyê axaftinê",
+      "subtitle": "Belavbûna ragihandinan di navbera gotara kînê ya aşkere, veşartî, teşwîqî û ne-gotara kînê de."
       },
       "intensity": {
         "eyebrow": "Tûjbûn",
@@ -344,8 +356,8 @@
       },
       "targetGroups": {
         "eyebrow": "Armanc",
-        "title": "Herî zêde komên armanc",
-        "subtitle": "Belavbûna ji zêdetir bo kêmtir a komên hatine armanckirin di pencereya radarê de.",
+      "title": "Koma armanc",
+      "subtitle": "Belavbûna ji zêdetir bo kêmtir a kom an civakên ku herî zêde wek armanc hatine destnîşankirin.",
         "countLabel": "Ragihandin",
         "trendEyebrow": "Şopandin",
         "trendTitle": "Şopandina demî ya komên armanc",
@@ -387,8 +399,8 @@
       },
       "keywords": {
         "eyebrow": "Gotinên sereke",
-        "title": "Ewrê gotinan û tabloya frekansê",
-        "subtitle": "Frekansên gotinên hesas ên şîfrekirî ku tenê di çarçoveya navxweyî de tên nîşandan.",
+      "title": "Ewrika peyvên nefretê",
+      "subtitle": "Frekansên peyvên hesas ên ji ragihandinên tomarkirî derketine, ku tenê di çarçoveya navxweyî ya destûrdar de tên nîşandan.",
         "keywordColumn": "Gotin",
         "countColumn": "Hejmar"
       }

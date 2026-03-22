@@ -302,12 +302,24 @@
     }
   },
   "monitoring": {
-    "eyebrow": "Balagh Radar",
-    "pageTitle": "Live Hate Speech Radar",
-    "pageSubtitle": "This radar is rebuilt from submitted reports directly in the database. It tracks classification, severity, targeting, platform spread, emotional tone, dehumanization, escalation, and estimated geographic spread across the last 52 weeks.",
+    "eyebrow": "Baligh Radar",
+    "pageTitle": "Baligh Hate Speech Radar",
+    "pageSubtitle": "This radar focuses on four core indicators linked directly to the database: type of speech, targeted group, emotional tone map, and hate keyword cloud.",
     "generatedAt": "Updated",
+    "sourceDate": "Data through",
+    "displayedRange": "Displayed range",
+    "currentIntensity": "Current intensity level",
+    "intensityLevels": {
+      "calm": "Calm",
+      "elevated": "Elevated",
+      "critical": "Critical"
+    },
+    "latestAvailable": "Latest published data",
     "weeksWindow": "Weeks tracked",
     "emptyState": "No completed reports are available yet for the radar view.",
+    "unpublishedTitle": "No radar snapshot has been published yet",
+    "unpublishedNote": "This page shows only the last snapshot published manually from the admin dashboard. New data will not appear here until the radar is updated from the dashboard.",
+    "publishedNote": "This page shows a published radar snapshot only. New reports and updates remain stored in the database, but they do not appear here until a manual radar update is triggered from the dashboard.",
     "estimatedLabel": "Estimated",
     "internalOnly": "Internal only",
     "methodologyTitle": "Methodology",
@@ -330,8 +342,8 @@
     "sections": {
       "classification": {
         "eyebrow": "Classification",
-        "title": "Classification Breakdown",
-        "subtitle": "Share of explicit, implicit, incitement, and non-hate reports."
+      "title": "Type of Speech",
+      "subtitle": "Distribution across explicit, implicit, incitement, and non-hate classifications."
       },
       "intensity": {
         "eyebrow": "Intensity",
@@ -344,8 +356,8 @@
       },
       "targetGroups": {
         "eyebrow": "Targeting",
-        "title": "Most Targeted Groups",
-        "subtitle": "Descending distribution of targeted communities in the radar window.",
+      "title": "Targeted Group",
+      "subtitle": "Descending distribution of the communities or groups most frequently identified as targets.",
         "countLabel": "Reports",
         "trendEyebrow": "Tracking",
         "trendTitle": "Target Group Time Tracking",
@@ -387,8 +399,8 @@
       },
       "keywords": {
         "eyebrow": "Keywords",
-        "title": "Keyword Cloud and Frequency Table",
-        "subtitle": "Encrypted keyword frequencies visible only in the internal dashboard context.",
+      "title": "Hate Keyword Cloud",
+      "subtitle": "Frequencies of sensitive keywords extracted from stored reports, visible only in the authorized internal context.",
         "keywordColumn": "Keyword",
         "countColumn": "Count"
       }

@@ -1,5 +1,6 @@
 import { getSeverityScoreOutOfFive } from '@/lib/analysis-utils';
 import type { AnalysisResult } from '@/lib/report-generator';
+import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
 
 const aiClassificationValues = ['explicit', 'implicit', 'incitement', 'none'] as const;
 const aiSpeechTypeValues = ['direct', 'implicit', 'symbolic', 'false_propaganda'] as const;
@@ -193,7 +194,7 @@ export function buildStructuredAiFields(input: {
                 : getSeverityScoreOutOfFive(Number(analysis.severity_score || 0))
         )
     );
-    const aiTargetGroups = dedupe([
+    const aiTargetGroups = canonicalizeTargetGroupValues([
         ...normalizeStringArray(analysis.ai_target_groups),
         ...selectedTargetGroupLabels,
         normalizeString(analysis.target_group_arabic),

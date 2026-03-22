@@ -4,6 +4,7 @@ import { analyzeContent } from '@/lib/analysis-service';
 import { getSeverityScoreOutOfFive, mapRiskLevel } from '@/lib/analysis-utils';
 import { buildEncryptedAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
+import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
 
 export async function POST(req: NextRequest) {
     try {
@@ -23,9 +24,13 @@ export async function POST(req: NextRequest) {
                     ].filter(Boolean)
                 )
             );
+            const selectedTargetGroupLabels = canonicalizeTargetGroupValues([
+                analysis.target_group_arabic || '',
+                analysis.target_group || '',
+            ]);
             const structuredAi = buildStructuredAiFields({
                 analysis,
-                selectedTargetGroupLabels: analysis.target_group_arabic ? [analysis.target_group_arabic] : [],
+                selectedTargetGroupLabels,
                 analysisText: text || '',
                 hasImage: Boolean(image),
                 escalationFlag: getSeverityScoreOutOfFive(severity) === 5,
@@ -75,8 +80,8 @@ export async function POST(req: NextRequest) {
                         ...analysisForStorage,
                         speech_type: analysis.classification,
                         rationale: analysis.rationale_arabic || analysis.rationale || '',
-                        target_group: analysis.target_group_arabic || analysis.target_group || '',
-                        target_group_label: analysis.target_group_arabic || analysis.target_group || '',
+                        target_group: selectedTargetGroupLabels.join(', ') || analysis.target_group_arabic || analysis.target_group || '',
+                        target_group_label: selectedTargetGroupLabels.join(', ') || analysis.target_group_arabic || analysis.target_group || '',
                         ai_classification: structuredAi.aiClassification,
                         ai_severity: structuredAi.aiSeverity,
                         ai_path_sentence: structuredAi.aiPathSentence,

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { NEWS_CATEGORIES, type NewsCategoryKey } from '@/data/newsCategories';
 import { RequirePermission, usePermissions } from './AdminPermissions';
+import { useAdminI18n } from './AdminI18n';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -56,6 +57,7 @@ const defaultForm: FormState = {
 
 export function AdminNewsManager() {
     const { can } = usePermissions();
+    const { t, locale, formatDate, pickLocalizedText, formatNewsCategory, translateApiError } = useAdminI18n();
     const [items, setItems] = useState<NewsItem[]>([]);
     const [form, setForm] = useState<FormState>(defaultForm);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -74,20 +76,21 @@ export function AdminNewsManager() {
                 const res = await fetch('/api/admin/news');
                 const data = await res.json();
                 if (!res.ok || !Array.isArray(data)) {
-                    setError(data?.error || 'Failed to load news articles');
+                    setError(translateApiError(data?.error || t('errors.loadNews')));
                     setItems([]);
                 } else {
                     setItems(data);
                 }
-            } catch (e) {
-                console.error(e);
-                setError('Failed to load news articles');
+            } catch (loadError) {
+                console.error(loadError);
+                setError(t('errors.loadNews'));
             } finally {
                 setLoading(false);
             }
         }
-        load();
-    }, []);
+
+        void load();
+    }, [t, translateApiError]);
 
     const handleChange = (key: keyof FormState, value: string | boolean) => {
         setForm((prev) => ({ ...prev, [key]: value }));
@@ -104,9 +107,10 @@ export function AdminNewsManager() {
         e.preventDefault();
         const action = editingId ? 'PATCH' : 'POST';
         if (!can('news', action)) {
-            setError('You do not have permission to perform this action');
+            setError(t('common.permissionDenied'));
             return;
         }
+
         setSaving(true);
         setError(null);
         setMessage(null);
@@ -121,37 +125,39 @@ export function AdminNewsManager() {
                     titleEn: form.titleEn || form.titleAr,
                     summaryAr: form.summaryAr,
                     summaryEn: form.summaryEn || form.summaryAr,
-                bodyAr: form.bodyAr || form.summaryAr,
-                bodyEn: form.bodyEn || form.bodyAr,
-                category: form.category,
-                imageUrl: form.imageUrl || null,
-                videoUrl: form.videoUrl || null,
-                authorName: form.authorName || null,
-                authorNameEn: form.authorNameEn || null,
-                publishedAt: form.publishedAt || null,
-                publishNow: form.publishNow,
-            }),
-        });
+                    bodyAr: form.bodyAr || form.summaryAr,
+                    bodyEn: form.bodyEn || form.bodyAr || form.summaryAr,
+                    category: form.category,
+                    imageUrl: form.imageUrl || null,
+                    videoUrl: form.videoUrl || null,
+                    authorName: form.authorName || null,
+                    authorNameEn: form.authorNameEn || null,
+                    publishedAt: form.publishedAt || null,
+                    publishNow: form.publishNow,
+                }),
+            });
             const data = await res.json().catch(() => null);
             if (!res.ok) {
-                setError(data?.error || 'Failed to save article');
+                setError(translateApiError(data?.error || t('errors.saveNews')));
                 setSaving(false);
                 return;
             }
+
             if (editingId) {
-                setItems((prev) => prev.map((i) => (i.id === editingId ? data : i)));
-                setMessage('Article updated');
-                void toastSuccess('تم تحديث الخبر بنجاح');
+                setItems((prev) => prev.map((item) => (item.id === editingId ? data : item)));
+                setMessage(t('news.updated'));
+                void toastSuccess(t('news.updated'));
             } else {
                 setItems((prev) => [data, ...prev]);
-                setMessage('Article created');
-                void toastSuccess('تم إنشاء الخبر بنجاح');
+                setMessage(t('news.created'));
+                void toastSuccess(t('news.created'));
             }
+
             resetForm();
             setShowModal(false);
-        } catch (e) {
-            console.error(e);
-            setError('Unexpected error');
+        } catch (submitError) {
+            console.error(submitError);
+            setError(t('common.unexpectedError'));
         } finally {
             setSaving(false);
         }
@@ -161,8 +167,8 @@ export function AdminNewsManager() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">News Articles</h3>
-                    <p className="text-xs text-gray-500">{items.length} articles</p>
+                    <h3 className="text-lg font-semibold text-gray-900">{t('news.title')}</h3>
+                    <p className="text-xs text-gray-500">{t('news.count', { count: items.length })}</p>
                 </div>
                 <RequirePermission resource="news" action="POST">
                     <button
@@ -171,45 +177,59 @@ export function AdminNewsManager() {
                             resetForm();
                             setShowModal(true);
                         }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-emerald-700"
                     >
                         <span className="text-lg">＋</span>
-                        <span>Add article</span>
+                        <span>{t('news.add')}</span>
                     </button>
                 </RequirePermission>
             </div>
 
-            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
                 {loading ? (
-                    <p className="text-sm text-gray-500">Loading...</p>
+                    <p className="text-sm text-gray-500">{t('news.loading')}</p>
                 ) : items.length === 0 ? (
-                    <div className="text-center text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6">
-                        No news articles yet.
+                    <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-gray-500">
+                        {t('news.empty')}
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        {items.map((item) => (
-                            <div key={item.id} className="border border-gray-100 rounded-xl p-3 flex items-start gap-3 hover:border-emerald-200">
-                                <div className="w-12 h-12 rounded-lg bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center text-lg uppercase">
+                        {items.map((item) => {
+                            const authorName = locale === 'ar'
+                                ? item.authorName || item.authorNameEn
+                                : item.authorNameEn || item.authorName;
+
+                            return (
+                            <div
+                                key={item.id}
+                                className="flex items-start gap-3 rounded-xl border border-gray-100 p-3 hover:border-emerald-200"
+                            >
+                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-50 text-lg font-bold uppercase text-emerald-700">
                                     {item.category?.slice(0, 2)}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        {new Date(item.publishedAt || item.createdAt || '').toLocaleDateString('en-US')}
-                                        {item.authorName ? ` · ${item.authorName}` : ''}
+                                    <p className="mb-1 text-sm text-gray-500">
+                                        {formatDate(item.publishedAt || item.createdAt || '')}
+                                        {authorName ? ` · ${authorName}` : ''}
                                     </p>
                                     <h4 className="text-base font-semibold text-gray-900">
-                                        {item.title?.en || item.title?.ar || 'Untitled'}
+                                        {pickLocalizedText(item.title) || t('common.untitled')}
                                     </h4>
-                                    <p className="text-xs text-gray-600 line-clamp-2">
-                                        {item.summary?.en || item.summary?.ar || ''}
+                                    <p className="line-clamp-2 text-xs text-gray-600">
+                                        {pickLocalizedText(item.summary) || ''}
                                     </p>
-                                    <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                                        <span className="px-2 py-0.5 bg-gray-100 rounded-lg border border-gray-200">
-                                            {item.category}
+                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                                        <span className="rounded-lg border border-gray-200 bg-gray-100 px-2 py-0.5">
+                                            {formatNewsCategory(item.category)}
                                         </span>
-                                        <span className={`px-2 py-0.5 rounded-lg border ${item.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                                            {item.isPublished ? 'Published' : 'Draft'}
+                                        <span
+                                            className={`rounded-lg border px-2 py-0.5 ${
+                                                item.isPublished
+                                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                                    : 'border-gray-200 bg-gray-50 text-gray-600'
+                                            }`}
+                                        >
+                                            {item.isPublished ? t('common.published') : t('common.draft')}
                                         </span>
                                     </div>
                                 </div>
@@ -217,8 +237,8 @@ export function AdminNewsManager() {
                                     <RequirePermission resource="news" action="PATCH">
                                         <button
                                             type="button"
-                                            className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
-                                            title="Edit"
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                            title={t('common.edit')}
                                             onClick={() => {
                                                 setEditingId(item.id);
                                                 setForm({
@@ -247,24 +267,26 @@ export function AdminNewsManager() {
                                     <RequirePermission resource="news" action="DELETE">
                                         <button
                                             type="button"
-                                            className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
-                                            title="Delete"
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-red-100 bg-red-50 font-bold text-red-700 hover:bg-red-100"
+                                            title={t('common.delete')}
                                             onClick={async () => {
                                                 const result = await Swal.fire({
-                                                    title: 'Delete this article?',
+                                                    title: t('news.deleteConfirm'),
                                                     icon: 'warning',
                                                     showCancelButton: true,
                                                     confirmButtonColor: '#d33',
                                                     cancelButtonColor: '#3085d6',
-                                                    confirmButtonText: 'Yes, delete',
+                                                    confirmButtonText: t('common.yesDelete'),
+                                                    cancelButtonText: t('common.cancel'),
+                                                    reverseButtons: locale === 'ar',
                                                 });
                                                 if (!result.isConfirmed) return;
                                                 const res = await fetch(`/api/admin/news?id=${item.id}`, { method: 'DELETE' });
                                                 const data = await res.json().catch(() => null);
                                                 if (res.ok) {
-                                                    setItems((prev) => prev.filter((i) => i.id !== item.id));
+                                                    setItems((prev) => prev.filter((current) => current.id !== item.id));
                                                 } else {
-                                                    setError(data?.error || 'Failed to delete article');
+                                                    setError(translateApiError(data?.error || t('news.deleteError')));
                                                 }
                                             }}
                                         >
@@ -273,40 +295,43 @@ export function AdminNewsManager() {
                                     </RequirePermission>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
 
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50">
-                    <div className="mt-[10vh] mb-[10vh] w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h3 className="text-lg font-semibold text-gray-900">{editingId ? 'Edit News Article' : 'Add News Article'}</h3>
+                    <div className="mt-[10vh] mb-[10vh] max-h-[80vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-gray-100 bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {editingId ? t('news.editTitle') : t('news.addTitle')}
+                            </h3>
                             <button
                                 type="button"
                                 onClick={() => {
                                     setShowModal(false);
                                     resetForm();
                                 }}
-                                className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                aria-label="Close"
+                                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                aria-label={t('common.close')}
                             >
                                 ×
                             </button>
                         </div>
-                        <form className="p-6 space-y-3" onSubmit={handleSubmit}>
+                        <form className="space-y-3 p-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-3">
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Title (Arabic)"
+                                    placeholder={t('news.titleAr')}
                                     value={form.titleAr}
                                     onChange={(e) => handleChange('titleAr', e.target.value)}
                                     required
                                 />
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Title (English)"
+                                    placeholder={t('news.titleEn')}
                                     value={form.titleEn}
                                     onChange={(e) => handleChange('titleEn', e.target.value)}
                                 />
@@ -314,7 +339,7 @@ export function AdminNewsManager() {
                             <div className="grid grid-cols-2 gap-3">
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Summary (Arabic)"
+                                    placeholder={t('news.summaryAr')}
                                     rows={2}
                                     value={form.summaryAr}
                                     onChange={(e) => handleChange('summaryAr', e.target.value)}
@@ -322,7 +347,7 @@ export function AdminNewsManager() {
                                 />
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Summary (English)"
+                                    placeholder={t('news.summaryEn')}
                                     rows={2}
                                     value={form.summaryEn}
                                     onChange={(e) => handleChange('summaryEn', e.target.value)}
@@ -331,14 +356,14 @@ export function AdminNewsManager() {
                             <div className="grid grid-cols-2 gap-3">
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Body (Arabic)"
+                                    placeholder={t('news.bodyAr')}
                                     rows={3}
                                     value={form.bodyAr}
                                     onChange={(e) => handleChange('bodyAr', e.target.value)}
                                 />
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Body (English)"
+                                    placeholder={t('news.bodyEn')}
                                     rows={3}
                                     value={form.bodyEn}
                                     onChange={(e) => handleChange('bodyEn', e.target.value)}
@@ -346,16 +371,18 @@ export function AdminNewsManager() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <ImagePicker
-                                    label="Image"
+                                    label={t('news.image')}
                                     value={form.imageUrl}
                                     onChange={(url) => handleChange('imageUrl', url)}
-                                    placeholder="Image URL"
+                                    placeholder={t('news.imageUrl')}
                                 />
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Video URL (optional)</label>
+                                    <label className="mb-1 block text-sm font-semibold text-gray-700">
+                                        {t('news.videoUrl')} ({t('common.optional')})
+                                    </label>
                                     <input
                                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                        placeholder="Video URL (optional)"
+                                        placeholder={`${t('news.videoUrl')} (${t('common.optional')})`}
                                         value={form.videoUrl}
                                         onChange={(e) => handleChange('videoUrl', e.target.value)}
                                     />
@@ -363,25 +390,25 @@ export function AdminNewsManager() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Author name</label>
+                                    <label className="mb-1 block text-sm font-semibold text-gray-700">{t('news.authorName')}</label>
                                     <input
                                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                        placeholder="Author name"
+                                        placeholder={t('news.authorName')}
                                         value={form.authorName}
                                         onChange={(e) => handleChange('authorName', e.target.value)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Author name (English)</label>
+                                    <label className="mb-1 block text-sm font-semibold text-gray-700">{t('news.authorNameEn')}</label>
                                     <input
                                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                        placeholder="Author name (English)"
+                                        placeholder={t('news.authorNameEn')}
                                         value={form.authorNameEn}
                                         onChange={(e) => handleChange('authorNameEn', e.target.value)}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Publish date</label>
+                                    <label className="mb-1 block text-sm font-semibold text-gray-700">{t('news.publishDate')}</label>
                                     <input
                                         type="date"
                                         className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -391,15 +418,15 @@ export function AdminNewsManager() {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+                                <label className="mb-1 block text-sm font-semibold text-gray-700">{t('news.category')}</label>
                                 <select
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     value={form.category}
                                     onChange={(e) => handleChange('category', e.target.value as NewsCategoryKey)}
                                 >
-                                    {categoryOptions.map(([key, cat]) => (
+                                    {categoryOptions.map(([key, category]) => (
                                         <option key={key} value={key}>
-                                            {cat.icon} {cat.label}
+                                            {category.icon} {formatNewsCategory(key)}
                                         </option>
                                     ))}
                                 </select>
@@ -413,7 +440,7 @@ export function AdminNewsManager() {
                                     className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <label htmlFor="publishNow" className="text-sm text-gray-700">
-                                    Publish now
+                                    {t('news.publishNow')}
                                 </label>
                             </div>
                             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -425,16 +452,16 @@ export function AdminNewsManager() {
                                         setShowModal(false);
                                         resetForm();
                                     }}
-                                    className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                    className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-100"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
+                                    className="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                                 >
-                                    {saving ? 'Saving...' : editingId ? 'Update article' : 'Save article'}
+                                    {saving ? t('common.saving') : editingId ? t('news.update') : t('news.save')}
                                 </button>
                             </div>
                         </form>

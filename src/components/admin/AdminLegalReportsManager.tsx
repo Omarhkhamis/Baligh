@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { getSeverityScoreOutOfFive } from '@/lib/analysis-utils';
+import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
 import Swal from 'sweetalert2';
 import { RequirePermission, usePermissions } from './AdminPermissions';
+import { useAdminI18n } from './AdminI18n';
 
 type AnalysisScores = {
     platformLabel?: string;
@@ -101,22 +103,7 @@ const emptyFilters: FilterState = {
     severity: '',
 };
 
-const reviewStatusOptions = [
-    { value: 'pending', label: 'Pending review' },
-    { value: 'reviewed', label: 'Reviewed' },
-    { value: 'escalated', label: 'Escalated' },
-    { value: 'closed', label: 'Closed' },
-] as const;
-
-const classifyLabel = (value: string) => {
-    const normalized = (value || '').toUpperCase();
-    if (normalized === 'CATEGORY A') return 'Direct incitement';
-    if (normalized === 'CATEGORY B') return 'Harassment / threat';
-    if (normalized === 'CATEGORY C') return 'Dehumanization';
-    if (normalized === 'CATEGORY D') return 'Low-level hate';
-    if (normalized === 'SAFE' || normalized === 'NONE') return 'Safe content';
-    return value || '—';
-};
+const reviewStatusOptions = ['pending', 'reviewed', 'escalated', 'closed'] as const;
 
 function getAnalysisScores(item: LegalItem): AnalysisScores {
     return ((item.analysisLog.aiScores as AnalysisScores | null) || {}) as AnalysisScores;
@@ -154,13 +141,16 @@ function getPostText(item: LegalItem, scores: AnalysisScores) {
 }
 
 function getTargetGroup(scores: AnalysisScores) {
-    const targetGroupList = [
+    const targetGroupList = canonicalizeTargetGroupValues([
         ...(Array.isArray(scores.targetGroups) ? scores.targetGroups : []),
         ...(Array.isArray(scores.target_groups) ? scores.target_groups : []),
-    ].filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+        scores.target_group_label,
+        scores.target_group,
+        scores.targetGroup,
+    ]);
 
     if (targetGroupList.length > 0) {
-        return Array.from(new Set(targetGroupList)).join(', ');
+        return targetGroupList.join(', ');
     }
 
     return scores.target_group_label || scores.target_group || scores.targetGroup || '—';
@@ -203,7 +193,7 @@ function getImageAttachments(item: LegalItem, scores: AnalysisScores) {
 }
 
 function getSpeechType(item: LegalItem, scores: AnalysisScores) {
-    return scores.speech_type || classifyLabel(item.analysisLog.classification);
+    return scores.speech_type || item.analysisLog.classification;
 }
 
 function getSeverity(item: LegalItem, scores: AnalysisScores) {
@@ -242,13 +232,16 @@ function getReasoning(scores: AnalysisScores) {
     return scores.rationale || scores.reasoning_ar || scores.reasoning || '—';
 }
 
-function getImageDescription(scores: AnalysisScores) {
-    return scores.imageDescription || scores.image_description || scores.imageContextDescription || scores.image_context_description || '—';
+function getDisplayReasoning(scores: AnalysisScores, locale: 'ar' | 'en') {
+    if (locale === 'ar') {
+        return scores.reasoning_ar || scores.rationale || scores.reasoning || '—';
+    }
+
+    return scores.reasoning || scores.rationale || scores.reasoning_ar || '—';
 }
 
-function getReviewStatusLabel(value: string) {
-    const match = reviewStatusOptions.find((option) => option.value === value);
-    return match?.label || value || '—';
+function getImageDescription(scores: AnalysisScores) {
+    return scores.imageDescription || scores.image_description || scores.imageContextDescription || scores.image_context_description || '—';
 }
 
 function getReviewStatusTone(value: string) {
@@ -277,6 +270,19 @@ function escapeCsvValue(value: unknown) {
 
 export function AdminLegalReportsManager() {
     const { can } = usePermissions();
+    const {
+        t,
+        locale,
+        formatDate,
+        translateApiError,
+        formatPlatform,
+        formatImmediateDanger,
+        formatClassification,
+        formatRiskLevel,
+        formatSpeechType,
+        formatReviewStatus,
+        formatTargetGroup,
+    } = useAdminI18n();
     const [items, setItems] = useState<LegalItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -312,20 +318,20 @@ export function AdminLegalReportsManager() {
                 });
                 const data = await res.json();
                 if (!res.ok || !Array.isArray(data)) {
-                    setError(data?.error || 'Failed to load legal reports');
+                    setError(translateApiError(data?.error || t('errors.loadLegalReports')));
                     setItems([]);
                 } else {
                     setItems(data);
                 }
             } catch (e) {
                 console.error(e);
-                setError('Failed to load legal reports');
+                setError(t('errors.loadLegalReports'));
             } finally {
                 setLoading(false);
             }
         }
         load();
-    }, [appliedFilters]);
+    }, [appliedFilters, t, translateApiError]);
 
     useEffect(() => {
         if (selected && !items.some((item) => item.id === selected.id)) {
@@ -346,19 +352,23 @@ export function AdminLegalReportsManager() {
 
     const handleDelete = async (id: string) => {
         const confirm = await Swal.fire({
-            title: 'Delete this legal report?',
+            title: t('legal.deleteConfirm'),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: t('common.yesDelete'),
+            cancelButtonText: t('common.cancel'),
+            reverseButtons: locale === 'ar',
         });
         if (!confirm.isConfirmed) return;
         const res = await fetch(`/api/admin/legal-reports?id=${id}`, { method: 'DELETE', credentials: 'include' });
         if (res.ok) {
             setItems((prev) => prev.filter((r) => r.id !== id));
             if (selected?.id === id) setSelected(null);
+        } else {
+            const data = await res.json().catch(() => null);
+            setError(translateApiError(data?.error));
         }
     };
 
@@ -384,7 +394,7 @@ export function AdminLegalReportsManager() {
             const data = await response.json().catch(() => null);
 
             if (!response.ok || !data) {
-                setError(data?.error || 'Failed to update review status');
+                setError(translateApiError(data?.error || t('errors.updateReview')));
                 return;
             }
 
@@ -394,26 +404,24 @@ export function AdminLegalReportsManager() {
 
             await Swal.fire({
                 icon: 'success',
-                title: 'Saved',
-                text: 'Review status updated successfully.',
+                title: t('legal.reviewSavedTitle'),
+                text: t('legal.reviewSavedBody'),
                 timer: 1600,
                 showConfirmButton: false,
             });
         } catch (updateError) {
             console.error(updateError);
-            setError('Failed to update review status');
+            setError(t('errors.updateReview'));
         } finally {
             setSavingReview(false);
         }
     };
 
-    const formatDate = (value: string) => new Date(value).toLocaleDateString();
-
     const handleApplyFilters = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo) {
-            setError('Start date cannot be later than end date.');
+            setError(t('legal.startDateAfterEnd'));
             return;
         }
 
@@ -505,26 +513,24 @@ export function AdminLegalReportsManager() {
         return (
             <div className="grid md:grid-cols-2 gap-3 mt-4">
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                    <p className="text-xs text-gray-500">Platform</p>
-                    <p className="text-sm text-gray-900">{scores.platformLabel || scores.platform_label || scores.platform || '—'}</p>
+                    <p className="text-xs text-gray-500">{t('legal.platform')}</p>
+                    <p className="text-sm text-gray-900">{formatPlatform(scores.platformLabel || scores.platform_label || scores.platform || '')}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                    <p className="text-xs text-gray-500">Post link</p>
-                    <p className="text-sm text-gray-900 break-all">{postLink || '—'}</p>
+                    <p className="text-xs text-gray-500">{t('legal.postLink')}</p>
+                    <p className="text-sm text-gray-900 break-all">{postLink || t('common.none')}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                    <p className="text-xs text-gray-500">Immediate danger</p>
-                    <p className="text-sm text-gray-900">
-                        {scores.immediateDangerLabel || scores.immediateDanger || scores.immediate_danger_label || scores.immediate_danger || '—'}
-                    </p>
+                    <p className="text-xs text-gray-500">{t('legal.immediateDanger')}</p>
+                    <p className="text-sm text-gray-900">{formatImmediateDanger(scores.immediateDangerLabel || scores.immediateDanger || scores.immediate_danger_label || scores.immediate_danger || '')}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                    <p className="text-xs text-gray-500">Target group</p>
-                    <p className="text-sm text-gray-900">{getTargetGroup(scores)}</p>
+                    <p className="text-xs text-gray-500">{t('legal.targetGroup')}</p>
+                    <p className="text-sm text-gray-900">{getTargetGroup(scores).split(', ').map((value) => formatTargetGroup(value)).join(', ')}</p>
                 </div>
                 <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                    <p className="text-xs text-gray-500">Image description</p>
-                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{scores.imageDescription || scores.image_description || '—'}</p>
+                    <p className="text-xs text-gray-500">{t('legal.imageDescription')}</p>
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{scores.imageDescription || scores.image_description || t('common.none')}</p>
                 </div>
             </div>
         );
@@ -532,28 +538,28 @@ export function AdminLegalReportsManager() {
 
     return (
         <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-gray-900">Legal Reports</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('legal.title')}</h2>
             {!can('reports', 'PATCH') && (
                 <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                    Reports are read-only for your current role.
+                    {t('legal.readOnly')}
                 </p>
             )}
             <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
                 <form className="mb-4 grid gap-3 md:grid-cols-5" onSubmit={handleApplyFilters}>
                     <div className="md:col-span-2">
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">Report number</label>
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">{t('legal.reportNumber')}</label>
                         <input
                             type="text"
                             value={filters.reportNumber}
                             onChange={(event) =>
                                 setFilters((current) => ({ ...current, reportNumber: event.target.value }))
                             }
-                            placeholder="Search by report number only"
+                            placeholder={t('legal.searchByReport')}
                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">From date</label>
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">{t('legal.fromDate')}</label>
                         <input
                             type="date"
                             value={filters.dateFrom}
@@ -564,7 +570,7 @@ export function AdminLegalReportsManager() {
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">To date</label>
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">{t('legal.toDate')}</label>
                         <input
                             type="date"
                             value={filters.dateTo}
@@ -575,7 +581,7 @@ export function AdminLegalReportsManager() {
                         />
                     </div>
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">Severity</label>
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">{t('legal.severity')}</label>
                         <select
                             value={filters.severity}
                             onChange={(event) =>
@@ -583,7 +589,7 @@ export function AdminLegalReportsManager() {
                             }
                             className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         >
-                            <option value="">All severities</option>
+                            <option value="">{t('legal.allSeverities')}</option>
                             {[1, 2, 3, 4, 5].map((value) => (
                                 <option key={value} value={value}>
                                     {value} / 5
@@ -598,14 +604,14 @@ export function AdminLegalReportsManager() {
                                 type="submit"
                                 className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                             >
-                                Apply filters
+                                {t('legal.applyFilters')}
                             </button>
                             <button
                                 type="button"
                                 onClick={handleResetFilters}
                                 className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
                             >
-                                Reset
+                                {t('legal.reset')}
                             </button>
                             <button
                                 type="button"
@@ -613,21 +619,21 @@ export function AdminLegalReportsManager() {
                                 disabled={loading || items.length === 0}
                                 className="rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Export CSV
+                                {t('legal.exportCsv')}
                             </button>
                         </div>
                         <p className="text-xs text-gray-500">
-                            {loading ? 'Loading filtered results...' : `${items.length} reports found`}
+                            {loading ? t('legal.loadingFiltered') : t('legal.reportsFound', { count: items.length })}
                         </p>
                     </div>
                 </form>
 
                 {loading ? (
-                    <p className="text-sm text-gray-500">Loading...</p>
+                    <p className="text-sm text-gray-500">{t('legal.loading')}</p>
                 ) : error ? (
                     <p className="text-sm text-red-600">{error}</p>
                 ) : items.length === 0 ? (
-                    <p className="text-sm text-gray-500">No legal reports yet.</p>
+                    <p className="text-sm text-gray-500">{t('legal.empty')}</p>
                 ) : (
                     <div className="grid md:grid-cols-2 gap-3">
                         {items.map((item) => {
@@ -647,7 +653,7 @@ export function AdminLegalReportsManager() {
                                 >
                                     <div className="flex items-center justify-between mb-2">
                                         <span className={`text-xs font-bold px-2 py-1 rounded-full border ${riskColors[item.analysisLog.riskLevel] || riskColors.LOW}`}>
-                                            {item.analysisLog.riskLevel}
+                                            {formatRiskLevel(item.analysisLog.riskLevel)}
                                         </span>
                                         <span className="text-xs text-gray-400">{formatDate(item.createdAt)}</span>
                                     </div>
@@ -658,22 +664,24 @@ export function AdminLegalReportsManager() {
                                         <span
                                             className={`inline-flex rounded-full border px-2 py-0.5 text-[11px] font-semibold ${getReviewStatusTone(item.humanReviewStatus)}`}
                                         >
-                                            {getReviewStatusLabel(item.humanReviewStatus)}
+                                            {formatReviewStatus(item.humanReviewStatus)}
                                         </span>
                                         {item.escalationFlag ? (
                                             <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-semibold text-red-700">
-                                                Escalated
+                                                {t('legal.escalated')}
                                             </span>
                                         ) : null}
                                     </div>
-                                    <p className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{item.title}</p>
-                                    <p className="text-xs text-gray-600 line-clamp-2">{item.details}</p>
+                                    <p className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{item.reportNumber || t('legal.reportSummary')}</p>
+                                    <p className="text-xs text-gray-600 line-clamp-2">
+                                        {t('legal.classification')}: {formatClassification(item.analysisLog.classification)} · {t('legal.severity')}: {severity}
+                                    </p>
 
                                     {(postText || imageAttachments.length > 0) && (
                                         <div className="mt-3 space-y-2">
                                             {postText && (
                                                 <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
-                                                    <p className="text-[11px] text-gray-500">Post text</p>
+                                                    <p className="text-[11px] text-gray-500">{t('legal.postText')}</p>
                                                     <p className="mt-1 text-xs leading-5 text-gray-800 line-clamp-3 whitespace-pre-wrap break-words">
                                                         {postText}
                                                     </p>
@@ -682,7 +690,7 @@ export function AdminLegalReportsManager() {
                                             {imageAttachments.length > 0 && (
                                                 <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
                                                     <div className="mb-2 flex items-center justify-between gap-2">
-                                                        <p className="text-[11px] text-gray-500">Post images</p>
+                                                        <p className="text-[11px] text-gray-500">{t('legal.postImages')}</p>
                                                         <span className="text-[11px] font-semibold text-emerald-700">
                                                             {imageAttachments.length}
                                                         </span>
@@ -711,21 +719,21 @@ export function AdminLegalReportsManager() {
 
                                     <div className="mt-3 grid grid-cols-2 gap-2">
                                         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
-                                            <p className="text-[11px] text-gray-500">Target group</p>
-                                            <p className="text-xs font-semibold text-gray-900 line-clamp-1">{targetGroup}</p>
+                                            <p className="text-[11px] text-gray-500">{t('legal.targetGroup')}</p>
+                                            <p className="text-xs font-semibold text-gray-900 line-clamp-1">{targetGroup.split(', ').map((value) => formatTargetGroup(value)).join(', ')}</p>
                                         </div>
                                         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2">
-                                            <p className="text-[11px] text-gray-500">Severity</p>
+                                            <p className="text-[11px] text-gray-500">{t('legal.severity')}</p>
                                             <p className="text-xs font-semibold text-gray-900">{severity}</p>
                                         </div>
                                         <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 col-span-2">
-                                            <p className="text-[11px] text-gray-500">Speech type</p>
-                                            <p className="text-xs font-semibold text-gray-900 line-clamp-1">{speechType}</p>
+                                            <p className="text-[11px] text-gray-500">{t('legal.speechType')}</p>
+                                            <p className="text-xs font-semibold text-gray-900 line-clamp-1">{formatSpeechType(speechType)}</p>
                                         </div>
                                     </div>
 
                                     <div className="mt-3">
-                                        <p className="text-[11px] text-gray-500 mb-1">Hateful words</p>
+                                        <p className="text-[11px] text-gray-500 mb-1">{t('legal.hatefulWords')}</p>
                                         {hatefulWords.length > 0 ? (
                                             <div className="flex flex-wrap gap-1.5">
                                                 {hatefulWords.slice(0, 4).map((word) => (
@@ -743,7 +751,7 @@ export function AdminLegalReportsManager() {
                                                 )}
                                             </div>
                                         ) : (
-                                            <p className="text-xs text-gray-500">—</p>
+                                            <p className="text-xs text-gray-500">{t('common.none')}</p>
                                         )}
                                     </div>
                                 </div>
@@ -760,7 +768,7 @@ export function AdminLegalReportsManager() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-xs text-gray-500">{formatDate(selected.createdAt)}</p>
-                                <h3 className="text-xl font-bold text-gray-900">Legal report detail</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{t('legal.reportDetail')}</h3>
                             </div>
                             <div className="flex gap-2">
                                 <RequirePermission resource="reports" action="DELETE">
@@ -768,14 +776,14 @@ export function AdminLegalReportsManager() {
                                         onClick={() => handleDelete(selected.id)}
                                         className="px-3 py-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-sm"
                                     >
-                                        Delete
+                                        {t('common.delete')}
                                     </button>
                                 </RequirePermission>
                                 <button
                                     onClick={() => setSelected(null)}
                                     className="px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100 text-sm"
                                 >
-                                    Close
+                                    {t('common.close')}
                                 </button>
                             </div>
                         </div>
@@ -795,44 +803,44 @@ export function AdminLegalReportsManager() {
                                 <>
                                     <div className="grid md:grid-cols-2 gap-3">
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Report number</p>
-                                            <p className="font-bold text-gray-900">{selected.reportNumber || '—'}</p>
+                                            <p className="text-xs text-gray-500">{t('legal.reportNumber')}</p>
+                                            <p className="font-bold text-gray-900">{selected.reportNumber || t('common.none')}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Human review</p>
+                                            <p className="text-xs text-gray-500">{t('legal.humanReview')}</p>
                                             <div className="mt-1 flex flex-wrap items-center gap-2">
                                                 <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getReviewStatusTone(selected.humanReviewStatus)}`}>
-                                                    {getReviewStatusLabel(selected.humanReviewStatus)}
+                                                    {formatReviewStatus(selected.humanReviewStatus)}
                                                 </span>
                                                 {selected.escalationFlag ? (
                                                     <span className="inline-flex rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                                                        Escalated alert
+                                                        {t('legal.escalated')}
                                                     </span>
                                                 ) : null}
                                             </div>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Classification</p>
-                                            <p className="font-bold text-gray-900">{selected.analysisLog.classification}</p>
+                                            <p className="text-xs text-gray-500">{t('legal.classification')}</p>
+                                            <p className="font-bold text-gray-900">{formatClassification(selected.analysisLog.classification)}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Severity</p>
+                                            <p className="text-xs text-gray-500">{t('legal.severity')}</p>
                                             <p className="font-bold text-gray-900">{severity}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Risk level</p>
-                                            <p className="font-bold text-gray-900">{selected.analysisLog.riskLevel}</p>
+                                            <p className="text-xs text-gray-500">{t('legal.riskLevel')}</p>
+                                            <p className="font-bold text-gray-900">{formatRiskLevel(selected.analysisLog.riskLevel)}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Target group</p>
-                                            <p className="font-bold text-gray-900">{targetGroup}</p>
+                                            <p className="text-xs text-gray-500">{t('legal.targetGroup')}</p>
+                                            <p className="font-bold text-gray-900">{targetGroup.split(', ').map((value) => formatTargetGroup(value)).join(', ')}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50">
-                                            <p className="text-xs text-gray-500">Speech type</p>
-                                            <p className="font-bold text-gray-900">{speechType}</p>
+                                            <p className="text-xs text-gray-500">{t('legal.speechType')}</p>
+                                            <p className="font-bold text-gray-900">{formatSpeechType(speechType)}</p>
                                         </div>
                                         <div className="p-3 rounded-xl border border-gray-100 bg-gray-50 md:col-span-2">
-                                            <p className="text-xs text-gray-500">Hateful words</p>
+                                            <p className="text-xs text-gray-500">{t('legal.hatefulWords')}</p>
                                             {hatefulWords.length > 0 ? (
                                                 <div className="mt-2 flex flex-wrap gap-2">
                                                     {hatefulWords.map((word) => (
@@ -845,39 +853,39 @@ export function AdminLegalReportsManager() {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <p className="font-bold text-gray-900">—</p>
+                                                <p className="font-bold text-gray-900">{t('common.none')}</p>
                                             )}
                                         </div>
                                     </div>
 
                                     <div className="grid gap-3 lg:grid-cols-[1.3fr_0.7fr]">
                                         <div className="rounded-xl border border-gray-100 bg-white p-4">
-                                            <p className="text-xs text-gray-500 mb-2">Post text</p>
+                                            <p className="text-xs text-gray-500 mb-2">{t('legal.postText')}</p>
                                             {postText ? (
                                                 <p className="text-gray-900 leading-7 whitespace-pre-wrap break-words">
                                                     {postText}
                                                 </p>
                                             ) : (
                                                 <p className="text-sm text-gray-500">
-                                                    No original post text was stored for this report.
+                                                    {t('legal.noPostText')}
                                                 </p>
                                             )}
                                         </div>
                                         <div className="rounded-xl border border-gray-100 bg-white p-4 space-y-3">
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-1">Post link</p>
+                                                <p className="text-xs text-gray-500 mb-1">{t('legal.postLink')}</p>
                                                 <p className="text-sm text-gray-900 break-all">
-                                                    {postLink || '—'}
+                                                    {postLink || t('common.none')}
                                                 </p>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-1">Image description</p>
+                                                <p className="text-xs text-gray-500 mb-1">{t('legal.imageDescription')}</p>
                                                 <p className="text-sm text-gray-800 whitespace-pre-wrap">
                                                     {getImageDescription(scores)}
                                                 </p>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-gray-500 mb-1">Stored images</p>
+                                                <p className="text-xs text-gray-500 mb-1">{t('legal.storedImages')}</p>
                                                 <p className="text-sm font-semibold text-gray-900">
                                                     {imageAttachments.length}
                                                 </p>
@@ -889,7 +897,7 @@ export function AdminLegalReportsManager() {
                                         <div className="rounded-xl border border-gray-100 bg-white p-3">
                                             <div className="mb-2 flex items-center justify-between gap-3">
                                                 <p className="text-xs text-gray-500">
-                                                    Post images and attachments ({reportAttachments.length})
+                                                    {t('legal.postImagesAndAttachments')} ({reportAttachments.length})
                                                 </p>
                                             </div>
                                             <div className="grid gap-3 md:grid-cols-2">
@@ -900,7 +908,7 @@ export function AdminLegalReportsManager() {
                                                     >
                                                         <div className="mb-2 flex items-center justify-between gap-3">
                                                             <p className="text-xs font-semibold text-stone-500">
-                                                                {attachment.kind === 'pdf' ? `PDF ${index + 1}` : `Image ${index + 1}`}
+                                                                {attachment.kind === 'pdf' ? `${t('legal.attachment')} PDF ${index + 1}` : `${t('legal.image')} ${index + 1}`}
                                                             </p>
                                                             <a
                                                                 href={attachment.url}
@@ -908,7 +916,7 @@ export function AdminLegalReportsManager() {
                                                                 rel="noreferrer"
                                                                 className="text-xs font-semibold text-emerald-700 hover:text-emerald-800"
                                                             >
-                                                                Open file
+                                                                {t('legal.openFile')}
                                                             </a>
                                                         </div>
                                                         {attachment.kind === 'pdf' ? (
@@ -922,10 +930,10 @@ export function AdminLegalReportsManager() {
                                                                         </svg>
                                                                     </div>
                                                                     <p className="mt-3 text-sm font-semibold text-stone-900">
-                                                                        {attachment.name || `Attachment ${index + 1}`}
+                                                                        {attachment.name || `${t('legal.attachment')} ${index + 1}`}
                                                                     </p>
                                                                     <p className="mt-1 text-xs text-stone-500">
-                                                                        PDF document
+                                                                        {t('legal.pdfDocument')}
                                                                     </p>
                                                                 </div>
                                                             </div>
@@ -949,9 +957,9 @@ export function AdminLegalReportsManager() {
 
                                     {reportAttachments.length === 0 && getImageDescription(scores) !== '—' && (
                                         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-                                            <p className="text-sm font-semibold text-amber-900">No original image file is stored</p>
+                                            <p className="text-sm font-semibold text-amber-900">{t('legal.noOriginalImageTitle')}</p>
                                             <p className="mt-1 text-sm text-amber-800">
-                                                This report only has an image description in the analysis data. The dashboard can show the actual image only when the original upload URL was saved with the report.
+                                                {t('legal.noOriginalImageBody')}
                                             </p>
                                         </div>
                                     )}
@@ -959,9 +967,9 @@ export function AdminLegalReportsManager() {
                                     <div className="rounded-xl border border-gray-100 bg-white p-4">
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-900">Human review workflow</p>
+                                                <p className="text-sm font-semibold text-gray-900">{t('legal.reviewWorkflow')}</p>
                                                 <p className="text-xs text-gray-500">
-                                                    Analysts can update status and add an internal note without deleting the report.
+                                                    {t('legal.reviewWorkflowSubtitle')}
                                                 </p>
                                             </div>
                                         </div>
@@ -969,7 +977,7 @@ export function AdminLegalReportsManager() {
                                         <div className="mt-4 grid gap-4 md:grid-cols-2">
                                             <div>
                                                 <label className="mb-1 block text-xs font-semibold text-gray-600">
-                                                    Review status
+                                                    {t('legal.reviewStatus')}
                                                 </label>
                                                 <select
                                                     value={reviewStatus}
@@ -978,37 +986,37 @@ export function AdminLegalReportsManager() {
                                                     className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100"
                                                 >
                                                     {reviewStatusOptions.map((option) => (
-                                                        <option key={option.value} value={option.value}>
-                                                            {option.label}
+                                                        <option key={option} value={option}>
+                                                            {formatReviewStatus(option)}
                                                         </option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="rounded-xl border border-gray-100 bg-gray-50 px-3 py-3">
-                                                <p className="text-xs text-gray-500">Current internal state</p>
+                                                <p className="text-xs text-gray-500">{t('legal.currentInternalState')}</p>
                                                 <p className="mt-1 text-sm font-semibold text-gray-900">
-                                                    {getReviewStatusLabel(reviewStatus)}
+                                                    {formatReviewStatus(reviewStatus)}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="mt-4">
                                             <label className="mb-1 block text-xs font-semibold text-gray-600">
-                                                Internal review note
+                                                {t('legal.internalReviewNote')}
                                             </label>
                                             <textarea
                                                 value={reviewComment}
                                                 onChange={(event) => setReviewComment(event.target.value)}
                                                 disabled={!can('reports', 'PATCH') || savingReview}
                                                 rows={4}
-                                                placeholder="Add analyst note or follow-up summary"
+                                                placeholder={t('legal.internalReviewPlaceholder')}
                                                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100"
                                             />
                                         </div>
 
                                         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                                             <p className="text-xs text-gray-500">
-                                                Reporter is not notified from this panel. Updates remain internal only.
+                                                {t('legal.internalOnlyNote')}
                                             </p>
                                             <RequirePermission resource="reports" action="PATCH">
                                                 <button
@@ -1017,7 +1025,7 @@ export function AdminLegalReportsManager() {
                                                     disabled={savingReview}
                                                     className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                                                 >
-                                                    {savingReview ? 'Saving...' : 'Save review update'}
+                                                    {savingReview ? t('common.saving') : t('legal.saveReviewUpdate')}
                                                 </button>
                                             </RequirePermission>
                                         </div>
@@ -1026,9 +1034,9 @@ export function AdminLegalReportsManager() {
                             );
                         })()}
                         <div className="p-3 rounded-xl border border-gray-100 bg-white">
-                            <p className="text-xs text-gray-500 mb-1">Reasoning</p>
+                            <p className="text-xs text-gray-500 mb-1">{t('legal.reasoning')}</p>
                             <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                                {selected.analysisLog.aiScores?.rationale || selected.analysisLog.aiScores?.reasoning_ar || selected.analysisLog.aiScores?.reasoning || '—'}
+                                {getDisplayReasoning(selected.analysisLog.aiScores || {}, locale)}
                             </p>
                         </div>
 

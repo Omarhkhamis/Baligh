@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Swal from 'sweetalert2';
 import { normalizeReportCategory, REPORT_CATEGORIES, type ReportCategoryKey } from '@/data/reportCategories';
 import { RequirePermission, usePermissions } from './AdminPermissions';
+import { useAdminI18n } from './AdminI18n';
 import { ImagePicker } from './ImagePicker';
 import { toastSuccess } from './toast';
 
@@ -58,6 +59,7 @@ const defaultForm: FormState = {
 
 export function AdminReportsManager() {
     const { can } = usePermissions();
+    const { t, locale, formatDate, pickLocalizedText, formatReportCategory, translateApiError } = useAdminI18n();
     const [items, setItems] = useState<ReportItem[]>([]);
     const [form, setForm] = useState<FormState>(defaultForm);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -78,20 +80,21 @@ export function AdminReportsManager() {
                 const res = await fetch('/api/admin/reports');
                 const data = await res.json();
                 if (!res.ok || !Array.isArray(data)) {
-                    setError(data?.error || 'Failed to load reports');
+                    setError(translateApiError(data?.error || t('errors.loadReports')));
                     setItems([]);
                 } else {
                     setItems(data);
                 }
-            } catch (e) {
-                console.error(e);
-                setError('Failed to load reports');
+            } catch (loadError) {
+                console.error(loadError);
+                setError(t('errors.loadReports'));
             } finally {
                 setLoading(false);
             }
         }
-        load();
-    }, []);
+
+        void load();
+    }, [t, translateApiError]);
 
     useEffect(() => {
         const handlePdfDeleted = (event: Event) => {
@@ -114,18 +117,20 @@ export function AdminReportsManager() {
         setForm((prev) => ({ ...prev, [key]: value }));
     };
 
-    const uploadPdf = async (file: File, onSuccess: (url: string) => void, setUploading: (v: boolean) => void) => {
+    const uploadPdf = async (file: File, onSuccess: (url: string) => void, setUploading: (value: boolean) => void) => {
         if (!file.name.toLowerCase().endsWith('.pdf')) {
-            setError('Only PDF files are allowed');
+            setError(t('reports.pdfOnly'));
             return;
         }
         if (file.size > 20 * 1024 * 1024) {
-            setError('Max file size is 20MB');
+            setError(t('reports.pdfMaxSize'));
             return;
         }
+
         setUploading(true);
         setError(null);
         setMessage(null);
+
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -135,14 +140,15 @@ export function AdminReportsManager() {
             });
             const data = await res.json();
             if (!res.ok) {
-                setError(data?.error || 'Upload failed');
+                setError(translateApiError(data?.error || t('common.uploadFailed')));
                 return;
             }
+
             onSuccess(data.url);
-            setMessage('PDF uploaded');
-        } catch (e) {
-            console.error(e);
-            setError('Upload failed');
+            setMessage(t('reports.pdfUploaded'));
+        } catch (uploadError) {
+            console.error(uploadError);
+            setError(t('common.uploadFailed'));
         } finally {
             setUploading(false);
         }
@@ -150,12 +156,12 @@ export function AdminReportsManager() {
 
     const handlePdfUploadAr = (file: File | null) => {
         if (!file) return;
-        uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlAr: url })), setUploadingPdfAr);
+        void uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlAr: url })), setUploadingPdfAr);
     };
 
     const handlePdfUploadEn = (file: File | null) => {
         if (!file) return;
-        uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlEn: url })), setUploadingPdfEn);
+        void uploadPdf(file, (url) => setForm((prev) => ({ ...prev, documentUrlEn: url })), setUploadingPdfEn);
     };
 
     const resetForm = () => {
@@ -169,9 +175,10 @@ export function AdminReportsManager() {
         e.preventDefault();
         const action = editingId ? 'PATCH' : 'POST';
         if (!can('studies', action)) {
-            setError('You do not have permission to perform this action');
+            setError(t('common.permissionDenied'));
             return;
         }
+
         setSaving(true);
         setError(null);
         setMessage(null);
@@ -200,28 +207,31 @@ export function AdminReportsManager() {
             });
             const data = await res.json().catch(() => null);
             if (!res.ok) {
-                setError(data?.error || 'Failed to save report');
+                setError(translateApiError(data?.error || t('errors.saveReport')));
                 setSaving(false);
                 return;
             }
+
             if (editingId) {
-                setItems((prev) => prev.map((i) => (i.id === editingId ? data : i)));
-                setMessage('Report updated');
-                void toastSuccess('تم تحديث التقرير بنجاح');
+                setItems((prev) => prev.map((item) => (item.id === editingId ? data : item)));
+                setMessage(t('reports.updated'));
+                void toastSuccess(t('reports.updated'));
             } else {
                 setItems((prev) => [data, ...prev]);
-                setMessage('Report created');
-                void toastSuccess('تم إنشاء التقرير بنجاح');
+                setMessage(t('reports.created'));
+                void toastSuccess(t('reports.created'));
             }
+
             resetForm();
             setShowModal(false);
-        } catch (e) {
-            console.error(e);
-            setError('Unexpected error');
+        } catch (submitError) {
+            console.error(submitError);
+            setError(t('common.unexpectedError'));
             void Swal.fire({
                 icon: 'error',
-                title: 'خطأ',
-                text: 'تعذر حفظ التقرير. حاول مجدداً.',
+                title: t('common.unexpectedError'),
+                text: t('errors.saveReport'),
+                reverseButtons: locale === 'ar',
             });
         } finally {
             setSaving(false);
@@ -232,8 +242,8 @@ export function AdminReportsManager() {
         <div className="space-y-4">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Reports & Studies</h3>
-                    <p className="text-xs text-gray-500">{items.length} entries</p>
+                    <h3 className="text-lg font-semibold text-gray-900">{t('reports.title')}</h3>
+                    <p className="text-xs text-gray-500">{t('reports.count', { count: items.length })}</p>
                 </div>
                 <RequirePermission resource="studies" action="POST">
                     <button
@@ -242,45 +252,59 @@ export function AdminReportsManager() {
                             resetForm();
                             setShowModal(true);
                         }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold shadow-sm hover:bg-emerald-700"
+                        className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white shadow-sm hover:bg-emerald-700"
                     >
                         <span className="text-lg">＋</span>
-                        <span>Add report</span>
+                        <span>{t('reports.add')}</span>
                     </button>
                 </RequirePermission>
             </div>
 
-            <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
                 {loading ? (
-                    <p className="text-sm text-gray-500">Loading...</p>
+                    <p className="text-sm text-gray-500">{t('reports.loading')}</p>
                 ) : items.length === 0 ? (
-                    <div className="text-center text-gray-500 bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6">
-                        No reports yet.
+                    <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-gray-500">
+                        {t('reports.empty')}
                     </div>
                 ) : (
                     <div className="space-y-3">
-                        {items.map((item) => (
-                            <div key={item.id} className="border border-gray-100 rounded-xl p-3 flex items-start gap-3 hover:border-emerald-200">
-                                <div className="w-12 h-12 rounded-lg bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-lg uppercase">
+                        {items.map((item) => {
+                            const authorName = locale === 'ar'
+                                ? item.authorName || item.authorNameEn
+                                : item.authorNameEn || item.authorName;
+
+                            return (
+                            <div
+                                key={item.id}
+                                className="flex items-start gap-3 rounded-xl border border-gray-100 p-3 hover:border-emerald-200"
+                            >
+                                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-lg font-bold uppercase text-blue-700">
                                     {item.category?.slice(0, 2)}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-sm text-gray-500 mb-1">
-                                        {new Date(item.publishedAt || item.createdAt || '').toLocaleDateString('en-US')}
-                                        {item.authorName || item.authorNameEn ? ` · ${item.authorName || item.authorNameEn}` : ''}
+                                    <p className="mb-1 text-sm text-gray-500">
+                                        {formatDate(item.publishedAt || item.createdAt || '')}
+                                        {authorName ? ` · ${authorName}` : ''}
                                     </p>
                                     <h4 className="text-base font-semibold text-gray-900">
-                                        {item.title?.en || item.title?.ar || 'Untitled'}
+                                        {pickLocalizedText(item.title) || t('common.untitled')}
                                     </h4>
-                                    <p className="text-xs text-gray-600 line-clamp-2">
-                                        {item.summary?.en || item.summary?.ar || ''}
+                                    <p className="line-clamp-2 text-xs text-gray-600">
+                                        {pickLocalizedText(item.summary || null) || ''}
                                     </p>
-                                    <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                                        <span className="px-2 py-0.5 bg-gray-100 rounded-lg border border-gray-200">
-                                            {item.category}
+                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                                        <span className="rounded-lg border border-gray-200 bg-gray-100 px-2 py-0.5">
+                                            {formatReportCategory(item.category)}
                                         </span>
-                                        <span className={`px-2 py-0.5 rounded-lg border ${item.isPublished ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                                            {item.isPublished ? 'Published' : 'Draft'}
+                                        <span
+                                            className={`rounded-lg border px-2 py-0.5 ${
+                                                item.isPublished
+                                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                                                    : 'border-gray-200 bg-gray-50 text-gray-600'
+                                            }`}
+                                        >
+                                            {item.isPublished ? t('common.published') : t('common.draft')}
                                         </span>
                                     </div>
                                 </div>
@@ -288,8 +312,8 @@ export function AdminReportsManager() {
                                     <RequirePermission resource="studies" action="PATCH">
                                         <button
                                             type="button"
-                                            className="w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 flex items-center justify-center"
-                                            title="Edit"
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                                            title={t('common.edit')}
                                             onClick={() => {
                                                 setEditingId(item.id);
                                                 setForm({
@@ -303,8 +327,8 @@ export function AdminReportsManager() {
                                                     authorName: item.authorName || '',
                                                     authorNameEn: item.authorNameEn || '',
                                                     imageUrl: item.imageUrl || '',
-                                                    documentUrlAr: (item as any).documentUrlAr || '',
-                                                    documentUrlEn: (item as any).documentUrlEn || '',
+                                                    documentUrlAr: (item as { documentUrlAr?: string | null }).documentUrlAr || '',
+                                                    documentUrlEn: (item as { documentUrlEn?: string | null }).documentUrlEn || '',
                                                     publishNow: item.isPublished ?? true,
                                                 });
                                                 setMessage(null);
@@ -318,24 +342,26 @@ export function AdminReportsManager() {
                                     <RequirePermission resource="studies" action="DELETE">
                                         <button
                                             type="button"
-                                            className="w-9 h-9 rounded-full bg-red-50 text-red-700 border border-red-100 hover:bg-red-100 flex items-center justify-center font-bold"
-                                            title="Delete"
+                                            className="flex h-9 w-9 items-center justify-center rounded-full border border-red-100 bg-red-50 font-bold text-red-700 hover:bg-red-100"
+                                            title={t('common.delete')}
                                             onClick={async () => {
                                                 const result = await Swal.fire({
-                                                    title: 'Delete this report?',
+                                                    title: t('reports.deleteConfirm'),
                                                     icon: 'warning',
                                                     showCancelButton: true,
                                                     confirmButtonColor: '#d33',
                                                     cancelButtonColor: '#3085d6',
-                                                    confirmButtonText: 'Yes, delete',
+                                                    confirmButtonText: t('common.yesDelete'),
+                                                    cancelButtonText: t('common.cancel'),
+                                                    reverseButtons: locale === 'ar',
                                                 });
                                                 if (!result.isConfirmed) return;
                                                 const res = await fetch(`/api/admin/reports?id=${item.id}`, { method: 'DELETE' });
                                                 const data = await res.json().catch(() => null);
                                                 if (res.ok) {
-                                                    setItems((prev) => prev.filter((i) => i.id !== item.id));
+                                                    setItems((prev) => prev.filter((current) => current.id !== item.id));
                                                 } else {
-                                                    setError(data?.error || 'Failed to delete report');
+                                                    setError(translateApiError(data?.error || t('reports.deleteError')));
                                                 }
                                             }}
                                         >
@@ -344,40 +370,43 @@ export function AdminReportsManager() {
                                     </RequirePermission>
                                 </div>
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
 
             {showModal && (
                 <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50">
-                    <div className="mt-[10vh] mb-[10vh] w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-[80vh] overflow-y-auto">
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                            <h3 className="text-lg font-semibold text-gray-900">{editingId ? 'Edit Report/Study' : 'Add Report/Study'}</h3>
+                    <div className="mt-[10vh] mb-[10vh] max-h-[80vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-gray-100 bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {editingId ? t('reports.editTitle') : t('reports.addTitle')}
+                            </h3>
                             <button
                                 type="button"
                                 onClick={() => {
                                     setShowModal(false);
                                     resetForm();
                                 }}
-                                className="w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center"
-                                aria-label="Close"
+                                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                aria-label={t('common.close')}
                             >
                                 ×
                             </button>
                         </div>
-                        <form className="p-6 space-y-3" onSubmit={handleSubmit}>
+                        <form className="space-y-3 p-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-3">
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Title (Arabic)"
+                                    placeholder={t('reports.titleAr')}
                                     value={form.titleAr}
                                     onChange={(e) => handleChange('titleAr', e.target.value)}
                                     required
                                 />
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Title (English)"
+                                    placeholder={t('reports.titleEn')}
                                     value={form.titleEn}
                                     onChange={(e) => handleChange('titleEn', e.target.value)}
                                 />
@@ -385,13 +414,13 @@ export function AdminReportsManager() {
                             <div className="grid grid-cols-2 gap-3">
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Author (Arabic or default)"
+                                    placeholder={t('reports.authorAr')}
                                     value={form.authorName}
                                     onChange={(e) => handleChange('authorName', e.target.value)}
                                 />
                                 <input
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Author (English, optional)"
+                                    placeholder={t('reports.authorEn')}
                                     value={form.authorNameEn}
                                     onChange={(e) => handleChange('authorNameEn', e.target.value)}
                                 />
@@ -399,7 +428,7 @@ export function AdminReportsManager() {
                             <div className="grid grid-cols-2 gap-3">
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Summary (Arabic)"
+                                    placeholder={t('reports.summaryAr')}
                                     rows={2}
                                     value={form.summaryAr}
                                     onChange={(e) => handleChange('summaryAr', e.target.value)}
@@ -407,7 +436,7 @@ export function AdminReportsManager() {
                                 />
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Summary (English)"
+                                    placeholder={t('reports.summaryEn')}
                                     rows={2}
                                     value={form.summaryEn}
                                     onChange={(e) => handleChange('summaryEn', e.target.value)}
@@ -416,14 +445,14 @@ export function AdminReportsManager() {
                             <div className="grid grid-cols-2 gap-3">
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Body (Arabic)"
+                                    placeholder={t('reports.bodyAr')}
                                     rows={3}
                                     value={form.bodyAr}
                                     onChange={(e) => handleChange('bodyAr', e.target.value)}
                                 />
                                 <textarea
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    placeholder="Body (English)"
+                                    placeholder={t('reports.bodyEn')}
                                     rows={3}
                                     value={form.bodyEn}
                                     onChange={(e) => handleChange('bodyEn', e.target.value)}
@@ -431,80 +460,80 @@ export function AdminReportsManager() {
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <ImagePicker
-                                    label="Image (optional)"
+                                    label={t('reports.image')}
                                     value={form.imageUrl}
                                     onChange={(url) => handleChange('imageUrl', url)}
-                                    placeholder="Image URL (optional)"
+                                    placeholder={t('reports.imageUrl')}
                                 />
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-gray-700">Document (Arabic PDF, max 20MB)</label>
+                                        <label className="block text-sm font-semibold text-gray-700">{t('reports.documentAr')}</label>
                                         <div className="flex gap-2">
                                             <input
                                                 type="file"
                                                 accept="application/pdf"
                                                 onChange={(e) => handlePdfUploadAr(e.target.files?.[0] || null)}
-                                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                                className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => handleChange('documentUrlAr', '')}
-                                                className="px-3 py-2 text-xs rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                                className="rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
                                             >
-                                                Clear
+                                                {t('common.clear')}
                                             </button>
                                         </div>
                                         <input
                                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                            placeholder="Or paste Arabic PDF/link"
+                                            placeholder={t('reports.documentHintAr')}
                                             value={form.documentUrlAr}
                                             onChange={(e) => handleChange('documentUrlAr', e.target.value)}
                                         />
                                         {form.documentUrlAr && (
-                                            <p className="text-xs text-emerald-700">Attached (AR): {form.documentUrlAr}</p>
+                                            <p className="text-xs text-emerald-700">{t('reports.attachedAr')}: {form.documentUrlAr}</p>
                                         )}
-                                        {uploadingPdfAr && <p className="text-xs text-gray-500">Uploading Arabic PDF...</p>}
+                                        {uploadingPdfAr && <p className="text-xs text-gray-500">{t('reports.uploadAr')}</p>}
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-semibold text-gray-700">Document (English PDF, max 20MB)</label>
+                                        <label className="block text-sm font-semibold text-gray-700">{t('reports.documentEn')}</label>
                                         <div className="flex gap-2">
                                             <input
                                                 type="file"
                                                 accept="application/pdf"
                                                 onChange={(e) => handlePdfUploadEn(e.target.files?.[0] || null)}
-                                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                                                className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => handleChange('documentUrlEn', '')}
-                                                className="px-3 py-2 text-xs rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                                className="rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-700 hover:bg-gray-100"
                                             >
-                                                Clear
+                                                {t('common.clear')}
                                             </button>
                                         </div>
                                         <input
                                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                            placeholder="Or paste English PDF/link"
+                                            placeholder={t('reports.documentHintEn')}
                                             value={form.documentUrlEn}
                                             onChange={(e) => handleChange('documentUrlEn', e.target.value)}
                                         />
                                         {form.documentUrlEn && (
-                                            <p className="text-xs text-emerald-700">Attached (EN): {form.documentUrlEn}</p>
+                                            <p className="text-xs text-emerald-700">{t('reports.attachedEn')}: {form.documentUrlEn}</p>
                                         )}
-                                        {uploadingPdfEn && <p className="text-xs text-gray-500">Uploading English PDF...</p>}
+                                        {uploadingPdfEn && <p className="text-xs text-gray-500">{t('reports.uploadEn')}</p>}
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Category</label>
+                                <label className="mb-1 block text-sm font-semibold text-gray-700">{t('reports.category')}</label>
                                 <select
                                     className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                     value={form.category}
                                     onChange={(e) => handleChange('category', e.target.value as ReportCategoryKey)}
                                 >
-                                    {categoryOptions.map(([key, cat]) => (
+                                    {categoryOptions.map(([key, category]) => (
                                         <option key={key} value={key}>
-                                            {cat.icon} {cat.label}
+                                            {category.icon} {formatReportCategory(key)}
                                         </option>
                                     ))}
                                 </select>
@@ -518,13 +547,11 @@ export function AdminReportsManager() {
                                     className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                                 />
                                 <label htmlFor="publishNowReports" className="text-sm text-gray-700">
-                                    Publish now
+                                    {t('reports.publishNow')}
                                 </label>
                             </div>
-
                             {error && <p className="text-sm text-red-600">{error}</p>}
                             {message && <p className="text-sm text-emerald-600">{message}</p>}
-
                             <div className="flex justify-end gap-2 pt-2">
                                 <button
                                     type="button"
@@ -532,16 +559,16 @@ export function AdminReportsManager() {
                                         setShowModal(false);
                                         resetForm();
                                     }}
-                                    className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+                                    className="rounded-lg border border-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-100"
                                 >
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition disabled:opacity-60"
+                                    className="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
                                 >
-                                    {saving ? 'Saving...' : editingId ? 'Update report' : 'Save report'}
+                                    {saving ? t('common.saving') : editingId ? t('reports.update') : t('reports.save')}
                                 </button>
                             </div>
                         </form>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useAdminI18n } from './AdminI18n';
 
 type UploadEntry = {
     name: string;
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function ImagePicker({ label, value, onChange, placeholder }: Props) {
+    const { t } = useAdminI18n();
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState<UploadEntry[]>([]);
     const [loading, setLoading] = useState(false);
@@ -39,7 +41,7 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
     };
 
     const handleDelete = async (name: string) => {
-        if (!window.confirm('حذف هذه الصورة نهائياً؟')) return;
+        if (!window.confirm(t('imagePicker.deleteImageConfirm'))) return;
         setDeleting(name);
         try {
             const deletedUrl = items.find((item) => item.name === name)?.url || `/uploads/${name}`;
@@ -100,7 +102,7 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                 <input
                     className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={value || ''}
-                    placeholder={placeholder || 'Image URL'}
+                    placeholder={placeholder || t('imagePicker.imageUrl')}
                     onChange={(e) => onChange(e.target.value)}
                 />
                 <button
@@ -108,7 +110,7 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                     onClick={() => setOpen((v) => !v)}
                     className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-100"
                 >
-                    Library
+                    {t('common.library')}
                 </button>
             </div>
 
@@ -116,14 +118,14 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl p-4 space-y-3 relative">
                         <div className="flex items-center justify-between">
-                            <p className="text-sm font-semibold text-gray-800">Image Library</p>
+                            <p className="text-sm font-semibold text-gray-800">{t('imagePicker.libraryTitle')}</p>
                             <div className="flex gap-2">
                                 <button
                                     type="button"
                                     onClick={loadImages}
                                     className="text-xs px-3 py-1 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
                                 >
-                                    Refresh
+                                    {t('imagePicker.refresh')}
                                 </button>
                                 <button
                                     type="button"
@@ -131,14 +133,14 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                                     className="text-xs px-3 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700"
                                     disabled={uploading}
                                 >
-                                    {uploading ? 'Uploading...' : 'Upload image'}
+                                    {uploading ? t('imagePicker.uploading') : t('imagePicker.uploadImage')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setOpen(false)}
                                     className="text-xs px-3 py-1 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
                                 >
-                                    Close
+                                    {t('imagePicker.close')}
                                 </button>
                             </div>
                         </div>
@@ -146,15 +148,15 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
                         {loading ? (
-                            <p className="text-sm text-gray-500">Loading...</p>
+                            <p className="text-sm text-gray-500">{t('imagePicker.loading')}</p>
                         ) : items.length === 0 ? (
-                            <p className="text-sm text-gray-500">No images uploaded yet.</p>
+                            <p className="text-sm text-gray-500">{t('imagePicker.noImages')}</p>
                         ) : (
                             <div className="max-h-96 overflow-y-auto space-y-5">
                                 <div className="space-y-2">
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">Images</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t('imagePicker.images')}</p>
                                     {items.filter((item) => !isPdf(item.name)).length === 0 ? (
-                                        <p className="text-sm text-gray-500">No images uploaded yet.</p>
+                                        <p className="text-sm text-gray-500">{t('imagePicker.noImages')}</p>
                                     ) : (
                                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                                             {items.filter((item) => !isPdf(item.name)).map((item) => (
@@ -186,7 +188,7 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                                                         }}
                                                         className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/90 text-gray-700 border border-gray-200 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-xs shadow-sm"
                                                         disabled={deleting === item.name}
-                                                        title="حذف الصورة"
+                                                        title={t('imagePicker.deleteTitle')}
                                                     >
                                                         {deleting === item.name ? '…' : '×'}
                                                     </button>
@@ -197,9 +199,9 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">PDF Files</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t('imagePicker.pdfs')}</p>
                                     {items.filter((item) => isPdf(item.name)).length === 0 ? (
-                                        <p className="text-sm text-gray-500">No PDF files uploaded yet.</p>
+                                        <p className="text-sm text-gray-500">{t('imagePicker.noPdfs')}</p>
                                     ) : (
                                         <div className="space-y-2">
                                             {items.filter((item) => isPdf(item.name)).map((item) => (
@@ -221,7 +223,7 @@ export function ImagePicker({ label, value, onChange, placeholder }: Props) {
                                                         onClick={() => handleDelete(item.name)}
                                                         className="h-7 w-7 rounded-full bg-white/90 text-gray-700 border border-gray-200 hover:bg-red-50 hover:text-red-600 flex items-center justify-center text-xs shadow-sm"
                                                         disabled={deleting === item.name}
-                                                        title="حذف الملف"
+                                                        title={t('imagePicker.deleteTitle')}
                                                     >
                                                         {deleting === item.name ? '…' : '×'}
                                                     </button>

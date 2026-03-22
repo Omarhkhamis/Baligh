@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ResultsDisplay from '@/components/ResultsDisplay';
 import type { AnalysisResult } from '@/lib/report-generator';
+import { getCanonicalTargetGroupLabelsFromKeys, TARGET_GROUP_KEYS, type TargetGroupKey } from '@/lib/target-groups';
 
 type FlowVariant = 'modal' | 'page';
 
@@ -18,8 +19,7 @@ type SubmissionState = {
     reportNumber: string;
 };
 
-const targetGroupOptions = ['druze', 'sunniMuslims', 'alawites', 'kurds', 'arabs', 'christians', 'womenChildren', 'otherGroupsMinorities', 'unspecified'] as const;
-type TargetGroupKey = typeof targetGroupOptions[number];
+const targetGroupOptions = TARGET_GROUP_KEYS;
 
 type FormState = {
     platform: string;
@@ -187,7 +187,7 @@ export function ReportFlowPanel({ variant = 'modal', onClose }: ReportFlowPanelP
             const trimmedPostLink = form.postLink.trim();
             const trimmedPostText = form.postText.trim();
             const selectedTargetGroupKeys = form.targetGroups;
-            const selectedTargetGroupLabels = selectedTargetGroupKeys.map((targetGroupKey) => t(`form.targetGroups.${targetGroupKey}`));
+            const selectedTargetGroupLabels = getCanonicalTargetGroupLabelsFromKeys(selectedTargetGroupKeys);
 
             payload.append('locale', locale);
             payload.append('platform', form.platform);
