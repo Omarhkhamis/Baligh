@@ -482,8 +482,8 @@ export function AdminLegalReportsManager() {
             ].map(escapeCsvValue);
         });
 
-        const csvContent = [headers.map(escapeCsvValue).join(','), ...rows.map((row) => row.join(','))].join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const csvContent = [headers.map(escapeCsvValue).join(','), ...rows.map((row) => row.join(','))].join('\r\n');
+        const blob = new Blob(['\uFEFF', csvContent], { type: 'text/csv;charset=utf-8;' });
         const downloadUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
         const filenameParts = ['legal-reports'];
