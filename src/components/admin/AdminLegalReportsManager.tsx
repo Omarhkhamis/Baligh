@@ -440,7 +440,6 @@ export function AdminLegalReportsManager() {
         const headers = [
             'report_number',
             'report_title',
-            'report_details',
             'report_created_at',
             'analysis_created_at',
             'classification',
@@ -463,7 +462,6 @@ export function AdminLegalReportsManager() {
             return [
                 item.reportNumber || '',
                 item.title,
-                item.details,
                 item.createdAt,
                 item.analysisLog.createdAt,
                 item.analysisLog.classification,
