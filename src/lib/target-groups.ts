@@ -203,6 +203,32 @@ function expandTargetGroupValue(value: string): string[] {
     return [source];
 }
 
+function expandKnownTargetGroupValue(value: string): string[] {
+    const source = value.trim();
+    if (!source) {
+        return [];
+    }
+
+    const normalized = normalizeTargetGroupAlias(source);
+    const alias = TARGET_GROUP_ALIAS_MAP[normalized];
+    if (alias) {
+        const keys = Array.isArray(alias) ? alias : [alias];
+        return keys.map((key) => getCanonicalTargetGroupLabelByKey(key));
+    }
+
+    const inferredKey = getTargetGroupKeyFromValue(source);
+    if (inferredKey) {
+        return [getCanonicalTargetGroupLabelByKey(inferredKey)];
+    }
+
+    const splitCandidates = source.split(/[،,;]+/).map((item) => item.trim()).filter(Boolean);
+    if (splitCandidates.length > 1) {
+        return splitCandidates.flatMap((item) => expandKnownTargetGroupValue(item));
+    }
+
+    return [];
+}
+
 export function canonicalizeTargetGroupValues(values: Array<string | null | undefined>) {
     const deduped = new Set<string>();
 
@@ -212,6 +238,25 @@ export function canonicalizeTargetGroupValues(values: Array<string | null | unde
         }
 
         for (const item of expandTargetGroupValue(value)) {
+            if (!item.trim()) {
+                continue;
+            }
+            deduped.add(item.trim());
+        }
+    }
+
+    return Array.from(deduped);
+}
+
+export function canonicalizeKnownTargetGroupValues(values: Array<string | null | undefined>) {
+    const deduped = new Set<string>();
+
+    for (const value of values) {
+        if (typeof value !== 'string' || !value.trim()) {
+            continue;
+        }
+
+        for (const item of expandKnownTargetGroupValue(value)) {
             if (!item.trim()) {
                 continue;
             }

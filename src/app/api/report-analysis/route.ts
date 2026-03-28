@@ -25,7 +25,7 @@ import {
 } from '@/lib/data-security';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
 import {
-    canonicalizeTargetGroupValues,
+    canonicalizeKnownTargetGroupValues,
     getCanonicalTargetGroupLabelsFromKeys,
     getTargetGroupKeyFromValue,
     type TargetGroupKey,
@@ -725,13 +725,15 @@ export async function POST(req: NextRequest) {
         const selectedTargetGroupKeys: TargetGroupKey[] = (target_groups || [])
             .map((value) => getTargetGroupKeyFromValue(value))
             .filter((value): value is TargetGroupKey => value !== null);
-        const selectedTargetGroupLabels = canonicalizeTargetGroupValues(
-            target_group_labels?.length
-                ? target_group_labels
-                : target_group
-                    ? [target_group]
-                    : getCanonicalTargetGroupLabelsFromKeys(selectedTargetGroupKeys.length > 0 ? selectedTargetGroupKeys : target_groups || [])
-        );
+        const selectedTargetGroupLabels = selectedTargetGroupKeys.length > 0
+            ? getCanonicalTargetGroupLabelsFromKeys(selectedTargetGroupKeys)
+            : canonicalizeKnownTargetGroupValues(
+                target_group_labels?.length
+                    ? target_group_labels
+                    : target_group
+                        ? [target_group]
+                        : getCanonicalTargetGroupLabelsFromKeys(target_groups || [])
+            );
         const selectedTargetGroupText = selectedTargetGroupLabels.join(', ');
 
         if (imageFiles.length > 0) {

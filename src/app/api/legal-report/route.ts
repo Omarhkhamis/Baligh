@@ -4,7 +4,7 @@ import { getSeverityScoreOutOfFive, mapRiskLevel } from '@/lib/analysis-utils';
 import { generateReportNumber, isUniqueConstraintError } from '@/lib/report-number';
 import { buildEncryptedAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
-import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
+import { canonicalizeKnownTargetGroupValues } from '@/lib/target-groups';
 
 const REPORT_PLATFORM_VALUES = ['facebook', 'telegram', 'x', 'youtube', 'instagram', 'tiktok', 'other'] as const;
 const DIRECT_RISK_VALUES = ['yes', 'no', 'unknown'] as const;
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
         const numericSeverity = typeof severity_score === 'number' ? severity_score : 0;
         const escalationFlag = getSeverityScoreOutOfFive(numericSeverity) === 5;
         const humanReviewStatus = escalationFlag ? 'escalated' : 'pending';
-        const selectedTargetGroupLabels = canonicalizeTargetGroupValues(target_group ? [target_group] : []);
+        const selectedTargetGroupLabels = canonicalizeKnownTargetGroupValues(target_group ? [target_group] : []);
         const structuredAi = buildStructuredAiFields({
             analysis: {
                 classification: safeClassification,

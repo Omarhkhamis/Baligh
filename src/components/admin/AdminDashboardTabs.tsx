@@ -10,6 +10,7 @@ import { AdminNewsManager } from './AdminNewsManager';
 import { AdminReportsManager } from './AdminReportsManager';
 import { AdminLegalReportsManager } from './AdminLegalReportsManager';
 import { AdminRadarManager } from './AdminRadarManager';
+import { AdminVolunteerApplicationsManager } from './AdminVolunteerApplicationsManager';
 
 type TeamMember = Parameters<typeof TeamManager>[0]['initialMembers'][number];
 type Analysis = {
@@ -64,6 +65,10 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
             if (currentRole === 'SUPER_ADMIN' || currentRole === 'ANALYST') {
                 items.push({ key: 'legal', label: t('tabs.legal'), icon: '⚖️' });
                 items.push({ key: 'radar', label: t('tabs.radar'), icon: '📡' });
+            }
+
+            if (currentRole !== 'VIEWER') {
+                items.push({ key: 'volunteerForms', label: t('tabs.volunteerForms'), icon: '📝' });
             }
 
             if (currentRole !== 'VIEWER') {
@@ -208,6 +213,11 @@ export function AdminDashboardTabs({ currentRole, stats, teamMembers, recentAnal
                 {active === 'radar' && (
                     <div className="space-y-3">
                         <AdminRadarManager />
+                    </div>
+                )}
+                {active === 'volunteerForms' && (
+                    <div className="space-y-3">
+                        <AdminVolunteerApplicationsManager />
                     </div>
                 )}
                 {active === 'admin' && (

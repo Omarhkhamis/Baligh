@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { decryptSensitiveStringArray } from '@/lib/data-security';
-import { canonicalizeTargetGroupValues } from '@/lib/target-groups';
+import { canonicalizeKnownTargetGroupValues } from '@/lib/target-groups';
 import {
     getDefaultRadarDescriptions,
     normalizeRadarDescriptions,
@@ -180,6 +180,7 @@ type RadarRecord = Prisma.LegalReportGetPayload<{
         reportNumber: true;
         createdAt: true;
         platform: true;
+        targetGroupsUser: true;
         aiProcessingStatus: true;
         humanReviewStatus: true;
         finalPath: true;
@@ -391,6 +392,7 @@ function buildMainRadarQuery(startDate: Date | null, endDate: Date | null, useLa
   WHERE
     (lr."finalPath" IS NULL OR lr."finalPath" != 'rejected'::"FinalPath")
     AND lr."aiProcessingStatus" = 'done'::"AiProcessingStatus"
+    AND lr."humanReviewStatus" = 'reviewed'::"HumanReviewStatus"
     ${lowerBoundFilter}
     ${upperBoundFilter}
   GROUP BY week, "aiClassification"
@@ -412,6 +414,7 @@ ORDER BY weekly.week DESC, weekly."aiClassification" ASC;`;
   WHERE
     (lr."finalPath" IS NULL OR lr."finalPath" != 'rejected'::"FinalPath")
     AND lr."aiProcessingStatus" = 'done'::"AiProcessingStatus"
+    AND lr."humanReviewStatus" = 'reviewed'::"HumanReviewStatus"
     ${lowerBoundFilter}
     ${upperBoundFilter}
   GROUP BY week, "aiClassification"
@@ -763,6 +766,7 @@ export async function getRadarDashboardData(options?: {
         prisma.legalReport.findMany({
             where: {
                 aiProcessingStatus: 'done',
+                humanReviewStatus: 'reviewed',
                 createdAt: {
                     gte: lowerBound,
                     ...(rangeEndDate ? { lte: rangeEndDate } : {}),
@@ -780,6 +784,7 @@ export async function getRadarDashboardData(options?: {
                 reportNumber: true,
                 createdAt: true,
                 platform: true,
+                targetGroupsUser: true,
                 aiProcessingStatus: true,
                 humanReviewStatus: true,
                 finalPath: true,
@@ -901,7 +906,7 @@ export async function getRadarDashboardData(options?: {
         platformTrend.set(weekKey, (platformTrend.get(weekKey) || 0) + 1);
         platformWeeklyCounts.set(platform, platformTrend);
 
-        for (const label of canonicalizeTargetGroupValues(report.analysisLog.aiTargetGroups)) {
+        for (const label of canonicalizeKnownTargetGroupValues(report.targetGroupsUser)) {
             if (!label) {
                 continue;
             }

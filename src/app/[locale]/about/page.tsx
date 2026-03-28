@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { useTranslations, useLocale } from 'next-intl';
 import AppHeader from '../../../components/AppHeader';
 import AppFooter from '../../../components/AppFooter';
+import MethodologySections from '../../../components/about/MethodologySections';
+import TrainingContent from '../../../components/about/TrainingContent';
+import VolunteerApplicationModal from '../../../components/about/VolunteerApplicationModal';
 
 // Icons
 const IconVision = () => (
@@ -26,19 +29,26 @@ const IconTeam = () => (
     </svg>
 );
 
-const IconPartners = () => (
-    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-    </svg>
-);
-
 const IconVolunteer = () => (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
     </svg>
 );
 
-type TabType = 'vision' | 'change' | 'team' | 'partners' | 'volunteer';
+const IconMethodology = () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 6.75h15m-15 5.25h15m-15 5.25h10.5" />
+    </svg>
+);
+
+const IconTraining = () => (
+    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+    </svg>
+);
+
+type TabType = 'vision' | 'change' | 'methodology' | 'training' | 'team' | 'volunteer';
 
 export default function AboutPage() {
     const locale = useLocale();
@@ -49,8 +59,9 @@ export default function AboutPage() {
     const tabs = [
         { id: 'vision' as TabType, label: t('tabs.vision'), icon: IconVision },
         { id: 'change' as TabType, label: t('tabs.change'), icon: IconChange },
+        { id: 'methodology' as TabType, label: t('tabs.methodology'), icon: IconMethodology },
+        { id: 'training' as TabType, label: t('tabs.training'), icon: IconTraining },
         { id: 'team' as TabType, label: t('tabs.team'), icon: IconTeam },
-        { id: 'partners' as TabType, label: t('tabs.partners'), icon: IconPartners },
         { id: 'volunteer' as TabType, label: t('tabs.volunteer'), icon: IconVolunteer }
     ];
 
@@ -97,11 +108,12 @@ export default function AboutPage() {
             </div>
 
             <main className="container mx-auto px-4 py-8">
-                <div className="w-full max-w-5xl mx-auto animate-fade-in min-h-[400px]">
+                <div className={`w-full mx-auto animate-fade-in min-h-[400px] ${activeTab === 'methodology' || activeTab === 'training' ? 'max-w-none' : 'max-w-5xl'}`}>
                     {activeTab === 'vision' && <VisionTab locale={locale} />}
                     {activeTab === 'change' && <ChangeTab locale={locale} />}
+                    {activeTab === 'methodology' && <MethodologySections />}
+                    {activeTab === 'training' && <TrainingContent />}
                     {activeTab === 'team' && <TeamTab locale={locale} />}
-                    {activeTab === 'partners' && <PartnersTab locale={locale} />}
                     {activeTab === 'volunteer' && <VolunteerTab locale={locale} />}
                 </div>
             </main>
@@ -117,6 +129,14 @@ function VisionTab({ locale }: { locale: string }) {
 
     const content = {
         ar: {
+            startedTitle: "كيف بدأنا",
+            startedLead: "لأن الكلمة تقتل أيضاً.",
+            startedParagraphs: [
+                "ليس بالطلقات دائماً — بل بالتحريض الذي يمهّد الطريق لها. في مجتمعات خرجت لتوّها من الصراع، كلمة واحدة منتشرة على وسائل التواصل تكفي لإعادة إشعال ما أُطفئ بصعوبة.",
+                "رأينا هذا يحدث. ولم نستطع أن نصمت.",
+                "في تموز 2025، التقى أفراد جمعهم إحساس واحد: خطاب الكراهية ينتشر بلا رقيب ولا حسيب، وتداعياته تصل إلى انتهاكات جماعية حقيقية — بينما الضحايا لا يجدون أحداً يوثّق ما حدث أو يساعدهم على المطالبة بحقوقهم.",
+                "من هذا الإحساس المشترك وُلدت مبادرة بلّغ — جهد مستقل لرصد الخطاب المنفلت، وتفعيل قنوات المحاسبة، والدفع نحو فضاء رقمي يحترم كرامة الإنسان."
+            ],
             visionTitle: "رؤيتنا",
             visionText: "فضاء يَتمكّن فيه الأفراد من التعبير عن آرائهم بحرية ومسؤولية، ضمن بيئة تحترم الكرامة الإنسانية، وتحمي التعددية من التحريض والوصم والإقصاء، وتدعم التماسك المجتمعي والعيش المشترك.",
             missionTitle: "رسالتنا",
@@ -131,6 +151,14 @@ function VisionTab({ locale }: { locale: string }) {
             ]
         },
         en: {
+            startedTitle: "How We Started",
+            startedLead: "Because words can kill too.",
+            startedParagraphs: [
+                "Not always with bullets, but with the incitement that clears the way for them. In societies emerging from conflict, a single widely shared sentence on social media can be enough to reignite what was extinguished with difficulty.",
+                "We saw this happen. And we could not stay silent.",
+                "In July 2025, people came together around one shared conviction: hate speech was spreading without oversight or accountability, and its consequences were reaching real collective violations, while victims could find no one to document what happened or help them pursue their rights.",
+                "From that shared conviction, Baligh was born: an independent effort to monitor unchecked hate speech, activate channels of accountability, and push toward a digital space that respects human dignity."
+            ],
             visionTitle: "Our Vision",
             visionText: "A space where individuals can express their opinions freely and responsibly, in an environment that respects human dignity, protects pluralism from incitement, stigma and exclusion, and supports social cohesion and coexistence.",
             missionTitle: "Our Mission",
@@ -145,6 +173,14 @@ function VisionTab({ locale }: { locale: string }) {
             ]
         },
         ku: {
+            startedTitle: "Me Çawa Dest Pê Kir",
+            startedLead: "Ji ber ku peyv jî dikare bikuje.",
+            startedParagraphs: [
+                "Ne her dem bi guleyan, lê bi wê hêrs û tehrîkê ku rê ji wê re vedike. Di civakên ku nû ji pevçûnê derketine de, tenê yek peyva belavbûyî li ser medyaya civakî dikare têra ku tiştê ku bi zehmetî vemirandiye dîsa pê bike.",
+                "Me ev yek dît. Û me nikarîbû bêdeng bimînin.",
+                "Di Tîrmeha 2025-an de, kesên ku bi hestek hevpar hatibûn cem hev: gotara kînê bê çavdêrî û bê hesabpirsîn belav dibû, û encamên wê digihîştin binpêkirinên komî yên rastîn, di dema ku qurbaniyan kesek nedidît ku ya qewimî belge bike an alîkariya wan bike ji bo daxwaza mafên xwe.",
+                "Ji vê hesta hevpar Baligh çêbû: hewldanek serbixwe ji bo şopandina gotara ji kontrolê derketî, çalakkirina rêyên hesabpirsînê, û xebitîn ji bo qadeke dîjîtal ku rûmeta mirovî rêz bigire."
+            ],
             visionTitle: "Dîtina Me",
             visionText: "Qadeke ku kes dikarin bi azadî û berpirsyarî ramanên xwe îfade bikin, di jîngehek ku rûmeta mirovî rêz dike, pirrengiyê ji tehrîk, leke-lêdan û dûrxistinê diparêze.",
             missionTitle: "Peyama Me",
@@ -164,6 +200,18 @@ function VisionTab({ locale }: { locale: string }) {
 
     return (
         <div className="space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+                <h3 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
+                    <span className="text-2xl">🌱</span> {t.startedTitle}
+                </h3>
+                <div className="space-y-4 text-[17px] text-gray-700 leading-[2.1]">
+                    <p className="text-xl font-bold text-gray-900">{t.startedLead}</p>
+                    {t.startedParagraphs.map((paragraph, idx) => (
+                        <p key={idx}>{paragraph}</p>
+                    ))}
+                </div>
+            </div>
+
             {/* Vision */}
             <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
                 <h3 className="text-2xl font-bold text-gray-900 mb-5 flex items-center gap-3">
@@ -294,25 +342,25 @@ function TeamTab({ locale }: { locale: string }) {
 
     const content = {
         ar: {
-            title: "فريق العمل في بَلِّغ",
-            para1: "تقوم مبادرة بَلِّغ على فريق متعدد التخصصات يضم خبرات في البحث الاجتماعي، والتحليل، والعمل الحقوقي، والتقنيات الرقمية. نشأ هذا الفريق من نواة تأسيسية بدأت التعاون منذ المراحل الأولى للمبادرة، وأسهمت في بلورة رؤيتها ومنهجيتها وأطر عملها الأساسية.",
-            para2: "ينطلق عمل الفريق من التزام واضح بالمعايير الأخلاقية، وحساسية السياق، واحترام الخصوصية، والعمل القائم على الأدلة وتقليل الضرر. يعمل الفريق ضمن هيكل تعاوني مرن وتكاملي، بما يعزز التعلم المستمر والمسؤولية الجماعية، ويدعم التطوير المتواصل لأدوات ومنهجيات المبادرة.",
+            title: "أعضاء المبادرة",
+            para1: "",
+            para2: "",
             para3: "",
-            teamSectionTitle: "فريقنا"
+            teamSectionTitle: "أعضاء المبادرة"
         },
         en: {
-            title: "The Baligh Team",
+            title: "Initiative Members",
             para1: "Baligh operates with a multidisciplinary team bringing together expertise in social research, analysis, human rights work, and digital technologies. This work was formed from a founding team that began collaboration from the early stages of establishing the initiative.",
             para2: "The initiative views its team as the core of continuous development and the engine of daily work, not just an administrative framework. The team's work is built on commitment to ethical standards, context sensitivity, privacy respect, and evidence-based work.",
             para3: "Today, the team includes researchers, analysts, developers, and experts working with clear roles within a flexible collaborative structure that encourages expertise integration and continuous learning.",
-            teamSectionTitle: "Team Members"
+            teamSectionTitle: "Initiative Members"
         },
         ku: {
-            title: "Tîma Xebatê li Balagh",
+            title: "Endamên Destpêşxeriyê",
             para1: "Balagh bi tîmeke pir-şaxe ya ku pisporiyên di lêkolîna civakî, analîz, xebata mafên mirovan, û teknolojiyên dîjîtal de berhev dike dixebite.",
             para2: "Destpêşxerî tîma xwe wekî navika pêşxistina berdewam û motora xebata rojane dibîne, ne tenê çarçoveyek îdarî.",
             para3: "Îro, tîm lêkolîner, analîzkar, pêşdebir û pisporan dihewîne ku bi rolên zelal di nav avahiyek hevkarî ya nermbûyî de dixebitin.",
-            teamSectionTitle: "Endamên Tîmê"
+            teamSectionTitle: "Endamên Destpêşxeriyê"
         }
     };
     const t = content[locale as keyof typeof content] || content.ar;
@@ -341,19 +389,6 @@ function TeamTab({ locale }: { locale: string }) {
 
     return (
         <div className="space-y-8" dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                        <span className="text-2xl">👥</span> {t.title}
-                    </h3>
-                </div>
-                <div className="space-y-5 text-[17px] text-gray-700 leading-[2.1]">
-                    <p>{t.para1}</p>
-                    <p>{t.para2}</p>
-                    <p>{t.para3}</p>
-                </div>
-            </div>
-
             <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-6 px-2 text-center">{t.teamSectionTitle}</h3>
                 {displayMembers.length === 0 ? (
@@ -406,76 +441,48 @@ function TeamTab({ locale }: { locale: string }) {
     );
 }
 
-function PartnersTab({ locale }: { locale: string }) {
-    const isRtl = locale === 'ar';
-    const content = {
-        en: {
-            title: 'Partners',
-            body: 'We collaborate with research, tech, and human-rights organizations to build effective monitoring and analysis tools. Partner entries will be managed from the dashboard soon.',
-            cta: 'Institutional Partnership'
-        },
-        ku: {
-            title: 'Hevkarên me',
-            body: 'Em bi rêxistinên lêkolînê, teknîkî û mafên mirovan re hevkariyê dikin ji bo amûrên şopandin û analîzkirinê. Kêşeya hevkariya dê nêzde ji panelê were rêvebirin.',
-            cta: 'Hevkarî ya Serlêdanî'
-        },
-        ar: {
-            title: 'الشراكات في بَلِّغ',
-            body: 'تنطلق فلسفة بَلِّغ في بناء الشراكات من قناعة بأن مواجهة خطاب الكراهية والعنف تتطلب عملًا تشاركيًا طويل الأمد، قائمًا على تبادل المعرفة وتكامل الأدوار. وتنظر المبادرة إلى الشراكات بوصفها خيارًا استراتيجيًا لتعزيز الأثر، لا مجرد إطار تنفيذي أو تمويلي. تعتمد بَلِّغ في شراكاتها على معايير واضحة، في مقدمتها الاستقلالية، والمنهجية القائمة على الأدلة، واحترام الخصوصية وحساسية السياق. وتحرص على أن تكون هذه الشراكات منصات تعاون مهني تُسهم في تطوير أدوات الرصد والتحليل، وبناء القدرات، وإنتاج معرفة قابلة للاستخدام من قبل صناع القرار والفاعلين المدنيين والبحثيين.',
-            cta: 'شراكة مؤسسية'
-        },
-    };
-    const t = content[locale as keyof typeof content] || content.ar;
-
-    return (
-        <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm" dir={isRtl ? 'rtl' : 'ltr'}>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">🤝 {t.title}</h3>
-            <p className={`text-[17px] text-gray-700 leading-[2] ${isRtl ? 'text-right' : 'text-left'}`}>{t.body}</p>
-            <div className="mt-6 flex justify-center">
-                <a
-                    href="mailto:info@baligh.org"
-                    className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-[#1E8C4E] text-white font-semibold text-sm shadow-sm hover:bg-[#177342] transition-colors"
-                >
-                    {t.cta || 'Institutional Partnership'}
-                </a>
-            </div>
-        </div>
-    );
-}
-
 function VolunteerTab({ locale }: { locale: string }) {
     const isRtl = locale === 'ar';
+    const [isVolunteerModalOpen, setIsVolunteerModalOpen] = useState(false);
     const content = {
         ar: {
-            title: 'التطوّع في بَلِّغ',
-            body: 'يقوم عمل مبادرة بَلِّغ منذ انطلاقها على الجهد التطوعي بوصفه ركيزة أساسية ومنهجًا واعيًا للعمل، لا مجرد مساهمة مؤقتة. فقد تأسست المبادرة كجهد تطوعي مستقل، واستمر تطورها بالاعتماد على خبرات وأدوار تطوعية متخصصة أسهمت في بناء منهجيتها وأدواتها ومخرجاتها. تنظر المبادرة إلى التطوّع كجزء بنيوي من هويتها، لما يتيحه من تنوّع معرفي واستقلالية ومرونة تنظيمية. فالتطوّع في بَلِّغ هو مشاركة مهنية قائمة على أدوار واضحة ومسؤوليات محددة، ويخضع لمعايير أخلاقية ومنهجية تحكم طبيعة العمل وتضمن جودته. تفتح بَلِّغ باب التطوّع أمام الأفراد الراغبين في المساهمة بوقتهم وخبراتهم ضمن مجالات متعددة، وتعتبر المتطوعين جزءًا فاعلًا من بنيتها التنظيمية، يشاركون في تطوير العمل وتعزيز أثره، بما يسهم في بناء فضاء عام أكثر مسؤولية واحترامًا للكرامة الإنسانية.',
+            title: 'التطوع في بَلِّغ — شراكة لا مساهمة',
+            body: 'قامت بلّغ منذ تأسيسها على جهد تطوعي مستقل، واستمر تطورها بخبرات متخصصة أسهمت في بناء منهجيتها وأدواتها. التطوع هنا ليس ترقيعاً لفجوات — هو جزء بنيوي من هوية المبادرة، يمنحها تنوعاً معرفياً واستقلالية حقيقية. لكل متطوع دور واضح ومسؤوليات محددة، ومعايير أخلاقية ومنهجية تحكم العمل وتضمن جودته. المتطوعون في بلّغ ليسوا مساعدين — هم شركاء في بناء فضاء رقمي أكثر مسؤولية.',
             cta: 'تطوّع معنا'
         },
         en: {
-            title: 'Volunteer',
-            body: 'Support Balagh by reporting harmful content, contributing to monitoring and analysis, or helping with translations. Reach out to join the effort.',
+            title: 'Volunteering at Balagh — Partnership, Not Just Contribution',
+            body: 'Balagh has relied, since its founding, on independent volunteer effort, and it has continued to grow through specialized expertise that helped shape its methodology and tools. Volunteering here is not patchwork for gaps. It is a structural part of the initiative’s identity, giving it real intellectual diversity and independence. Every volunteer has a clear role, defined responsibilities, and ethical and methodological standards that govern the work and protect its quality. Volunteers at Balagh are not assistants. They are partners in building a more responsible digital space.',
             cta: 'Volunteer with us'
         },
         ku: {
-            title: 'Xebatkarî',
-            body: 'Hûn dikarin bi ragihandina naveroka xatarbar, şopandin û analîzkirin, an jî wergerandin destê xwe bigihînin Balagh. Ji bo beşdarbûnê bi tîmê re têkilî daynin.',
+            title: 'Xebatkarî li Baligh — Hevkarî ye, ne tenê Beşdarî',
+            body: 'Baligh ji destpêka xwe ve li ser hewldana dilxwazî ya serbixwe ava bûye, û pêşketina wê bi şarezayiyên taybet berdewam bûye ku di avakirina metodolojî û amûrên wê de beşdar bûne. Li vir xebatkarî ne tenê dagirtina valahiyan e, lê beşek bingehîn ji nasnameya destpêşxeriyê ye ku cihêrengiya zanînî û serbixwebûnek rastîn pê dide. Ji bo her dilxwazek rolêk zelal û berpirsiyariyên diyarkirî hene, û pîvanên exlaqî û metodolojîk hene ku xebatê rê ve dibin û kalîteya wê diparêzin. Dilxwazên Baligh ne alîkar in, ew hevkar in di avakirina qadeke dîjîtal a berpirstir de.',
             cta: 'Beşdarî me bibe'
         },
     };
     const t = content[locale as keyof typeof content] || content.ar;
 
     return (
-        <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm" dir={isRtl ? 'rtl' : 'ltr'}>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">🙌 {t.title}</h3>
-            <p className={`text-[17px] text-gray-700 leading-[2] ${isRtl ? 'text-right' : 'text-left'}`}>{t.body}</p>
-            <div className="mt-6 flex justify-center">
-                <a
-                    href="mailto:info@baligh.org"
-                    className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-[#1E8C4E] text-white font-semibold text-sm shadow-sm hover:bg-[#177342] transition-colors"
-                >
-                    {t.cta || 'Volunteer'}
-                </a>
+        <>
+            <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm" dir={isRtl ? 'rtl' : 'ltr'}>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">🙌 {t.title}</h3>
+                <p className={`text-[17px] text-gray-700 leading-[2] ${isRtl ? 'text-right' : 'text-left'}`}>{t.body}</p>
+                <div className="mt-6 flex justify-center">
+                    <button
+                        type="button"
+                        onClick={() => setIsVolunteerModalOpen(true)}
+                        className="inline-flex items-center justify-center px-5 py-3 rounded-full bg-[#1E8C4E] text-white font-semibold text-sm shadow-sm hover:bg-[#177342] transition-colors"
+                    >
+                        {t.cta || 'Volunteer'}
+                    </button>
+                </div>
             </div>
-        </div>
+            <VolunteerApplicationModal
+                isOpen={isVolunteerModalOpen}
+                locale={locale}
+                onClose={() => setIsVolunteerModalOpen(false)}
+            />
+        </>
     );
 }

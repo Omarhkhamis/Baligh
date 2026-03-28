@@ -28,8 +28,10 @@
   },
   "landing": {
     "hero": {
-      "title": "Alîkar be ji bo ewlekirina qada dîjîtal",
+      "title": "Peyvekek zirar dide ... û peyvekek xilas dike",
       "subtitle": "Amûreke analîzê ya ku li ser metodolojiyeke zanistî ji hêla tîma destpêşxeriyê ve hatiye pêşxistin, ku hişê çêkirî û pêdaçûna mirovî dike yek",
+      "noteTitle": "Baligh ne gilîkirin e — ew redkirina bêdengiyê ye",
+      "noteBody": "Ragihandina gotara kînê ne agahdarkirina li ser kesekî ye — ew gotineke zelal e: kerametî min heqê parastinê heye",
       "cta1": "Niha Ragihîne",
       "cta2": "Bibîne Em Çawa Alîkariyê Dikin"
     },
@@ -72,6 +74,40 @@
       },
       "features": "✓ Analîza bi hêza AI • ✓ Piştgirî ji bo 9 welatan • ✓ Ewle û 100% belaş"
     },
+    "observatory": {
+      "eyebrow": "Radar Baligh",
+      "title": "Niha çi dibe",
+      "subtitle": "Daneyên zindî yên çavdêriyê - bi berdewamî tên nûkirin",
+      "cta": "Hemû radarê bibîne",
+      "emptyTitle": "Radar tê nûkirin",
+      "emptyBody": "Dema ku amade bibe, li vir kurteyek ji dawîn snapshota weşandî dê xuya bibe.",
+      "thisMonth": "Vê mehê",
+      "latestMonth": "Dawîn meha şopandî",
+      "documentedCases": "dozên belgekirî",
+      "vsLastMonth": "li gor meha borî",
+      "noComparison": "Hêj pîvaneke mehane tune ye",
+      "topTargetedGroup": "Herî zêde hedefkirî",
+      "ofCases": "{value}% ji dozan",
+      "dominantType": "Cureyê serdest",
+      "ofClassifications": "{value}% ji polînkirinan",
+      "targetBadges": {
+        "high": "Bilind",
+        "medium": "Berçav",
+        "watch": "Tê şopandin"
+      },
+      "classificationLabels": {
+        "explicit": "Gotara aşkere",
+        "implicit": "Gotara veşartî",
+        "incitement": "Teşwîq",
+        "none": "Nebinavkirî"
+      },
+      "classificationBadges": {
+        "explicit": "Zelal",
+        "implicit": "Qada şîn",
+        "incitement": "Hişyariya bilind",
+        "none": "Parêzek kêmtir"
+      }
+    },
     "news": {
       "title": "Nûçe û Çavkanî",
       "subtitle": "Nûçe û çavkaniyên perwerdehiyê yên dawî bişopîne",
@@ -109,7 +145,7 @@
   },
   "home": {
     "hero": {
-      "title": "Alîkar be ji bo ewlekirina qada dîjîtal",
+      "title": "Peyvekek zirar dide ... û peyvekek xilas dike",
       "subtitle": "Amûreke analîzê ya ku li ser metodolojiyeke zanistî ji hêla tîma destpêşxeriyê ve hatiye pêşxistin, ku hişê çêkirî û pêdaçûna mirovî dike yek"
     },
     "form": {
@@ -1287,8 +1323,9 @@
     "tabs": {
       "vision": "Dîtina Me",
       "change": "Teoriya Guherînê",
-      "team": "Tîma Me",
-      "partners": "Hevkarî",
+      "methodology": "Metodolojî",
+      "training": "Perwerdeyên Taybet",
+      "team": "Endamên Destpêşxeriyê",
       "volunteer": "Dilxwazî"
     }
   }

@@ -1,7 +1,7 @@
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'ANALYST', 'EDITOR', 'VIEWER'] as const;
 
 export type AdminRole = (typeof ADMIN_ROLES)[number];
-export type PermissionResource = 'news' | 'studies' | 'reports' | 'team';
+export type PermissionResource = 'news' | 'studies' | 'reports' | 'team' | 'volunteer';
 export type PermissionAction = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 const editorPermissions: Record<PermissionResource, ReadonlySet<PermissionAction>> = {
@@ -9,6 +9,7 @@ const editorPermissions: Record<PermissionResource, ReadonlySet<PermissionAction
     studies: new Set(['GET', 'POST', 'PUT', 'PATCH']),
     reports: new Set([]),
     team: new Set([]),
+    volunteer: new Set(['GET']),
 };
 
 const analystPermissions: Record<PermissionResource, ReadonlySet<PermissionAction>> = {
@@ -16,6 +17,7 @@ const analystPermissions: Record<PermissionResource, ReadonlySet<PermissionActio
     studies: new Set(['GET']),
     reports: new Set(['GET', 'PUT', 'PATCH']),
     team: new Set([]),
+    volunteer: new Set(['GET']),
 };
 
 const viewerPermissions: Record<PermissionResource, ReadonlySet<PermissionAction>> = {
@@ -23,6 +25,7 @@ const viewerPermissions: Record<PermissionResource, ReadonlySet<PermissionAction
     studies: new Set([]),
     reports: new Set([]),
     team: new Set([]),
+    volunteer: new Set([]),
 };
 
 function normalizeAction(action: PermissionAction): PermissionAction {

@@ -27,6 +27,8 @@ type AdminI18nValue = {
     formatSpeechType: (value: string | null | undefined) => string;
     formatReviewStatus: (value: string | null | undefined) => string;
     formatTargetGroup: (value: string | null | undefined) => string;
+    formatVolunteerArea: (value: string | null | undefined) => string;
+    formatVolunteerHours: (value: string | null | undefined) => string;
 };
 
 const ADMIN_MESSAGES = {
@@ -79,6 +81,7 @@ const ADMIN_MESSAGES = {
             reports: 'التقارير والدراسات',
             legal: 'البلاغات',
             radar: 'المرصد',
+            volunteerForms: 'استمارات التطوع',
             admin: 'الحساب',
         },
         roles: {
@@ -327,6 +330,24 @@ const ADMIN_MESSAGES = {
             publishedAt: 'تاريخ النشر',
             reports: 'البلاغات',
         },
+        volunteerForms: {
+            title: 'استمارات التطوع',
+            count: '{count} استمارة',
+            loading: 'جارٍ تحميل استمارات التطوع...',
+            empty: 'لا توجد استمارات تطوع بعد.',
+            openDetails: 'عرض التفاصيل',
+            submittedAt: 'تاريخ الإرسال',
+            applicantName: 'الاسم',
+            applicantEmail: 'البريد الإلكتروني',
+            applicantPhone: 'الهاتف',
+            volunteerArea: 'مجال التطوع',
+            background: 'الخلفية / التخصص',
+            weeklyHours: 'الالتزام الزمني',
+            motivation: 'الدافع',
+            detailsTitle: 'تفاصيل استمارة التطوع',
+            detailsSubtitle: 'استعراض داخلي فقط. لا يمكن تعديل الاستمارة أو حذفها من هذه اللوحة.',
+            noPhone: 'غير مذكور',
+        },
         categories: {
             news: {
                 training: 'تدريب',
@@ -405,6 +426,19 @@ const ADMIN_MESSAGES = {
             other_groups_minorities: 'أقليات أخرى',
             unspecified: 'غير محدد',
         },
+        volunteerAreas: {
+            research_analysis: 'البحث والتحليل',
+            monitoring_documentation: 'الرصد والتوثيق',
+            technology_programming: 'التقنية والبرمجة',
+            communications_media: 'التواصل والإعلام',
+            legal_support: 'الدعم القانوني',
+            other: 'أخرى',
+        },
+        volunteerHours: {
+            under_3: 'أقل من 3 ساعات',
+            between_3_7: '3 إلى 7 ساعات',
+            over_7: 'أكثر من 7 ساعات',
+        },
         errors: {
             unauthorized: 'يجب تسجيل الدخول للوصول إلى لوحة الإدارة',
             permission: 'لا تملك الصلاحية لتنفيذ هذا الإجراء',
@@ -416,6 +450,7 @@ const ADMIN_MESSAGES = {
             loadReports: 'تعذر تحميل التقارير',
             saveReport: 'تعذر حفظ التقرير',
             loadLegalReports: 'تعذر تحميل البلاغات',
+            loadVolunteerForms: 'تعذر تحميل استمارات التطوع',
             updateReview: 'تعذر تحديث حالة المراجعة',
             loadRadar: 'تعذر تحميل حالة المرصد',
             publishRadar: 'تعذر تحديث صفحة المرصد',
@@ -477,6 +512,7 @@ const ADMIN_MESSAGES = {
             reports: 'Reports & Studies',
             legal: 'Reports',
             radar: 'Radar Control',
+            volunteerForms: 'Volunteer Forms',
             admin: 'Account',
         },
         roles: {
@@ -725,6 +761,24 @@ const ADMIN_MESSAGES = {
             publishedAt: 'Published at',
             reports: 'Reports',
         },
+        volunteerForms: {
+            title: 'Volunteer Forms',
+            count: '{count} forms',
+            loading: 'Loading volunteer forms...',
+            empty: 'No volunteer forms yet.',
+            openDetails: 'View details',
+            submittedAt: 'Submitted at',
+            applicantName: 'Name',
+            applicantEmail: 'Email',
+            applicantPhone: 'Phone',
+            volunteerArea: 'Volunteer area',
+            background: 'Background / Specialization',
+            weeklyHours: 'Weekly availability',
+            motivation: 'Motivation',
+            detailsTitle: 'Volunteer form details',
+            detailsSubtitle: 'Internal view only. The form cannot be edited or deleted from this panel.',
+            noPhone: 'Not provided',
+        },
         categories: {
             news: {
                 training: 'Training',
@@ -803,6 +857,19 @@ const ADMIN_MESSAGES = {
             other_groups_minorities: 'Other minorities',
             unspecified: 'Unspecified',
         },
+        volunteerAreas: {
+            research_analysis: 'Research and Analysis',
+            monitoring_documentation: 'Monitoring and Documentation',
+            technology_programming: 'Technology and Programming',
+            communications_media: 'Communications and Media',
+            legal_support: 'Legal Support',
+            other: 'Other',
+        },
+        volunteerHours: {
+            under_3: 'Less than 3 hours',
+            between_3_7: '3 to 7 hours',
+            over_7: 'More than 7 hours',
+        },
         errors: {
             unauthorized: 'You must sign in to access the admin dashboard',
             permission: 'You do not have permission to perform this action',
@@ -814,6 +881,7 @@ const ADMIN_MESSAGES = {
             loadReports: 'Failed to load reports',
             saveReport: 'Failed to save the report',
             loadLegalReports: 'Failed to load legal reports',
+            loadVolunteerForms: 'Failed to load volunteer forms',
             updateReview: 'Failed to update review status',
             loadRadar: 'Failed to load radar publication state',
             publishRadar: 'Failed to update the radar page',
@@ -1041,6 +1109,9 @@ export function AdminI18nProvider({
             if (normalized.includes('failed_to_load_legal_reports') || normalized.includes('load_legal_reports')) {
                 return t('errors.loadLegalReports');
             }
+            if (normalized.includes('failed_to_load_volunteer_forms') || normalized.includes('load_volunteer_forms')) {
+                return t('errors.loadVolunteerForms');
+            }
             if (normalized.includes('failed_to_load_account') || normalized.includes('load_account')) {
                 return t('errors.loadAccount');
             }
@@ -1141,6 +1212,20 @@ export function AdminI18nProvider({
                 return typeof translated === 'string' ? translated : source;
             },
             formatTargetGroup: (value) => translateKnownValue('targetGroups', targetGroupAliases, value),
+            formatVolunteerArea: (value) => {
+                const source = (value || '').trim();
+                if (!source) return t('common.none');
+                const key = normalizeValueKey(source);
+                const translated = getNestedValue(messages, `volunteerAreas.${key}`) ?? getNestedValue(fallbackMessages, `volunteerAreas.${key}`);
+                return typeof translated === 'string' ? translated : source;
+            },
+            formatVolunteerHours: (value) => {
+                const source = (value || '').trim();
+                if (!source) return t('common.none');
+                const key = normalizeValueKey(source);
+                const translated = getNestedValue(messages, `volunteerHours.${key}`) ?? getNestedValue(fallbackMessages, `volunteerHours.${key}`);
+                return typeof translated === 'string' ? translated : source;
+            },
         };
     }, [dir, isSwitchingLocale, locale, router, startTransition]);
 

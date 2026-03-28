@@ -39,10 +39,8 @@ export default function AppHeader() {
     const mobileNavLinks = [
         { href: `/${locale}`, label: t('nav.home'), icon: '🏠', description: locale === 'ar' ? 'الصفحة الرئيسية' : 'Home Page' },
         { href: `/${locale}/about`, label: t('topBar.about'), icon: '👤', description: locale === 'ar' ? 'من نحن' : 'About Us' },
-        { href: `/${locale}/methodology`, label: t('topBar.methodology'), icon: '🧭', description: locale === 'ar' ? 'المنهجية' : 'Methodology' },
         { href: `/${locale}/legal`, label: t('nav.legal'), icon: '⚖️', description: locale === 'ar' ? 'الإطار القانوني' : 'Legal Framework' },
         { href: `/${locale}/protection`, label: t('nav.protection'), icon: '🛡️', description: locale === 'ar' ? 'الحماية الرقمية' : 'Digital Protection' },
-        { href: `/${locale}/training`, label: t('nav.training'), icon: '🎓', description: locale === 'ar' ? 'التدريب' : 'Training' },
         { href: `/${locale}/monitoring`, label: monitoringNavLabel, icon: '📈', description: locale === 'ar' ? 'تقارير الرصد' : 'Monitoring Reports' },
         { href: `/${locale}/reports`, label: t('nav.reports'), icon: '📊', description: locale === 'ar' ? 'التقارير' : 'Reports' },
         { href: `/${locale}/news`, label: t('nav.news'), icon: '📰', description: locale === 'ar' ? 'الأخبار' : 'News' },
@@ -178,10 +176,8 @@ export default function AppHeader() {
                     <div className="flex items-center justify-center gap-2 py-4 flex-wrap">
                         {[
                             { href: `/${locale}/about`, label: t('topBar.about') },
-                            { href: `/${locale}/methodology`, label: t('topBar.methodology') },
                             { href: `/${locale}/legal`, label: t('nav.legal'), icon: '⚖️' },
                             { href: `/${locale}/protection`, label: t('nav.protection'), icon: '🛡️' },
-                            { href: `/${locale}/training`, label: t('nav.training'), icon: '🎓' },
                             { href: `/${locale}/monitoring`, label: monitoringNavLabel, icon: '📈' },
                             { href: `/${locale}/reports`, label: t('nav.reports'), icon: '📊' },
                             { href: `/${locale}/news`, label: t('nav.news'), icon: '📰' },

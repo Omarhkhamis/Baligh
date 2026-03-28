@@ -206,6 +206,23 @@ model TeamMember {
   @@index([sortOrder])
 }
 
+model VolunteerApplication {
+  id            String   @id @default(uuid()) @db.Uuid
+  locale        String?
+  name          String
+  email         String
+  phone         String?
+  volunteerArea String
+  background    String
+  weeklyHours   String
+  motivation    String
+  createdAt     DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([createdAt])
+  @@index([volunteerArea])
+}
+
 model AnalysisLog {
   id               String    @id @default(uuid()) @db.Uuid
   inputText        String

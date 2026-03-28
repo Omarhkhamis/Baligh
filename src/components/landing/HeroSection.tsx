@@ -8,6 +8,7 @@ export default function HeroSection() {
     const t = useTranslations('landing.hero');
     const tTrust = useTranslations('landing.trustIndicators');
     const { openReportModal } = useReportModal();
+    const isRtl = locale === 'ar';
 
     return (
         <section className="relative min-h-[85vh] flex items-center justify-center bg-white px-4 py-12 md:py-20 overflow-hidden">
@@ -63,6 +64,29 @@ export default function HeroSection() {
                     <div className="flex items-center gap-3">
                         <span className="text-2xl grayscale">✓</span>
                         <span className="font-semibold text-gray-700 text-sm md:text-base">{tTrust('free.title')}</span>
+                    </div>
+                </div>
+
+                <div
+                    dir={isRtl ? 'rtl' : 'ltr'}
+                    className="mt-10 w-full max-w-5xl animate-fade-up delay-[400ms]"
+                >
+                    <div className="relative overflow-hidden rounded-[28px] border border-emerald-200/80 bg-gradient-to-l from-emerald-50 via-[#eef8f2] to-white px-6 py-6 md:px-8 md:py-7 shadow-[0_20px_45px_-30px_rgba(22,101,52,0.35)]">
+                        <div
+                            aria-hidden="true"
+                            className={`absolute top-0 h-28 w-28 rounded-full bg-emerald-100/70 blur-2xl ${isRtl ? 'left-4' : 'right-4'}`}
+                        />
+                        <div className={`relative flex items-start gap-4 ${isRtl ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                            <span className="mt-2 h-3.5 w-3.5 shrink-0 rounded-full bg-emerald-500" />
+                            <div className="space-y-2">
+                                <h2 className="text-xl md:text-2xl font-bold text-emerald-900 leading-snug">
+                                    {t('noteTitle')}
+                                </h2>
+                                <p className="text-base md:text-xl text-emerald-800 leading-relaxed">
+                                    {t('noteBody')}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

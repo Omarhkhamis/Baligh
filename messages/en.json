@@ -28,8 +28,10 @@
   },
   "landing": {
     "hero": {
-      "title": "Help Make the Digital Space Safer",
+      "title": "One word harms ... and one word saves",
       "subtitle": "An analysis tool based on a scientific methodology developed by the initiative team, combining artificial intelligence and human review",
+      "noteTitle": "Baligh is not informing on others — it is refusing silence",
+      "noteBody": "Reporting hate speech is not telling on someone — it is a clear statement: my dignity deserves protection",
       "cta1": "Report Now",
       "cta2": "See How We Help"
     },
@@ -72,6 +74,40 @@
       },
       "features": "✓ AI-powered analysis • ✓ Support for 9 countries • ✓ Safe and 100% free"
     },
+    "observatory": {
+      "eyebrow": "Baligh Radar",
+      "title": "What's Happening Now",
+      "subtitle": "Live monitoring data - continuously updating",
+      "cta": "View the full radar",
+      "emptyTitle": "Radar update in progress",
+      "emptyBody": "A short summary of the latest published snapshot will appear here when available.",
+      "thisMonth": "This Month",
+      "latestMonth": "Latest Tracked Month",
+      "documentedCases": "documented cases",
+      "vsLastMonth": "vs last month",
+      "noComparison": "No monthly comparison yet",
+      "topTargetedGroup": "Most Targeted Group",
+      "ofCases": "{value}% of cases",
+      "dominantType": "Dominant Type",
+      "ofClassifications": "{value}% of classifications",
+      "targetBadges": {
+        "high": "High",
+        "medium": "Notable",
+        "watch": "Under watch"
+      },
+      "classificationLabels": {
+        "explicit": "Explicit speech",
+        "implicit": "Implicit speech",
+        "incitement": "Incitement",
+        "none": "Unclassified"
+      },
+      "classificationBadges": {
+        "explicit": "Clear",
+        "implicit": "Gray zone",
+        "incitement": "High alert",
+        "none": "Lower share"
+      }
+    },
     "news": {
       "title": "Latest News & Resources",
       "subtitle": "Follow the latest updates and educational resources",
@@ -109,7 +145,7 @@
   },
   "home": {
     "hero": {
-      "title": "Help Make the Digital Space Safer",
+      "title": "One word harms ... and one word saves",
       "subtitle": "An analysis tool based on a scientific methodology developed by the initiative team, combining artificial intelligence and human review"
     },
     "form": {
@@ -1286,8 +1322,9 @@
     "tabs": {
       "vision": "Our Vision",
       "change": "Theory of Change",
-      "team": "Our Team",
-      "partners": "Partnerships",
+      "methodology": "Methodology",
+      "training": "Specialized Training",
+      "team": "Initiative Members",
       "volunteer": "Volunteer"
     }
   }

@@ -3,9 +3,29 @@
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-export default function AnalysisChecklist() {
+type AnalysisChecklistProps = {
+    variant?: 'blue' | 'green';
+};
+
+export default function AnalysisChecklist({ variant = 'blue' }: AnalysisChecklistProps) {
     const t = useTranslations('protection.content.awareness.checklist');
     const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+
+    const theme = variant === 'green'
+        ? {
+            container: 'bg-green-50 border-green-200',
+            optionHover: 'hover:border-green-400',
+            checkbox: 'text-green-600 focus:ring-green-500',
+            contextBorder: 'border-r-4 border-green-600',
+            contextText: 'text-green-800'
+        }
+        : {
+            container: 'bg-blue-50 border-blue-200',
+            optionHover: 'hover:border-blue-400',
+            checkbox: 'text-blue-600 focus:ring-blue-500',
+            contextBorder: 'border-r-4 border-blue-600',
+            contextText: 'text-blue-800'
+        };
 
     const questions = [
         t('questions.0'),
@@ -35,20 +55,20 @@ export default function AnalysisChecklist() {
     const result = getResultMessage();
 
     return (
-        <div className="bg-blue-50 p-8 rounded-xl border border-blue-200">
+        <div className={`p-8 rounded-xl border ${theme.container}`}>
             <h4 className="text-xl font-bold text-gray-900 mb-6">{t('title')}</h4>
 
             <div className="space-y-4 mb-6">
                 {questions.map((question, index) => (
                     <label
                         key={index}
-                        className="flex items-start gap-4 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-blue-400 cursor-pointer transition-all"
+                        className={`flex items-start gap-4 p-4 bg-white rounded-lg border-2 border-gray-200 cursor-pointer transition-all ${theme.optionHover}`}
                     >
                         <input
                             type="checkbox"
                             checked={checkedItems.has(index)}
                             onChange={() => toggleCheck(index)}
-                            className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                            className={`mt-1 w-5 h-5 rounded focus:ring-2 ${theme.checkbox}`}
                         />
                         <span className="text-gray-800 leading-relaxed">{question}</span>
                     </label>
@@ -65,9 +85,9 @@ export default function AnalysisChecklist() {
             )}
 
             {/* Syrian Context Alert */}
-            <div className="mt-6 p-6 bg-white rounded-lg border-r-4 border-blue-600">
+            <div className={`mt-6 p-6 bg-white rounded-lg ${theme.contextBorder}`}>
                 <p className="text-gray-700 leading-relaxed">
-                    <strong className="text-blue-800">{t('contextAlert')}</strong>
+                    <strong className={theme.contextText}>{t('contextAlert')}</strong>
                 </p>
             </div>
         </div>

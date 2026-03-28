@@ -1,21 +1,31 @@
 import AppHeader from '../../components/AppHeader';
+import AppFooter from '../../components/AppFooter';
 import HeroSection from '../../components/landing/HeroSection';
-import ServiceCards from '../../components/landing/ServiceCards';
+import MonitoringSnapshot from '../../components/landing/MonitoringSnapshot';
 import ReportsSection from '../../components/landing/ReportsSection';
 import LatestNews from '../../components/landing/LatestNews';
-import FinalCTA from '../../components/landing/FinalCTA';
+import HomeAnalysisChecklist from '../../components/landing/HomeAnalysisChecklist';
+import { getPublishedRadarDashboardData } from '../../lib/radar-dashboard';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const publishedRadar = await getPublishedRadarDashboardData();
+
   return (
     <div className="min-h-screen bg-white">
       <AppHeader />
       <main>
         <HeroSection />
-        <ServiceCards />
+        <MonitoringSnapshot
+          data={publishedRadar.data}
+          publication={publishedRadar.publication}
+        />
         <ReportsSection />
         <LatestNews />
-        <FinalCTA />
+        <HomeAnalysisChecklist />
       </main>
+      <AppFooter />
     </div>
   );
 }
