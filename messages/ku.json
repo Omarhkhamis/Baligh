@@ -226,6 +226,7 @@
       "validation": "Ji kerema xwe qada pêwîst dagire berî şandinê.",
       "validationPlatform": "Te vê naverokê li kîjan platformê dît?",
       "validationPostUrl": "Lînka postê pêwîst e",
+      "validationPostUrlInvalid": "Lînka postê ne rast e",
       "validationPostText": "Ji kerema xwe herî kêm nivîsa postê binivîse",
       "validationRisk": "Ma tu difikirî ku ev metirsiyeke rasterast e? Ji kerema xwe bersivekê hilbijêre",
       "submitError": "Niha nekarî ragihandin bişîne. Ji kerema xwe paşê dîsa biceribîne."

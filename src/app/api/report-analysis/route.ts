@@ -23,6 +23,7 @@ import {
     encryptSensitiveStringArray,
     toDateOnlyTimestamp,
 } from '@/lib/data-security';
+import { normalizeReportPostLink } from '@/lib/report-post-link';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
 import {
     canonicalizeKnownTargetGroupValues,
@@ -717,6 +718,11 @@ export async function POST(req: NextRequest) {
         if (!post_link) {
             return NextResponse.json({ error: 'Post URL is required' }, { status: 400 });
         }
+
+        const normalizedPostLink = normalizeReportPostLink(post_link);
+        if (!normalizedPostLink) {
+            return NextResponse.json({ error: 'Post URL is invalid' }, { status: 400 });
+        }
         if (!immediate_danger) {
             return NextResponse.json({ error: 'Do you think this poses a direct threat? Please select an answer' }, { status: 400 });
         }
@@ -766,7 +772,7 @@ export async function POST(req: NextRequest) {
                 reportNumber,
                 platform,
                 platformLabel: platform_label,
-                postLink: post_link,
+                postLink: normalizedPostLink,
                 text: analysisInputText,
                 locale,
                 targetGroupLabels: selectedTargetGroupLabels,
@@ -857,7 +863,7 @@ export async function POST(req: NextRequest) {
 
         const details = [
             `Platform: ${platform}`,
-            `Post link: ${post_link}`,
+            `Post link: ${normalizedPostLink}`,
             `Target groups: ${selectedTargetGroupText || '—'}`,
             `Immediate danger: ${immediate_danger}`,
             allStoredUploads.length > 0 ? `Attached files: ${allStoredUploads.length}` : null,
@@ -917,7 +923,7 @@ export async function POST(req: NextRequest) {
                                 targetGroups: selectedTargetGroupLabels,
                                 target_group_keys: selectedTargetGroupKeys,
                                 targetGroupKeys: selectedTargetGroupKeys,
-                                postLink: post_link,
+                                postLink: normalizedPostLink,
                                 platform,
                                 platformLabel: platform_label || platform,
                                 immediateDanger: immediate_danger,
@@ -970,7 +976,7 @@ export async function POST(req: NextRequest) {
                             escalationFlag,
                             humanReviewStatus,
                             platform: normalizePlatformValue(platform),
-                            postUrl: post_link,
+                            postUrl: normalizedPostLink,
                             imageUrls: encryptSensitiveStringArray(allStoredUploads.map((storedFile) => storedFile.url)),
                             targetGroupsUser: selectedTargetGroupLabels,
                             isDirectRisk: normalizeDirectRiskValue(immediate_danger),

@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSeverityScoreOutOfFive, mapRiskLevel } from '@/lib/analysis-utils';
 import { generateReportNumber, isUniqueConstraintError } from '@/lib/report-number';
 import { buildEncryptedAnalysisLogFields, toDateOnlyTimestamp } from '@/lib/data-security';
+import { normalizeReportPostLink } from '@/lib/report-post-link';
 import { buildStructuredAiFields } from '@/lib/structured-report-fields';
 import { canonicalizeKnownTargetGroupValues } from '@/lib/target-groups';
 
@@ -46,7 +47,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing post link or text' }, { status: 400 });
         }
 
-        const safeText = text || `Report link: ${post_link}`;
+        const normalizedPostLink = normalizeReportPostLink(post_link);
+        if (post_link && !normalizedPostLink) {
+            return NextResponse.json({ error: 'Post URL is invalid' }, { status: 400 });
+        }
+
+        const safeText = text || `Report link: ${normalizedPostLink}`;
         const safeClassification = classification || 'Report';
         const safeRisk = risk_level || 'Low';
         const submittedAt = toDateOnlyTimestamp(timestamp ? new Date(timestamp) : new Date());
@@ -72,7 +78,7 @@ export async function POST(req: NextRequest) {
 
         const details = [
             platform ? `Platform: ${platform}` : null,
-            post_link ? `Post link: ${post_link}` : null,
+            normalizedPostLink ? `Post link: ${normalizedPostLink}` : null,
             reporter_country ? `Reporter country: ${reporter_country}` : null,
             target_group ? `Target group: ${target_group}` : null,
             immediate_danger ? `Immediate danger: ${immediate_danger}` : null,
@@ -123,7 +129,7 @@ export async function POST(req: NextRequest) {
                                 reasoning: reasoning_ar || '',
                                 rationale: reasoning_ar || '',
                                 imageDescription: image_description || '',
-                                postLink: post_link || '',
+                                postLink: normalizedPostLink || '',
                                 reporterCountry: reporter_country || '',
                                 targetGroup: selectedTargetGroupLabels.join(', ') || target_group || '',
                                 target_group: selectedTargetGroupLabels.join(', ') || target_group || '',
@@ -153,7 +159,7 @@ export async function POST(req: NextRequest) {
                             escalationFlag,
                             humanReviewStatus,
                             platform: normalizePlatformValue(platform),
-                            postUrl: post_link || null,
+                            postUrl: normalizedPostLink || null,
                             targetGroupsUser: selectedTargetGroupLabels,
                             isDirectRisk: normalizeDirectRiskValue(immediate_danger),
                             createdAt: submittedAt,

@@ -226,6 +226,7 @@
       "validation": "Please complete the required fields before submitting.",
       "validationPlatform": "Which platform did you see this content on?",
       "validationPostUrl": "Post URL is required",
+      "validationPostUrlInvalid": "Post URL is invalid",
       "validationPostText": "Please enter the post text at minimum",
       "validationRisk": "Do you think this poses a direct threat? Please select an answer",
       "submitError": "The report could not be submitted right now. Please try again shortly."

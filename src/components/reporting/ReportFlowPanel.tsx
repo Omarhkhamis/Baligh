@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ResultsDisplay from '@/components/ResultsDisplay';
+import { normalizeReportPostLink } from '@/lib/report-post-link';
 import type { AnalysisResult } from '@/lib/report-generator';
 import { getCanonicalTargetGroupLabelsFromKeys, TARGET_GROUP_KEYS, type TargetGroupKey } from '@/lib/target-groups';
 
@@ -159,6 +160,10 @@ export function ReportFlowPanel({ variant = 'modal', onClose }: ReportFlowPanelP
             return t('form.validationPostUrl');
         }
 
+        if (!normalizeReportPostLink(form.postLink)) {
+            return t('form.validationPostUrlInvalid');
+        }
+
         if (!form.postText.trim()) {
             return t('form.validationPostText');
         }
@@ -184,7 +189,7 @@ export function ReportFlowPanel({ variant = 'modal', onClose }: ReportFlowPanelP
 
         try {
             const payload = new FormData();
-            const trimmedPostLink = form.postLink.trim();
+            const trimmedPostLink = normalizeReportPostLink(form.postLink);
             const trimmedPostText = form.postText.trim();
             const selectedTargetGroupKeys = form.targetGroups;
             const selectedTargetGroupLabels = getCanonicalTargetGroupLabelsFromKeys(selectedTargetGroupKeys);
@@ -334,11 +339,22 @@ export function ReportFlowPanel({ variant = 'modal', onClose }: ReportFlowPanelP
                                         {t('form.postLinkLabel')}
                                     </label>
                                     <input
-                                        type="url"
+                                        type="text"
                                         value={form.postLink}
                                         onChange={(event) => updateField('postLink', event.target.value)}
+                                        onBlur={(event) => {
+                                            const normalized = normalizeReportPostLink(event.target.value);
+                                            if (normalized) {
+                                                updateField('postLink', normalized);
+                                            }
+                                        }}
                                         placeholder={t('form.postLinkPlaceholder')}
                                         className={`w-full border border-stone-300 bg-[#f7f5ef] font-medium text-stone-800 outline-none transition placeholder:text-emerald-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 ${isModal ? 'h-10 rounded-2xl px-3 text-[11px]' : 'h-20 rounded-[22px] px-6 text-xl'}`}
+                                        inputMode="url"
+                                        autoComplete="url"
+                                        autoCapitalize="none"
+                                        autoCorrect="off"
+                                        spellCheck={false}
                                         dir="ltr"
                                     />
                                 </div>
