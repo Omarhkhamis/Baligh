@@ -40,3 +40,5 @@ prisma/dev.db
 .env
 Omar.md
 Omaren.md
+backup.sql
+QUICK_START.md
