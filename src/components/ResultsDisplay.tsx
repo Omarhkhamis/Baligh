@@ -85,8 +85,8 @@ export default function ResultsDisplay({
     if (normalizedAiClassification === "none") return "none";
 
     const violationType = String(result.violation_type || "").trim().toUpperCase();
-    if (violationType === "A") return "explicit";
-    if (violationType === "B") return "incitement";
+    if (violationType === "A" || violationType === "T") return "incitement";
+    if (violationType === "B") return "explicit";
     if (violationType === "C" || violationType === "D") return "implicit";
 
     const normalizedClassification = String(result.classification || "")

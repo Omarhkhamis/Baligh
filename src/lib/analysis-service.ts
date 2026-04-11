@@ -1,17 +1,20 @@
 import { SchemaType, type Part } from '@google/generative-ai';
-import { HSIE_SYRIA_SYSTEM_PROMPT } from '@/lib/prompts';
+import { HATE_SPEECH_SYSTEM_PROMPT } from '@/lib/prompts';
 import { getGeminiClient, getGeminiModelName } from '@/lib/gemini';
 import { normalizeAnalysisResult } from '@/lib/analysis-utils';
 
 export const INVALID_AI_JSON_RESPONSE_MESSAGE = 'Invalid JSON response from Gemini';
 const ANALYSIS_MAX_OUTPUT_TOKENS = 4096;
 const COMPACT_JSON_INSTRUCTION =
-    "Return a compact JSON object only. Keep rationale_arabic, awareness_note_arabic, ai_severity_explanation, ai_path_sentence, ai_legal_basis, ai_notes, and image_description brief. Limit arrays to the most relevant 3 items.";
+    "Return a compact JSON object only. Keep reasoning, hateful_words, and image_description brief.";
 
 type AnalyzeContentParams = {
     text?: string;
     image?: string | null;
     locale?: string;
+    platform?: string;
+    reportId?: string | number;
+    immediateDanger?: string | boolean | null;
 };
 
 const languageMap: Record<string, string> = {
@@ -20,40 +23,128 @@ const languageMap: Record<string, string> = {
     ku: 'Kurdish (Kurmanji)',
 };
 
-export async function analyzeContent({ text, image, locale = 'ar' }: AnalyzeContentParams) {
+function extractHashtags(text?: string) {
+    if (!text) {
+        return 'none';
+    }
+
+    const tags = text.match(/#[\u0600-\u06FF\w]+/g);
+    return tags ? tags.join(' | ') : 'none';
+}
+
+function normalizeReporterDeclaredDanger(value: AnalyzeContentParams['immediateDanger']) {
+    if (typeof value === 'boolean') {
+        return value ? 'yes' : 'no';
+    }
+
+    if (typeof value === 'string') {
+        const normalized = value.trim();
+        return normalized || 'unknown';
+    }
+
+    return 'unknown';
+}
+
+function appendValidationFlag(result: Record<string, unknown>, flag: string) {
+    const currentFlags = Array.isArray(result.validation_flags)
+        ? result.validation_flags.filter((value): value is string => typeof value === 'string')
+        : [];
+
+    result.validation_flags = Array.from(new Set([...currentFlags, flag]));
+}
+
+function validateAndClean(result: Record<string, unknown>, hasImage: boolean) {
+    const cleaned: Record<string, unknown> = { ...result };
+    const classification = typeof cleaned.classification === 'string' ? cleaned.classification.trim() : '';
+    const targetGroup = typeof cleaned.target_group === 'string' ? cleaned.target_group.trim() : '';
+    const severity =
+        typeof cleaned.severity === 'number'
+            ? cleaned.severity
+            : Number.parseFloat(String(cleaned.severity ?? ''));
+    const riskLevel =
+        typeof cleaned.risk_level === 'string' ? cleaned.risk_level.trim().toUpperCase() : '';
+
+    if (!hasImage) {
+        if (typeof cleaned.image_description === 'string' && cleaned.image_description.trim()) {
+            appendValidationFlag(cleaned, 'HALLUCINATED_IMAGE_REMOVED');
+        }
+        cleaned.image_description = null;
+        cleaned.image_verified = false;
+    }
+
+    if (cleaned.immediate_danger === true && classification === 'Safe') {
+        cleaned.needs_review = true;
+        appendValidationFlag(cleaned, 'DANGER_SAFE_CONFLICT');
+    }
+
+    if (Number.isFinite(severity) && severity >= 4 && riskLevel === 'LOW') {
+        cleaned.needs_review = true;
+        appendValidationFlag(cleaned, 'SEVERITY_RISK_MISMATCH');
+    }
+
+    if (!targetGroup && (classification === 'Category A' || classification === 'Category B')) {
+        cleaned.needs_review = true;
+        appendValidationFlag(cleaned, 'MISSING_TARGET_GROUP');
+    }
+
+    return cleaned;
+}
+
+function buildAnalysisPrompt({
+    text,
+    image,
+    platform,
+    reportId,
+    immediateDanger,
+}: Pick<AnalyzeContentParams, 'text' | 'image' | 'platform' | 'reportId' | 'immediateDanger'>) {
+    return `
+REPORT_ID: ${reportId ?? 'unknown'}
+PLATFORM: ${platform || 'unknown'}
+HAS_IMAGE_ATTACHED: ${image ? 'YES' : 'NO'}
+HASHTAGS_DETECTED: ${extractHashtags(text)}
+REPORTER_DECLARED_DANGER: ${normalizeReporterDeclaredDanger(immediateDanger)}
+
+TEXT_TO_ANALYZE:
+${text?.trim() || 'EMPTY'}
+    `.trim();
+}
+
+export async function analyzeContent({
+    text,
+    image,
+    platform,
+    reportId,
+    immediateDanger,
+}: AnalyzeContentParams) {
     if (!text && !image) {
         throw new Error('Text or Image is required');
     }
 
     const client = getGeminiClient();
-    const targetLanguage = languageMap[locale] || 'Arabic';
-
-    const promptParts: Array<string | Part> = [];
-    if (text) {
-        promptParts.push(text);
-    }
+    const promptParts: Array<string | Part> = [
+        buildAnalysisPrompt({ text, image, platform, reportId, immediateDanger }),
+    ];
 
     if (image) {
         const mimeTypeMatch = image.match(/^data:([^;]+);base64,/);
         const mimeType = mimeTypeMatch?.[1] || 'image/jpeg';
         const base64Data = image.split(',')[1] || image;
+
         promptParts.push({
             inlineData: {
                 data: base64Data,
                 mimeType,
             },
         });
-        promptParts.push(
-            "Describe the visual content of the image in the 'image_description' field. Focus on elements relevant to hate speech or violence if present."
-        );
     }
 
     promptParts.push(COMPACT_JSON_INSTRUCTION);
 
     const result = await client.generateContent(getGeminiModelName(), promptParts, {
-        systemInstruction: HSIE_SYRIA_SYSTEM_PROMPT(targetLanguage),
+        systemInstruction: HATE_SPEECH_SYSTEM_PROMPT,
         generationConfig: {
             temperature: 0.1,
+            topP: 0.8,
             maxOutputTokens: ANALYSIS_MAX_OUTPUT_TOKENS,
             responseMimeType: 'application/json',
             responseSchema: {
@@ -61,128 +152,41 @@ export async function analyzeContent({ text, image, locale = 'ar' }: AnalyzeCont
                 properties: {
                     classification: {
                         type: SchemaType.STRING,
-                        enum: ['Safe', 'Category A', 'Category B', 'Category C', 'Category D'],
+                        enum: ['Safe', 'Category A', 'Category B', 'Category C', 'Category T', 'Incomplete'],
                     },
-                    violation_type: {
+                    risk_level: {
                         type: SchemaType.STRING,
-                        enum: ['None', 'A', 'B', 'C', 'D'],
+                        enum: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'],
                     },
-                    is_identity_based: {
+                    severity: { type: SchemaType.NUMBER },
+                    speech_type: {
                         type: SchemaType.STRING,
-                        enum: ['Yes', 'No'],
+                        enum: ['Category A', 'Category B', 'Category C', 'Category T', 'Safe', 'Incomplete'],
                     },
-                    severity_score: { type: SchemaType.NUMBER },
-                    target_group_arabic: { type: SchemaType.STRING },
-                    rationale_arabic: { type: SchemaType.STRING },
-                    awareness_note_arabic: { type: SchemaType.STRING },
-                    image_description: { type: SchemaType.STRING },
-                    ai_classification: {
-                        type: SchemaType.STRING,
-                        enum: ['explicit', 'implicit', 'incitement', 'none'],
-                    },
-                    ai_severity: { type: SchemaType.NUMBER },
-                    ai_severity_explanation: { type: SchemaType.STRING },
-                    ai_speech_type: {
-                        type: SchemaType.STRING,
-                        enum: ['direct', 'implicit', 'symbolic', 'false_propaganda'],
-                    },
-                    ai_confidence: {
-                        type: SchemaType.STRING,
-                        enum: ['high', 'medium', 'low'],
-                    },
-                    ai_context_sensitivity: {
-                        type: SchemaType.STRING,
-                        enum: ['high', 'medium', 'low'],
-                    },
-                    ai_target_groups: {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING },
-                    },
-                    ai_hate_keywords: {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING },
-                    },
-                    ai_symbolic_references: {
-                        type: SchemaType.ARRAY,
-                        items: { type: SchemaType.STRING },
-                    },
-                    ai_emotions_detected: {
-                        type: SchemaType.ARRAY,
-                        items: {
-                            type: SchemaType.STRING,
-                            enum: ['hatred', 'anger', 'contempt', 'gloating', 'fear', 'generalization', 'revenge_desire', 'other'],
-                        },
-                    },
-                    ai_dehumanization_level: {
-                        type: SchemaType.STRING,
-                        enum: ['none', 'implicit', 'explicit'],
-                    },
-                    ai_generalization_type: {
-                        type: SchemaType.STRING,
-                        enum: ['individual_to_group', 'geographic', 'religious', 'ethnic', 'none'],
-                    },
-                    ai_account_type: {
-                        type: SchemaType.STRING,
-                        enum: ['personal', 'media', 'political', 'religious', 'anonymous', 'military'],
-                    },
-                    ai_reach_level: {
-                        type: SchemaType.STRING,
-                        enum: ['limited', 'moderate', 'wide'],
-                    },
-                    ai_content_type: {
-                        type: SchemaType.STRING,
-                        enum: ['text', 'image', 'video', 'meme', 'comment', 'live_stream'],
-                    },
-                    ai_language_register: {
-                        type: SchemaType.STRING,
-                        enum: ['formal', 'colloquial', 'symbolic', 'mixed'],
-                    },
-                    ai_conflict_context: {
-                        type: SchemaType.STRING,
-                        enum: ['active_conflict', 'tense', 'stable'],
-                    },
-                    ai_publisher_location: { type: SchemaType.STRING, nullable: true },
-                    ai_recommended_path: {
-                        type: SchemaType.STRING,
-                        enum: ['legal_action', 'documentation', 'monitoring', 'no_action'],
-                    },
-                    ai_path_sentence: { type: SchemaType.STRING },
-                    ai_legal_basis: { type: SchemaType.STRING, nullable: true },
-                    ai_escalation_flag: { type: SchemaType.BOOLEAN },
-                    ai_incitement_to_action: { type: SchemaType.BOOLEAN },
-                    ai_glorification_of_violence: { type: SchemaType.BOOLEAN },
-                    ai_notes: { type: SchemaType.STRING, nullable: true },
+                    target_group: { type: SchemaType.STRING, nullable: true },
+                    target_identified_from: { type: SchemaType.STRING, nullable: true },
+                    immediate_danger: { type: SchemaType.BOOLEAN },
+                    image_description: { type: SchemaType.STRING, nullable: true },
+                    image_verified: { type: SchemaType.BOOLEAN },
+                    hateful_words: { type: SchemaType.STRING, nullable: true },
+                    reasoning: { type: SchemaType.STRING },
+                    classification_path: { type: SchemaType.STRING, nullable: true },
+                    needs_review: { type: SchemaType.BOOLEAN },
                 },
                 required: [
                     'classification',
-                    'violation_type',
-                    'is_identity_based',
-                    'severity_score',
-                    'rationale_arabic',
-                    'target_group_arabic',
-                    'awareness_note_arabic',
-                    'ai_classification',
-                    'ai_severity',
-                    'ai_severity_explanation',
-                    'ai_speech_type',
-                    'ai_confidence',
-                    'ai_context_sensitivity',
-                    'ai_target_groups',
-                    'ai_hate_keywords',
-                    'ai_symbolic_references',
-                    'ai_emotions_detected',
-                    'ai_dehumanization_level',
-                    'ai_generalization_type',
-                    'ai_account_type',
-                    'ai_reach_level',
-                    'ai_content_type',
-                    'ai_language_register',
-                    'ai_conflict_context',
-                    'ai_recommended_path',
-                    'ai_path_sentence',
-                    'ai_escalation_flag',
-                    'ai_incitement_to_action',
-                    'ai_glorification_of_violence',
+                    'risk_level',
+                    'severity',
+                    'speech_type',
+                    'target_group',
+                    'target_identified_from',
+                    'immediate_danger',
+                    'image_description',
+                    'image_verified',
+                    'hateful_words',
+                    'reasoning',
+                    'classification_path',
+                    'needs_review',
                 ],
             },
         },
@@ -219,7 +223,7 @@ export async function analyzeContent({ text, image, locale = 'ar' }: AnalyzeCont
         throw new Error(INVALID_AI_JSON_RESPONSE_MESSAGE);
     }
 
-    return normalizeAnalysisResult(rawAnalysis, text || '');
+    return normalizeAnalysisResult(validateAndClean(rawAnalysis, Boolean(image)), text || '');
 }
 
 export async function extractTextFromImage({ image, locale = 'ar' }: AnalyzeContentParams) {

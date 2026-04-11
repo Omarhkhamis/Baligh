@@ -127,8 +127,9 @@ function inferAiClassification(analysis: AnalysisResult): AiClassificationValue 
     }
 
     const violationType = normalizeString(analysis.violation_type).toUpperCase();
-    if (violationType === 'A' || violationType === 'B') return 'incitement';
-    if (violationType === 'C') return 'explicit';
+    if (violationType === 'A' || violationType === 'T') return 'incitement';
+    if (violationType === 'B') return 'explicit';
+    if (violationType === 'C') return 'implicit';
     if (violationType === 'D') return 'implicit';
     return 'none';
 }

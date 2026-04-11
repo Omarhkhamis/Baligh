@@ -477,11 +477,14 @@ async function parseReportPayload(req: NextRequest): Promise<ParsedReportPayload
 }
 
 async function runAutomatedAnalysis(input: {
+    reportId?: string;
     text: string;
     locale: string;
+    platform?: string;
+    immediateDanger?: string;
     imageUploads: StoredUpload[];
 }): Promise<SuccessfulAutomationResult | FailedAutomationResult> {
-    const { text, locale, imageUploads } = input;
+    const { reportId, text, locale, platform, immediateDanger, imageUploads } = input;
     const primaryAnalysisImage = imageUploads.find((upload) => upload.kind === 'image');
 
     let imageContext: AnalysisImageContext = null;
@@ -532,6 +535,9 @@ async function runAutomatedAnalysis(input: {
                         text: analysisText,
                         image: analysisImage,
                         locale,
+                        platform,
+                        reportId,
+                        immediateDanger,
                     }),
                     AI_TIMEOUT_MS,
                     AI_TIMEOUT_MESSAGE
@@ -760,8 +766,11 @@ export async function POST(req: NextRequest) {
         let reportNumber = await prisma.$transaction(async (tx) => generateReportNumber(tx, submittedAt));
 
         const automationResult = await runAutomatedAnalysis({
+            reportId: reportNumber,
             text: normalizedText,
             locale,
+            platform,
+            immediateDanger: immediate_danger,
             imageUploads: allStoredUploads,
         });
         const analysisInputText = normalizedText || (automationResult.ok ? automationResult.imageContext?.extracted_text || '' : '');

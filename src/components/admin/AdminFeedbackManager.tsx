@@ -22,10 +22,11 @@ const riskColors: Record<string, string> = {
 
 const classifyLabel = (value: string) => {
     const normalized = (value || '').toUpperCase();
-    if (normalized === 'CATEGORY A') return 'Category A – Direct incitement';
-    if (normalized === 'CATEGORY B') return 'Category B – Harassment/Threat';
-    if (normalized === 'CATEGORY C') return 'Category C – Dehumanization';
-    if (normalized === 'CATEGORY D') return 'Category D – Low-level hate';
+    if (normalized === 'CATEGORY A') return 'Category A – Direct incitement to violence';
+    if (normalized === 'CATEGORY B') return 'Category B – Dehumanization / collective criminalization';
+    if (normalized === 'CATEGORY C') return 'Category C – Identity-based insult or stereotyping';
+    if (normalized === 'CATEGORY T') return 'Category T – Individual threat';
+    if (normalized === 'INCOMPLETE') return 'Incomplete';
     if (normalized === 'SAFE' || normalized === 'NONE') return 'Safe';
     return value || '—';
 };

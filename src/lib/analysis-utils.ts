@@ -8,22 +8,63 @@ function inferViolationType(classification?: string | null) {
     if (value.includes('CATEGORY B')) return 'B';
     if (value.includes('CATEGORY C')) return 'C';
     if (value.includes('CATEGORY D')) return 'D';
-    if (value.includes('SAFE') || value.includes('NONE')) return 'None';
+    if (value.includes('CATEGORY T')) return 'T';
+    if (value.includes('SAFE') || value.includes('NONE') || value.includes('INCOMPLETE')) return 'None';
     return '';
 }
 
-function parseSeverityScore(value: unknown) {
+function parseNumeric(value: unknown): number | null {
     if (typeof value === 'number' && Number.isFinite(value)) {
         return value;
     }
 
     if (typeof value === 'string') {
         const numeric = value.split('/')[0]?.trim();
-        const parsed = Number.parseFloat(numeric || '0');
-        return Number.isFinite(parsed) ? parsed : 0;
+        const parsed = Number.parseFloat(numeric || '');
+        return Number.isFinite(parsed) ? parsed : null;
     }
 
-    return 0;
+    return null;
+}
+
+function parseSeverityScore(value: unknown) {
+    return parseNumeric(value);
+}
+
+function parseSeverityLevel(value: unknown) {
+    const parsed = parseNumeric(value);
+    if (parsed === null) {
+        return null;
+    }
+
+    return parsed <= 5 ? parsed * 2 : parsed;
+}
+
+function normalizeDelimitedString(value: unknown, separators: RegExp) {
+    if (Array.isArray(value)) {
+        return value
+            .filter((item): item is string => typeof item === 'string')
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+
+    if (typeof value !== 'string') {
+        return [] as string[];
+    }
+
+    return value
+        .split(separators)
+        .map((item) => item.trim())
+        .filter(Boolean);
+}
+
+function inferIdentityBased(classification: string) {
+    const violationType = inferViolationType(classification);
+    if (violationType === 'A' || violationType === 'B' || violationType === 'C' || violationType === 'D') {
+        return 'Yes';
+    }
+
+    return 'No';
 }
 
 export function mapRiskLevel(value?: string | null): RiskLevelType {
@@ -39,8 +80,10 @@ export function mapRiskLevel(value?: string | null): RiskLevelType {
 
     if (
         normalized === 'B' ||
+        normalized === 'T' ||
         normalized.includes('HIGH') ||
         normalized.includes('CATEGORY B') ||
+        normalized.includes('CATEGORY T') ||
         normalized.includes('عال')
     ) {
         return 'HIGH';
@@ -61,13 +104,17 @@ export function mapRiskLevel(value?: string | null): RiskLevelType {
 export function normalizeAnalysisResult(raw: Record<string, unknown>, fallbackText = ''): AnalysisResult {
     const classification = (raw.classification || raw.label || raw.category || 'Safe') as string;
     const violation_type = (raw.violation_type || raw.violationType || inferViolationType(classification) || 'None') as string;
-    const severity_score = parseSeverityScore(
-        raw.severity_score ?? raw.severityScore ?? raw.score ?? raw.scores
-    );
+    const severity_score =
+        parseSeverityScore(raw.severity_score ?? raw.severityScore ?? raw.score ?? raw.scores) ??
+        parseSeverityLevel(raw.severity) ??
+        0;
 
-    const detected_markers = Array.isArray(raw.detected_markers)
-        ? raw.detected_markers.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
-        : [];
+    const detected_markers = Array.from(
+        new Set([
+            ...normalizeDelimitedString(raw.detected_markers, /[|,]/),
+            ...normalizeDelimitedString(raw.hateful_words, /\|/),
+        ])
+    );
 
     const rationale_arabic =
         (raw.rationale_arabic ||
@@ -77,14 +124,17 @@ export function normalizeAnalysisResult(raw: Record<string, unknown>, fallbackTe
             'لم يقدم النموذج تفسيراً.') as string;
 
     const target_group_arabic = (raw.target_group_arabic || raw.target_group || '') as string;
-    const image_description = (raw.image_description || '') as string;
+    const image_description =
+        typeof raw.image_description === 'string' ? raw.image_description : '';
 
     return {
         ...(raw as unknown as Partial<AnalysisResult>),
         classification,
         violation_type,
+        is_identity_based: (raw.is_identity_based || inferIdentityBased(classification)) as string,
         severity_score,
         rationale_arabic,
+        rationale: rationale_arabic,
         awareness_note_arabic: (raw.awareness_note_arabic || '') as string,
         target_group_arabic,
         detected_markers,

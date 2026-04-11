@@ -1,6 +1,6 @@
 export interface AnalysisResult {
-    classification: string; // Safe, Category A, Category B, Category C, Category D
-    violation_type: string; // None, A, B, C, D
+    classification: string; // Safe, Category A, Category B, Category C, Category T, Incomplete
+    violation_type: string; // None, A, B, C, T
     is_identity_based?: string; // Yes, No (New field)
     severity_score: number; // 0-10
     target_group_arabic?: string;
@@ -19,8 +19,16 @@ export interface AnalysisResult {
     rationale?: string;
     text?: string;
     image_description?: string;
+    image_verified?: boolean;
     legal_citation?: string;
     reasoning_ar?: string; // Mapped alias for rationale_arabic
+    speech_type?: string;
+    target_identified_from?: 'explicit_text' | 'hashtags' | 'geographic_context' | null;
+    immediate_danger?: boolean;
+    hateful_words?: string | null;
+    classification_path?: 'A1' | 'A2' | 'A3' | 'A4' | 'A5' | 'T' | null;
+    needs_review?: boolean;
+    validation_flags?: string[];
     ai_classification?: 'explicit' | 'implicit' | 'incitement' | 'none';
     ai_severity?: number;
     ai_severity_explanation?: string;
