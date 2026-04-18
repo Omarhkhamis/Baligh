@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { readApiResponse } from '@/lib/api-response';
 import { getDefaultRadarDescriptions, type RadarDescriptionKey, type RadarDescriptions } from '@/lib/radar-descriptions';
 import type { RadarPublicationMeta, RadarSelectedRange } from '@/lib/radar-dashboard';
 import { useAdminI18n } from './AdminI18n';
@@ -18,6 +19,11 @@ type RadarAdminResponse = {
     history: RadarPublicationMeta[];
     descriptions: RadarDescriptions;
     selectedRange: RadarSelectedRange;
+};
+
+type RadarMutationResponse = RadarAdminResponse & {
+    success?: boolean;
+    summary?: RadarSummary;
 };
 
 const RADAR_DESCRIPTION_FIELDS: Array<{ key: RadarDescriptionKey; labelKey: string }> = [
@@ -49,13 +55,13 @@ export function AdminRadarManager() {
 
         try {
             const response = await fetch('/api/admin/radar');
-            const data = await response.json();
+            const result = await readApiResponse<RadarAdminResponse>(response, t('errors.loadRadar'));
 
-            if (!response.ok) {
-                throw new Error(data?.error || t('errors.loadRadar'));
+            if (!result.ok) {
+                throw new Error(result.error);
             }
 
-            const payload = data as RadarAdminResponse;
+            const payload = result.data;
             setCurrent(payload.current);
             setHistory(payload.history || []);
             setDescriptions(payload.descriptions || getDefaultRadarDescriptions());
@@ -88,12 +94,17 @@ export function AdminRadarManager() {
                     descriptions,
                 }),
             });
-            const data = await response.json();
+            const result = await readApiResponse<RadarMutationResponse>(response, t('errors.publishRadar'));
 
-            if (!response.ok || !data?.success) {
-                throw new Error(data?.error || t('errors.publishRadar'));
+            if (!result.ok) {
+                throw new Error(result.error);
             }
 
+            if (!result.data.success) {
+                throw new Error(t('errors.publishRadar'));
+            }
+
+            const data = result.data;
             setCurrent(data.current as RadarPublicationMeta);
             setHistory((data.history as RadarPublicationMeta[]) || []);
             setDescriptions((data.descriptions as RadarDescriptions) || descriptions);
@@ -128,12 +139,17 @@ export function AdminRadarManager() {
                     descriptions,
                 }),
             });
-            const data = await response.json();
+            const result = await readApiResponse<RadarMutationResponse>(response, t('errors.saveRadarDescriptions'));
 
-            if (!response.ok || !data?.success) {
-                throw new Error(data?.error || t('errors.saveRadarDescriptions'));
+            if (!result.ok) {
+                throw new Error(result.error);
             }
 
+            if (!result.data.success) {
+                throw new Error(t('errors.saveRadarDescriptions'));
+            }
+
+            const data = result.data;
             setCurrent(data.current as RadarPublicationMeta);
             setHistory((data.history as RadarPublicationMeta[]) || []);
             setDescriptions((data.descriptions as RadarDescriptions) || descriptions);

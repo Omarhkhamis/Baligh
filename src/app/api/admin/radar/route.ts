@@ -45,31 +45,36 @@ function parseRangeDates(startValue: unknown, endValue: unknown) {
 }
 
 export async function GET(req: NextRequest) {
-    const auth = await requirePermission(req, 'reports', 'GET');
-    if (auth.response) {
-        return auth.response;
+    try {
+        const auth = await requirePermission(req, 'reports', 'GET');
+        if (auth.response) {
+            return auth.response;
+        }
+
+        const [current, history] = await Promise.all([
+            getPublishedRadarDashboardData({ includeKeywords: true }),
+            getRadarPublicationHistory(8),
+        ]);
+
+        return NextResponse.json({
+            current: current.publication,
+            history,
+            descriptions: current.data?.descriptions ?? getDefaultRadarDescriptions(),
+            selectedRange: current.data?.selectedRange ?? { startDate: null, endDate: null },
+        });
+    } catch (error) {
+        console.error('Failed to load radar state', error);
+        return NextResponse.json({ error: 'Failed to load radar state' }, { status: 500 });
     }
-
-    const [current, history] = await Promise.all([
-        getPublishedRadarDashboardData({ includeKeywords: true }),
-        getRadarPublicationHistory(8),
-    ]);
-
-    return NextResponse.json({
-        current: current.publication,
-        history,
-        descriptions: current.data?.descriptions ?? getDefaultRadarDescriptions(),
-        selectedRange: current.data?.selectedRange ?? { startDate: null, endDate: null },
-    });
 }
 
 export async function POST(req: NextRequest) {
-    const auth = await requirePermission(req, 'reports', 'PATCH');
-    if (auth.response) {
-        return auth.response;
-    }
-
     try {
+        const auth = await requirePermission(req, 'reports', 'PATCH');
+        if (auth.response) {
+            return auth.response;
+        }
+
         const body = await req.json().catch(() => ({}));
         const parsedRange = parseRangeDates(body.startDate, body.endDate);
         const descriptions = normalizeRadarDescriptions(body.descriptions);
@@ -107,12 +112,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-    const auth = await requirePermission(req, 'reports', 'PATCH');
-    if (auth.response) {
-        return auth.response;
-    }
-
     try {
+        const auth = await requirePermission(req, 'reports', 'PATCH');
+        if (auth.response) {
+            return auth.response;
+        }
+
         const body = await req.json().catch(() => ({}));
         const descriptions = normalizeRadarDescriptions(body.descriptions);
 

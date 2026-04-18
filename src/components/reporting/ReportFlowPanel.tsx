@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import ResultsDisplay from '@/components/ResultsDisplay';
+import { readApiResponse } from '@/lib/api-response';
 import { normalizeReportPostLink } from '@/lib/report-post-link';
 import type { AnalysisResult } from '@/lib/report-generator';
 import { getCanonicalTargetGroupLabelsFromKeys, TARGET_GROUP_KEYS, type TargetGroupKey } from '@/lib/target-groups';
@@ -18,6 +19,12 @@ type ReportFlowPanelProps = {
 type SubmissionState = {
     result: AnalysisResult;
     reportNumber: string;
+};
+
+type ReportSubmissionResponse = {
+    success?: boolean;
+    result?: AnalysisResult;
+    reportNumber?: string;
 };
 
 const targetGroupOptions = TARGET_GROUP_KEYS;
@@ -218,11 +225,15 @@ export function ReportFlowPanel({ variant = 'modal', onClose }: ReportFlowPanelP
                 method: 'POST',
                 body: payload,
             });
+            const result = await readApiResponse<ReportSubmissionResponse>(response, t('form.submitError'));
 
-            const data = await response.json();
+            if (!result.ok) {
+                throw new Error(result.error);
+            }
 
-            if (!response.ok || !data?.success || !data?.result || !data?.reportNumber) {
-                throw new Error(data?.error || t('form.submitError'));
+            const data = result.data;
+            if (!data.success || !data.result || !data.reportNumber) {
+                throw new Error(t('form.submitError'));
             }
 
             setSubmission({
